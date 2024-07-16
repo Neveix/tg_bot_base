@@ -1,5 +1,7 @@
+from typing import Callable
+
 class Operation:
-    def __init__(self, name: str, inputs_count: int = 1, actions: list[str | function] = []):
+    def __init__(self, name: str, inputs_count: int = 1, actions: list[str | Callable] = []):
         self.name = name
         self.inputs_count = inputs_count
         self.actions = actions
