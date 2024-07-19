@@ -1,12 +1,12 @@
 from typing import Callable
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 
-class Keyboard:
+class Button:
     def __init__(self, name: str, text: str | Callable, buttons: list[list[list[str, str]]] | Callable):
         self.name = name
         self.text = text
         self.buttons = buttons
-        self.keyboard_manager = None
+        self.button_manager = None
     def to_dict(self, **kwargs) -> dict:
         result = {}
         if callable(self.text):

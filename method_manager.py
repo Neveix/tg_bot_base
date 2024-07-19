@@ -1,4 +1,4 @@
-from method import Method
+from .method import Method
 
 class MethodManager:
     __method__dict__: dict[str, Method]

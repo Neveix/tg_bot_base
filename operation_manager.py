@@ -1,4 +1,4 @@
-from operation import Operation
+from .operation import Operation
 
 class OperationManager:
     __operation_dict__ : dict[str, Operation]

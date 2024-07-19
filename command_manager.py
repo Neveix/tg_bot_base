@@ -1,4 +1,4 @@
-from command import Command
+from .command import Command
 
 class CommandManager:
     __command_dict__ : dict[str, Command]
