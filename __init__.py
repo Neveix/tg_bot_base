@@ -1,11 +1,9 @@
-from .bot_manager import BotManager
-from .button_manager import ButtonManager
-from .method_manager import MethodManager
-from .operation_manager import OperationManager
-from .command_manager import CommandManager
-from .button import Button
-from .method import Method
-from .operation import Operation
-from .command import Command
-
-# small change
+from .src.bot_manager import BotManager
+from .src.button_manager import ButtonManager
+from .src.method_manager import MethodManager
+from .src.operation_manager import OperationManager
+from .src.command_manager import CommandManager
+from .src.button import Button
+from .src.method import Method
+from .src.operation import Operation
+from .src.command import Command
