@@ -21,7 +21,7 @@ class Button:
             reply_markup = []
             for y, old_line in enumerate(result["reply_markup"]):
                 line = []
-                for x, old_button in enumerate(line):
+                for x, old_button in enumerate(old_line):
                     line.append(InlineKeyboardButton(text = old_button[0], callback_data = old_button[1]))
                 reply_markup.append(line)
             result["reply_markup"] = InlineKeyboardMarkup(reply_markup)
