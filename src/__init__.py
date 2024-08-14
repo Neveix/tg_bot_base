@@ -7,5 +7,3 @@ from .button import Button
 from .method import Method
 from .operation import Operation
 from .command import Command
-
-# small change

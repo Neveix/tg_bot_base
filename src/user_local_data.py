@@ -1,6 +1,8 @@
+from .bot_manager import BotManager
 class UserLocalData:
     __data__: dict[str, dict]
-    def __init__(self):
+    def __init__(self, bot: BotManager):
+        
         UserLocalData.__data__ = {}
     def set(self, user_id, field, value):
         UserLocalData.__create_user_if_not_exists__(user_id)
