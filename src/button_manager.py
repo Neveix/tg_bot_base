@@ -19,12 +19,14 @@ class ButtonManager:
             if data[0] == "button":
                 button = self.get_clone(data[1])
                 button.convert_callback_data(user_id)
+                self.bot_manager.user_local_data.append(user_id, "__directory_stack", data[1])
                 await query.edit_message_text(**button.to_dict())
             elif data[0] == "step_back":
                 directory_stack = self.bot_manager.user_local_data.get(user_id, "__directory_stack")
                 if len(directory_stack) == 1:
                     return
-                button = self.get_clone(data[1])
+                directory_stack.remove(directory_stack[-1])
+                button = self.get_clone(directory_stack[-1])
                 button.convert_callback_data(user_id)
                 await query.edit_message_text(**button.to_dict())
                 

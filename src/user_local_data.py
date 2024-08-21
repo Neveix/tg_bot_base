@@ -7,6 +7,14 @@ class UserLocalData:
         self.__create_user_if_not_exists__(user_id)
         self.__data__[user_id][field] = value
         
+    def append(self, user_id: int, field, value):
+        self.__create_user_if_not_exists__(user_id)
+        list = self.get(user_id, field)
+        if list == None:
+            self.set(user_id, field, [value])
+        else:
+            list.append(value)
+        
     def get(self, user_id, field: int):
         if self.__data__.get(user_id) != None:
             return self.__data__.get(user_id).get(field)
