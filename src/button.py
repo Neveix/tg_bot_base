@@ -8,9 +8,9 @@ class Button:
         self.text = text
         self.buttons = buttons
         self.button_manager: ButtonManager = button_manager
-    def convert_callback_data(self, user_id: int) -> None:
+    def handle_callback_data(self, button_to_dict: dict[str, object], user_id: int):
         __callback_data = []
-        buttons = self.get_buttons()
+        buttons: InlineKeyboardMarkup = button_to_dict.get("reply_markup")
         for line in buttons:
             for button in line:
                 __callback_data.append(button[1])
@@ -43,19 +43,26 @@ class Button:
         else:
             return self.buttons
     def to_dict(self, **kwargs) -> dict:
+        user_id = kwargs.get("user_id")
         result = {}
         result["text"] = self.get_text(**kwargs)
         result["reply_markup"] = self.get_buttons(**kwargs)
         if result.get("reply_markup") and len(result["reply_markup"]) > 0:
             reply_markup = []
+            __callback_data = []
             for old_line in result["reply_markup"]:
                 line = []
                 for old_button in old_line:
-                    old_button_text = old_button[0]
-                    old_button_callback_data = old_button[1]
+                    old_button_text = None
+                    old_button_callback_data = None
                     if callable(old_button):
                         old_button_text, old_button_callback_data = old_button(**kwargs)
-                    line.append(InlineKeyboardButton(text = old_button_text, callback_data = old_button_callback_data))
+                    else:
+                        old_button_text = old_button[0]
+                        old_button_callback_data = old_button[1]
+                    __callback_data.append(old_button_callback_data)
+                    line.append(InlineKeyboardButton(text = old_button_text, callback_data = len(__callback_data)-1))
                 reply_markup.append(line)
             result["reply_markup"] = InlineKeyboardMarkup(reply_markup)
+            self.button_manager.bot_manager.user_local_data.set(user_id, "__callback_data", __callback_data)
         return result

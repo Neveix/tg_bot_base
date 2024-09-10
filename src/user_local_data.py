@@ -2,7 +2,7 @@ from .bot_manager import BotManager
 class UserLocalData:
     def __init__(self, bot: BotManager):
         self.__data__: dict[str, dict] = {}
-        
+        self.bot_manager = bot
     def set(self, user_id: int, field, value):
         self.__create_user_if_not_exists__(user_id)
         self.__data__[user_id][field] = value

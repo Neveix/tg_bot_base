@@ -7,3 +7,5 @@ from .button import Button
 from .method import Method
 from .operation import Operation
 from .command import Command
+from .sqlite.database_field import DataBaseField
+from .sqlite.user_global_data import UserGlobalData
