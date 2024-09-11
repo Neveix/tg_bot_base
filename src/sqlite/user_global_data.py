@@ -1,9 +1,24 @@
 import sqlite3
 
-from database_field import DataBaseField
+from .database_field import DataBaseField
 
 class UserGlobalData:
-    
+    def is_valid_column_name(column_name):
+        from re import match
+        # Регулярное выражение для проверки имени колонки
+        pattern = r'^[a-zA-Z_][a-zA-Z0-9_]*$'
+        # Список зарезервированных слов SQLite
+        reserved_keywords = {
+            "SELECT", "INSERT", "DELETE", "UPDATE", "FROM", "WHERE", 
+            "JOIN", "CREATE", "DROP", "TABLE", "ALTER", "COLUMN", 
+            "INDEX", "VIEW", "TRIGGER", "PRIMARY", "KEY", "FOREIGN", 
+            "UNIQUE", "NOT", "NULL", "AND", "OR", "LIKE", "IN", 
+            "BETWEEN", "AS", "IS", "GROUP", "ORDER", "HAVING"
+        }
+        # Проверка по регулярному выражению
+        if match(pattern, column_name) and column_name.upper() not in reserved_keywords:
+            return True
+        return False
     def __init__(self, bot_manager, path: str, fields: list[DataBaseField]):
         self.bot_manager = bot_manager
         bot_manager.user_global_data = self
@@ -11,7 +26,7 @@ class UserGlobalData:
         self.fields = fields
         self.connection = sqlite3.connect(path)
         cur = self.connection.cursor()
-        cur.execute(f"CREATE TABLE IF NOT EXISTS UserGlobalData({",".join(map(lambda f: f.name+f.value,fields))})") 
+        cur.execute(f"CREATE TABLE IF NOT EXISTS UserGlobalData({",".join(map(lambda f: f.name+f.type,fields))})") 
         cur.close()
         self.connection.commit()
     def set(self, user_id, field, value):

@@ -10,3 +10,8 @@ class CommandManager:
         self.__command_dict__[command.name] = command
     def get(self, name: str):
         return self.__command_dict__.get(name)
+    def get_all_handlers(self):
+        result = []
+        for key in self.__command_dict__:
+            result.append(self.get(key).to_command_handler())
+        return result
