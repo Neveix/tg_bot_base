@@ -1,5 +1,5 @@
 from telegram.ext import CallbackQueryHandler, CallbackContext
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import CallbackQuery, Update, InlineKeyboardButton, InlineKeyboardMarkup
 from .bot_manager import BotManager
 from .button import Button
 
@@ -19,19 +19,23 @@ class ButtonManager:
                 return
             data = __callback_data[int(query.data)]
             if data[0] == "button":
-                button = self.get_clone(data[1])
-                self.bot_manager.user_local_data.append(user_id, "__directory_stack", data[1])
-                await query.edit_message_text(**button.to_dict(user_id=user_id,bot_manager=bot_manager))
+                await ButtonManager.simulate_switch_to_button(data[1], query, user_id, bot_manager)
             elif data[0] == "step_back":
-                directory_stack = self.bot_manager.user_local_data.get(user_id, "__directory_stack")
-                if len(directory_stack) == 1:
-                    return
-                directory_stack.remove(directory_stack[-1])
-                button = self.get_clone(directory_stack[-1])
-                await query.edit_message_text(**button.to_dict(user_id=user_id,bot_manager=bot_manager))
+                ButtonManager.simulate_step_back(query, user_id, bot_manager)
             elif data[0] == "function":
                 await data[1](button_manager=self, update=update, context=context)
         self.__handler_callback = __handler_callback
+    async def simulate_switch_to_button(button_name: str, query: CallbackQuery, user_id: int, bot_manager: BotManager):
+        button = bot_manager.button_manager.get_clone(button_name)
+        bot_manager.user_local_data.append(user_id, "__directory_stack", button_name)
+        await query.edit_message_text(**button.to_dict(user_id=user_id,bot_manager=bot_manager))
+    async def simulate_step_back(query: CallbackQuery,user_id: int, bot_manager: BotManager):
+        directory_stack = bot_manager.user_local_data.get(user_id, "__directory_stack")
+        if len(directory_stack) == 1:
+            return
+        directory_stack.remove(directory_stack[-1])
+        button = bot_manager.button_manager.get_clone(directory_stack[-1])
+        await query.edit_message_text(**button.to_dict(user_id=user_id,bot_manager=bot_manager))
     def add(self, button: Button):
         button.button_manager = self
         self.__button_dict__[button.name] = button
