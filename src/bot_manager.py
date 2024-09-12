@@ -10,5 +10,6 @@ class BotManager:
         self.button_manager = ButtonManager(self)
         from . import UserLocalData
         self.user_local_data = UserLocalData(self)
+        self.user_global_data = None
         from . import MessageManager
         self.message_manager = MessageManager(self)
