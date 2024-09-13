@@ -12,8 +12,11 @@ class MessageManager:
                 update.message.from_user.id,
                 "__after_input")
             if callable(__after_input):
+                self.bot_manager.user_local_data.set(
+                update.message.from_user.id,
+                "__after_input", None)
                 await __after_input(
-                    message=update.message.text, 
+                    message=update.message, 
                     bot_manager=self.bot_manager,
                     update=update,
                     context=context
