@@ -6,7 +6,10 @@ class UserLocalData:
     def set(self, user_id: int, field, value):
         self.__create_user_if_not_exists__(user_id)
         self.__data__[user_id][field] = value
-        
+    def add(self, user_id: int, field, value):
+        self.__create_user_if_not_exists__(user_id)
+        old_value = self.get(user_id, field, 0)
+        self.__data__[user_id][field] = old_value + value
     def append(self, user_id: int, field, value):
         self.__create_user_if_not_exists__(user_id)
         list = self.get(user_id, field)

@@ -8,6 +8,17 @@ class MessageManager:
         from .bot_manager import BotManager
         self.bot_manager: BotManager = bot_manager
         async def handle_message(update: Update, context: CallbackContext):
+            __media_group_id = self.bot_manager.user_local_data.get(
+                update.message.from_user.id,
+                "__media_group_id")
+            if update.message.media_group_id != None:
+                if __media_group_id == update.message.media_group_id:
+                    return
+                self.bot_manager.user_local_data.set(
+                    update.message.from_user.id,
+                    "__media_group_id",
+                    update.message.media_group_id)
+            # print(f"    > handling message with {update.message.text=} and {update.message.media_group_id=}")
             __after_input = self.bot_manager.user_local_data.get(
                 update.message.from_user.id,
                 "__after_input")
@@ -22,11 +33,10 @@ class MessageManager:
                     context=context
                 )
         self.handle_message = handle_message
-    async def get_message_and_run_method(self, update: Update, context: CallbackContext, edit_text: str, function: Callable):
-        self.bot_manager.user_local_data.set(update.callback_query.from_user.id, "__callback_data", None)
-        await update.callback_query.edit_message_text(edit_text)
+    async def get_message_and_run_method(self, user_id: int, function: Callable):
+        self.bot_manager.user_local_data.set(user_id, "__callback_data", None)
         self.bot_manager.user_local_data.set(
-            update.callback_query.from_user.id,
+            user_id,
             "__after_input",
             function)
     def get_message_handler(self):
