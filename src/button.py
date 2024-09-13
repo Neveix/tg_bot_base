@@ -2,11 +2,12 @@ from typing import Callable
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 
 class Button:
-    def __init__(self, name: str, text: str | Callable, buttons: list[list[list[str, object] | Callable]] | Callable = None, button_manager = None):
+    def __init__(self, name: str, text: str | Callable, buttons: list[list[list[str, object] | Callable]] | Callable = None, button_manager = None, photo=None):
         from .button_manager import ButtonManager
         self.name = name
         self.text = text
         self.buttons = buttons
+        self.photo = photo
         self.button_manager: ButtonManager = button_manager
     def handle_callback_data(self, button_to_dict: dict[str, object], user_id: int):
         __callback_data = []
@@ -42,6 +43,8 @@ class Button:
             return self.buttons(**kwargs)
         else:
             return self.buttons
+    def get_photo(self, **kwargs):
+        return self.photo
     def to_dict(self, **kwargs) -> dict:
         user_id = kwargs.get("user_id")
         result = {}
@@ -65,4 +68,7 @@ class Button:
                 reply_markup.append(line)
             result["reply_markup"] = InlineKeyboardMarkup(reply_markup)
             self.button_manager.bot_manager.user_local_data.set(user_id, "__callback_data", __callback_data)
+        photo = self.get_photo(**kwargs)
+        if photo != None:
+            result["photo"] = photo
         return result

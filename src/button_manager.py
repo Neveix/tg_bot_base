@@ -25,13 +25,14 @@ class ButtonManager:
             elif data[0] == "step_back":
                 await bot_manager.button_manager.simulate_step_back(query)
             elif data[0] == "function":
-                await data[1](bot_manager=self.bot_manager, button_manager=self, update=update, context=context)
+                await data[1](bot_manager=self.bot_manager, button_manager=self, update=update, context=context, user_id=user_id)
         self.__handler_callback = __handler_callback
     async def simulate_switch_to_button(self, button_name: str, query: CallbackQuery):
         user_id = query.from_user.id
         button = self.bot_manager.button_manager.get_clone(button_name)
         self.bot_manager.user_local_data.append(user_id, "__directory_stack", button_name)
-        await query.edit_message_text(**button.to_dict(user_id=user_id,bot_manager=self.bot_manager))
+        button_dict = button.to_dict(user_id=user_id,bot_manager=self.bot_manager)
+        await query.edit_message_text(**button_dict)
     async def simulate_step_back(self, query: CallbackQuery):
         user_id = query.from_user.id
         directory_stack = self.bot_manager.user_local_data.get(user_id, "__directory_stack")
