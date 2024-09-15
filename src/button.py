@@ -75,6 +75,6 @@ class Button:
             self.button_manager.bot_manager.user_local_data.set(user_id, "__callback_data", __callback_data)
         photos = self.get_photos(**kwargs)
         if photos != None:
-            photos = list(map(lambda photo: InputMediaPhoto(PhotoSize(photo)),photos))
+            photos = list(map(lambda photo: InputMediaPhoto(media=photo),photos))
             result["photos"] = photos
         return result

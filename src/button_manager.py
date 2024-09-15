@@ -1,5 +1,5 @@
 from telegram.ext import CallbackQueryHandler, CallbackContext
-from telegram import CallbackQuery, Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import CallbackQuery, InputMedia, InputMediaPhoto, Update, InlineKeyboardButton, InlineKeyboardMarkup
 from .bot_manager import BotManager
 from .button import Button
 
@@ -38,7 +38,6 @@ class ButtonManager:
         await query.edit_message_text(**button_text_and_markup)
         photo_ids = button_dict.get("photos")
         if photo_ids != None:
-            print(f"got {photo_ids=}")
             await query.edit_message_media(media = photo_ids)
     async def simulate_step_back(self, query: CallbackQuery):
         user_id = query.from_user.id
