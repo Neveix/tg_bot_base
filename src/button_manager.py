@@ -32,7 +32,14 @@ class ButtonManager:
         button = self.bot_manager.button_manager.get_clone(button_name)
         self.bot_manager.user_local_data.append(user_id, "__directory_stack", button_name)
         button_dict = button.to_dict(user_id=user_id,bot_manager=self.bot_manager)
-        await query.edit_message_text(**button_dict)
+        button_text_and_markup = {}
+        button_text_and_markup["text"]= button_dict.get("text")
+        button_text_and_markup["reply_markup"]= button_dict.get("reply_markup")
+        await query.edit_message_text(**button_text_and_markup)
+        photo_ids = button_dict.get("photos")
+        if photo_ids != None:
+            print(f"got {photo_ids=}")
+            await query.edit_message_media(media = photo_ids)
     async def simulate_step_back(self, query: CallbackQuery):
         user_id = query.from_user.id
         directory_stack = self.bot_manager.user_local_data.get(user_id, "__directory_stack")
