@@ -7,8 +7,8 @@ from .src.button import Button
 from .src.method import Method
 from .src.operation import Operation
 from .src.command import Command
-from .src.sqlite.database_field import DataBaseField
-from .src.sqlite.user_global_data import UserGlobalData
 from .src.message_manager import MessageManager
-from .src import Utils
 from .src import SaveablePhotoSize
+from .src import DataBaseField
+from .src import UserGlobalData
+from .src import DataBaseManager

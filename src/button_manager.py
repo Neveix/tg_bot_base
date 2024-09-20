@@ -25,11 +25,18 @@ class ButtonManager:
             elif data[0] == "step_back":
                 await bot_manager.button_manager.simulate_step_back(query)
             elif data[0] == "function":
-                await data[1](bot_manager=self.bot_manager, button_manager=self, update=update, context=context, user_id=user_id)
+                kwargs = {}
+                if len(data) > 2:
+                    kwargs = data[2]
+                await data[1](bot_manager=self.bot_manager, 
+                    button_manager=self, update=update, context=context, user_id=user_id, **kwargs)
         self.__handler_callback = __handler_callback
     async def simulate_switch_to_button(self, button_name: str, query: CallbackQuery):
         user_id = query.from_user.id
-        button = self.bot_manager.button_manager.get_clone(button_name)
+        try:
+            button = self.bot_manager.button_manager.get_clone(button_name)
+        except UnknownButtonExeption:
+            return
         self.bot_manager.user_local_data.append(user_id, "__directory_stack", button_name)
         button_dict = button.to_dict(user_id=user_id,bot_manager=self.bot_manager)
         button_text_and_markup = {}
