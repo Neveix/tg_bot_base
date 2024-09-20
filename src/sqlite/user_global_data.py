@@ -4,7 +4,7 @@ from .data_base_manager import DataBaseManager
 
 class UserGlobalData(DataBaseManager):
     def __init__(self, bot_manager, path: str, fields: list[DataBaseField]=[]):
-        fields.insert(0,DataBaseField("user_id","INT PRIMARY KEY",0))
+        fields.insert(0,DataBaseField("user_id","INT",0))
         super().__init__(path, fields=fields)
         from ..bot_manager import BotManager
         self.bot_manager: BotManager = bot_manager
@@ -23,7 +23,9 @@ class UserGlobalData(DataBaseManager):
         cursor = self.connection.cursor()
         result = cursor.execute(f"SELECT * FROM {self.table_name} WHERE user_id = {user_id}").fetchone()
         if result == None:
-            cursor.execute(f"INSERT INTO {self.table_name} VALUES ({",".join(map(lambda f: f.default_value,self.fields))})")
+            cursor.execute(f"INSERT INTO {self.table_name}({",".join(self.field_names)}) \
+VALUES ({",".join("?"*len(self.field_names))})",
+                list(map(lambda f: f.default_value,self.fields)))
         cursor.close()
         self.connection.commit()
         

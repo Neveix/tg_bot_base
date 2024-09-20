@@ -1,19 +1,19 @@
 import sqlite3
 
-from tg_bot_base import DataBaseField
+from .database_field import DataBaseField
 
 class DataBaseManager:
-    def __init__(self, path: str, table_name: str = "Table", fields: list[DataBaseField] = []):
-        self.fields = [
+    def __init__(self, path: str, table_name: str = "DefaultTable", fields: list[DataBaseField] = []):
+        self.fields: list[DataBaseField] = [
             DataBaseField("id","INTEGER PRIMARY KEY AUTOINCREMENT", 0)
         ]
         self.fields.extend(fields)
         self.field_names = list(map(lambda field: field.name, self.fields))
         self.connection = sqlite3.connect(path)
         self.table_name = table_name
+        self.field_names_types = list(map(lambda field: field.name+" "+field.type,self.fields))
         cursor = self.connection.cursor()
-        columns = ",".join(map(lambda field: field.name+" "+field.type,self.fields))
-        cursor.execute("PRAGMA case_sensitive_like = false")
+        columns = ",".join(self.field_names_types)
         cursor.execute(f"CREATE TABLE IF NOT EXISTS {self.table_name}({columns})")
         from sqlite3 import OperationalError
         for field in self.fields:
