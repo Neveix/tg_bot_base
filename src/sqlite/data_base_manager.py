@@ -36,7 +36,10 @@ class DataBaseManager:
             if field.name in kwargs:
                 field_names.append(field.name)
                 field_values.append(kwargs.get(field.name))
-        cursor.execute(f"INSERT OR IGNORE INTO {self.table_name}({",".join(field_names)}) VALUES ({",".join("?"*len(field_names))})",field_values)
+        field_values = tuple(field_values)
+        text = f"INSERT OR IGNORE INTO {self.table_name}({",".join(field_names)}) VALUES ({",".join("?"*len(field_names))})"
+        # print(f"insert, {text=} {field_values=}")
+        cursor.execute(text,field_values)
         cursor.close()
         self.connection.commit()
     def delete(self, sql: str = ""):
