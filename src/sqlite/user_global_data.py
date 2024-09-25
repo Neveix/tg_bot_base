@@ -18,10 +18,10 @@ class UserGlobalData:
         self.con.commit()
     def __del__(self):
         self.con.close()
-    def get(self, user_id: int, fields: str):
+    def get(self, user_id: int, fields: str, default: Any = None):
         cur = self.con.cursor() 
         result = cur.execute(f"SELECT {fields} FROM {self.table_name} WHERE user_id = {user_id}").fetchall()
-        return result
+        return result or default
     def set(self, user_id: int, field: str, value):
         cur = self.con.cursor() 
         row_count = cur.execute(f"SELECT count() FROM {self.table_name} WHERE user_id = {user_id}").fetchall()[0][0]
@@ -51,7 +51,9 @@ class UserGlobalData:
             cur.execute(f"INSERT INTO {self.table_name} (user_id,{field}) VALUES ({user_id},?)", (list_str,))
         else:
             list_str = selected[0][0]
-            List = loads(list_str)
+            List = []
+            if list_str != None:
+                List = loads(list_str)
             List.append(value)
             list_str = dumps(List)
             cur.execute(f"UPDATE {self.table_name} SET {field} = ? WHERE user_id = {user_id}", (list_str,))
