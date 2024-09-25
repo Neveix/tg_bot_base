@@ -23,7 +23,7 @@ class DataBaseManager:
                 pass
         cursor.close()
         self.connection.commit()
-    def get(self, id: int = -1, columns: str = ""):
+    def get_by_id(self, id: int = -1, columns: str = ""):
         if id == -1:
             return
         result = self.browse(0,1,columns,f"WHERE id = {id}")[0]

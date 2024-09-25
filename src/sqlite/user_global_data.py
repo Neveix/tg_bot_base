@@ -1,40 +1,82 @@
+import sqlite3
+from typing import Any
 
-from .database_field import DataBaseField
-from .data_base_manager import DataBaseManager
-
-class UserGlobalData(DataBaseManager):
-    def __init__(self, bot_manager, path: str, fields: list[DataBaseField]=[]):
-        super().__init__(path, fields=fields)
-        from ..bot_manager import BotManager
-        self.bot_manager: BotManager = bot_manager
-        bot_manager.user_global_data = self
-    def set(self, user_id, field, value):
-        cursor = self.connection.cursor()
-        self.create_user(user_id)
-        kwargs = {}
-        kwargs[field] = value
-        self.insert(user_id=user_id, **kwargs)
-        #print(f"{self.get(user_id, "picture_favorites")=}")
-        text = f"UPDATE {self.table_name} SET {field} = ? WHERE user_id = ?"
-        args = (value,user_id,)
-        #print(f"update {text=} {args=}")
-        cursor.execute(text, args)
-        #print(f"{self.get(user_id, "picture_favorites")=}")
-        cursor.close()
-        self.connection.commit()
-        #print(f"global data {user_id=} set {field} to `{value}` of type {type(value)} ")
-    def get(self, user_id: int, columns: str, default=None):
-        """Gets the value from a DataBase's field."""
-        result = self.browse(0,1,columns,f"WHERE user_id = {user_id}") or default
-        #print(f"global data {user_id=} get {columns} = `{result}` of type {type(result)} ")
+class UserGlobalData:
+    def __init__(self, path: str):
+        self.con = sqlite3.connect(path)
+        self.table_name = "UserGlobalData"
+    def create_table(self, column_defs: str):
+        cur = self.con.cursor()
+        column_defs = f"user_id INTEGER PRIMARY KEY NOT NULL,{column_defs}"
+        cur.execute(f"CREATE TABLE IF NOT EXISTS {self.table_name} ({column_defs})")
+        cur.close()
+        self.con.commit()
+    def add_column(self, column_def):
+        cur = self.con.cursor()
+        cur.execute(f"ALTER TABLE {self.table_name} ADD COLUMN {column_def}")
+        cur.close()
+        self.con.commit()
+    def __del__(self):
+        self.con.close()
+    def get(self, user_id: int, fields: str):
+        cur = self.con.cursor() 
+        result = cur.execute(f"SELECT {fields} FROM {self.table_name} WHERE user_id = {user_id}").fetchall()
         return result
-    def create_user(self, user_id):
-        cursor = self.connection.cursor()
-        result = cursor.execute(f"SELECT * FROM {self.table_name} WHERE user_id = {user_id}").fetchone()
-        if result == None:
-            cursor.execute(f"INSERT OR IGNORE INTO {self.table_name}({",".join(self.field_names)}) \
-VALUES ({",".join("?"*len(self.field_names))})",
-                list(map(lambda f: f.default_value,self.fields)))
-        cursor.close()
-        self.connection.commit()
-        
+    def set(self, user_id: int, field: str, value: Any):
+        cur = self.con.cursor() 
+        row_count = cur.execute(f"SELECT count() FROM {self.table_name} WHERE user_id = {user_id}").fetchall()[0][0]
+        if row_count == 0:
+            cur.execute(f"INSERT INTO {self.table_name} ({field}) VALUES (?)", value)
+        else:
+            cur.execute(f"UPDATE {self.table_name} SET {field} = ? WHERE user_id = {user_id}", value)
+        cur.close()
+        self.con.commit()
+    def add(self, user_id: int, field: str, value: Any):
+        cur = self.con.cursor() 
+        row_count = cur.execute(f"SELECT count() FROM {self.table_name} WHERE user_id = {user_id}").fetchall()[0][0]
+        if row_count == 0:
+            cur.execute(f"INSERT INTO {self.table_name} ({field}) VALUES (?)", value)
+        else:
+            cur.execute(f"UPDATE {self.table_name} SET {field} = {field} + ? WHERE user_id = {user_id}", value)
+        cur.close()
+        self.con.commit()
+    def add_to_list(self, user_id: int, field: str, value: Any):
+        cur = self.con.cursor() 
+        row_count = cur.execute(f"SELECT count() FROM {self.table_name} WHERE user_id = {user_id}").fetchall()[0][0]
+        from json import dumps
+        from json import loads
+        if row_count == 0:
+            list = [value]
+            list_str = dumps(list)
+            cur.execute(f"INSERT INTO {self.table_name} ({field}) VALUES (?)", list_str)
+        else:
+            list_str = cur.execute(f"SELECT {field} FROM {self.table_name} WHERE user_id = {user_id}").fetchall()[0][0]
+            List = loads(list_str)
+            List.append(value)
+            list_str = dumps(List)
+            cur.execute(f"UPDATE {self.table_name} SET {field} = ? WHERE user_id = {user_id}", list_str)
+        cur.close()
+        self.con.commit()
+    def remove_from_list(self, user_id: int, field: str, value: Any):
+        cur = self.con.cursor() 
+        row_count = cur.execute(f"SELECT count() FROM {self.table_name} WHERE user_id = {user_id}").fetchall()[0][0]
+        from json import dumps
+        from json import loads
+        if row_count > 0:
+            list_str = cur.execute(f"SELECT {field} FROM {self.table_name} WHERE user_id = {user_id}").fetchall()[0][0]
+            List: list = loads(list_str)
+            List.remove(value)
+            list_str = dumps(List)
+            cur.execute(f"UPDATE {self.table_name} SET {field} = ? WHERE user_id = {user_id}", list_str)
+        cur.close()
+        self.con.commit()
+    def delete_user(self, user_id: int, sql: str):
+        """executes: DELETE FROM {self.table_name} WHERE user_id = {user_id} {sql} """
+        cur = self.con.cursor()
+        cur.execute(f"DELETE FROM {self.table_name} WHERE user_id = {user_id} {sql}")
+        cur.close()
+        self.con.commit()
+    def select(self, columns: str, sql: str):
+        """returns: cur.execute(f"SELECT {columns} FROM {self.table_name} {sql}").fetchall()"""
+        cur = self.con.cursor() 
+        return cur.execute(f"SELECT {columns} FROM {self.table_name} {sql}").fetchall()

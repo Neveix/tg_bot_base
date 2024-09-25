@@ -12,3 +12,4 @@ from .src import SaveablePhotoSize
 from .src import DataBaseField
 from .src import UserGlobalData
 from .src import DataBaseManager
+from .src import UserLocalData
