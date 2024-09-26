@@ -4,8 +4,6 @@ class BotManager:
     def __init__(self):
         from . import CommandManager
         self.command_manager = CommandManager(self)
-        from . import MethodManager
-        self.method_manager = MethodManager(self)
         from . import ButtonManager
         self.button_manager = ButtonManager(self)
         from . import UserLocalData

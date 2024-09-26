@@ -47,11 +47,14 @@ class DataBaseManager:
         cursor.execute(f"DELETE FROM {self.table_name} {sql}")
         cursor.close()
         self.connection.commit()
-    def browse(self, page: int, count: int, columns: str = "", sql: str = ""):
+    def browse(self, page: int = 0, count: int = -1, columns: str = "", sql: str = ""):
         cursor = self.connection.cursor()
         if columns == "":
             columns = ",".join(map(lambda field: field.name, self.fields))
-        result = cursor.execute(f"SELECT {columns} FROM {self.table_name} {sql} LIMIT {count} OFFSET {page*count}").fetchall()
+        limit_str = ""
+        if count != -1:
+            limit_str = f"LIMIT {count} OFFSET {page*count}"
+        result = cursor.execute(f"SELECT {columns} FROM {self.table_name} {sql} {limit_str}").fetchall()
         cursor.close()
         return result
     def count(self, sql: str) -> int:
