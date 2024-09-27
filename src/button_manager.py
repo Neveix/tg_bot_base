@@ -35,6 +35,8 @@ class ButtonManager:
                 args = data.args[1:]
                 await function(bot_manager=self.bot_manager, 
                     button_manager=self, update=update, context=context, user_id=user_id, *args, **data.kwargs)
+            elif data.action == "show_alert":
+                await bot_manager.button_manager.simulate_show_alert(query=query, text = data.args[0])
         self.handle_callback = handle_callback
     async def simulate_switch_to_button(self, button_name: str, query: CallbackQuery):
         user_id = query.from_user.id
@@ -59,6 +61,8 @@ class ButtonManager:
         directory_stack.remove(directory_stack[-1])
         button = self.bot_manager.button_manager.get_clone(directory_stack[-1])
         await query.edit_message_text(**button.to_dict(user_id=user_id,bot_manager=self.bot_manager))
+    async def simulate_show_alert(self, query: CallbackQuery, text: str):
+        await query.answer(text=text, show_alert=True)
     def add(self, button: Button):
         button.button_manager = self
         self.__button_dict__[button.name] = button
