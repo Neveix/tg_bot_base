@@ -1,7 +1,6 @@
 from typing import Callable
 from telegram import Update
 from telegram.ext import CallbackContext
-from telegram.ext import ContextTypes
 
 class MessageManager:
     def __init__(self, bot_manager):
@@ -18,7 +17,6 @@ class MessageManager:
                     update.message.from_user.id,
                     "__media_group_id",
                     update.message.media_group_id)
-            # print(f"    > handling message with {update.message.text=} and {update.message.media_group_id=}")
             __after_input = self.bot_manager.user_local_data.get(
                 update.message.from_user.id,
                 "__after_input")

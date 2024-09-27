@@ -10,7 +10,7 @@ class ButtonManager:
     def __init__(self, bot_manager: BotManager):
         self.bot_manager: BotManager = bot_manager
         self.__button_dict__ = {}
-        async def __handler_callback(update: Update, context: CallbackContext):
+        async def handle_callback(update: Update, context: CallbackContext):
             query = update.callback_query
             user_id: int = query.from_user.id
             await query.answer()
@@ -30,7 +30,7 @@ class ButtonManager:
                     kwargs = data[2]
                 await data[1](bot_manager=self.bot_manager, 
                     button_manager=self, update=update, context=context, user_id=user_id, **kwargs)
-        self.__handler_callback = __handler_callback
+        self.handle_callback = handle_callback
     async def simulate_switch_to_button(self, button_name: str, query: CallbackQuery):
         user_id = query.from_user.id
         try:
@@ -68,4 +68,4 @@ class ButtonManager:
     def get_clone(self, name: str) -> Button:
         return self.get(name).clone()
     def get_callback_query_handler(self) -> CallbackQueryHandler:
-        return CallbackQueryHandler(self.__handler_callback)
+        return CallbackQueryHandler(self.handle_callback)

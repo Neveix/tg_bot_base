@@ -21,8 +21,13 @@ class UserLocalData:
         if self.__data__.get(user_id) != None:
             self.__data__[user_id] = {}
     def get(self, user_id, field: int, default = None):
+        result = None
         if self.__data__.get(user_id) != None:
-            return self.__data__.get(user_id).get(field) or default
+            result = self.__data__.get(user_id).get(field)
+        if result == None:
+            return default
+        else:
+            return result
         
     def create_user_if_not_exists(self, user_id: int):
         if self.__data__.get(user_id) == None:
