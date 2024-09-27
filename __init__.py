@@ -9,3 +9,4 @@ from .src import DataBaseField
 from .src import UserGlobalData
 from .src import DataBaseManager
 from .src import UserLocalData
+from .src import CallbackData

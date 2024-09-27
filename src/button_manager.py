@@ -2,8 +2,12 @@ from telegram.ext import CallbackQueryHandler, CallbackContext
 from telegram import CallbackQuery, InputMedia, InputMediaPhoto, Update, InlineKeyboardButton, InlineKeyboardMarkup
 from .bot_manager import BotManager
 from .button import Button
+from tg_bot_base.src.callback_data import CallbackData
 
 class UnknownButtonExeption(BaseException):
+    pass
+
+class CallbackDataWithNoFunction(BaseException):
     pass
 
 class ButtonManager:
@@ -19,17 +23,18 @@ class ButtonManager:
                 return
             if len(__callback_data) <= int(query.data):
                 return
-            data = __callback_data[int(query.data)]
-            if data[0] == "button":
-                await bot_manager.button_manager.simulate_switch_to_button(data[1], query)
-            elif data[0] == "step_back":
-                await bot_manager.button_manager.simulate_step_back(query)
-            elif data[0] == "function":
-                kwargs = {}
-                if len(data) > 2:
-                    kwargs = data[2]
-                await data[1](bot_manager=self.bot_manager, 
-                    button_manager=self, update=update, context=context, user_id=user_id, **kwargs)
+            data: CallbackData = __callback_data[int(query.data)]
+            if data.action == "button":
+                await bot_manager.button_manager.simulate_switch_to_button(*data.args, query=query)
+            elif data.action == "step_back":
+                await bot_manager.button_manager.simulate_step_back(query=query)
+            elif data.action == "function":
+                function = data.args[0]
+                if not callable(function):
+                    raise CallbackDataWithNoFunction
+                args = data.args[1:]
+                await function(bot_manager=self.bot_manager, 
+                    button_manager=self, update=update, context=context, user_id=user_id, *args, **data.kwargs)
         self.handle_callback = handle_callback
     async def simulate_switch_to_button(self, button_name: str, query: CallbackQuery):
         user_id = query.from_user.id

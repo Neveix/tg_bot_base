@@ -1,8 +1,11 @@
 from typing import Any, Callable
-from telegram import Bot, InlineKeyboardMarkup, InlineKeyboardButton, PhotoSize, InputMediaPhoto
+from telegram import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto
+from tg_bot_base.src.callback_data import CallbackData
 
 class Button:
-    def __init__(self, name: str, text: str | Callable, buttons: list[list[list[str, object] | Callable]] | Callable = None, photos=None):
+    
+    def __init__(self, name: str, text: str | Callable, 
+            buttons: list[list[list[str, CallbackData] | Callable]] | Callable = None, photos=None):
         from .button_manager import ButtonManager
         self.name = name
         self.text = text
