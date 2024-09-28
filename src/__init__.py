@@ -9,4 +9,4 @@ from .saveable_photo_size import SaveablePhotoSize
 from .sqlite.database_field import DataBaseField
 from .sqlite.user_global_data import UserGlobalData
 from .sqlite.data_base_manager import DataBaseManager
-from .callback_data import CallbackData
+from .callback_data import CallbackData, FunctionCallbackData

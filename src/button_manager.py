@@ -44,7 +44,9 @@ class ButtonManager:
             button = self.bot_manager.button_manager.get_clone(button_name)
         except UnknownButtonExeption:
             return
-        self.bot_manager.user_local_data.append(user_id, "__directory_stack", button_name)
+        __directory_stack = self.bot_manager.user_local_data.get(user_id,"__directory_stack", [])
+        if __directory_stack[-1] != button_name:
+            __directory_stack.append(button_name)
         button_dict = button.to_dict(user_id=user_id,bot_manager=self.bot_manager)
         button_text_and_markup = {}
         button_text_and_markup["text"]= button_dict.get("text")

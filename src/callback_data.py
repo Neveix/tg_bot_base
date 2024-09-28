@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Callable, Literal
 
 class CallbackData:
     def __init__(self,action: Literal['button','step_back','function','show_alert'] | str, *args, **kwargs):
@@ -13,3 +13,7 @@ class CallbackData:
         self.action = action
         self.args = args
         self.kwargs = kwargs
+
+class FunctionCallbackData(CallbackData):
+    def __init__(self, function: Callable, *args, **kwargs):
+        super().__init__('function', function, *args, **kwargs)
