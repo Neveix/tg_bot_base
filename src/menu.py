@@ -2,7 +2,7 @@ from typing import Any, Callable
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto
 from tg_bot_base.src.callback_data import CallbackData
 
-class Button:
+class Menu:
     
     def __init__(self, name: str, text: str | Callable, 
             buttons: list[list[list[str, CallbackData] | Callable]] | Callable = None, photos=None):
@@ -33,7 +33,7 @@ class Button:
                     if not callable(button):
                         new_button = list(button)
                     newline.append(new_button)
-        clone = Button(self.name,self.text,
+        clone = Menu(self.name,self.text,
             buttons_clone
             ,photos=self.photos)
         clone.button_manager = self.button_manager
@@ -76,7 +76,7 @@ class Button:
         user_id = kwargs.get("user_id")
         result = {}
         result["text"] = self.get_text(**kwargs)
-        result["reply_markup"] = Button.buttons_to_inline_keyboard(self.get_buttons(**kwargs),**kwargs)
+        result["reply_markup"] = Menu.buttons_to_inline_keyboard(self.get_buttons(**kwargs),**kwargs)
         photos = self.get_photos(**kwargs)
         if photos != None:
             photos = list(map(lambda photo: InputMediaPhoto(media=photo),photos))

@@ -1,15 +1,8 @@
-from typing import Callable, Literal
+from typing import Callable
 
 class CallbackData:
-    def __init__(self,action: Literal['button','step_back','function','show_alert'] | str, *args, **kwargs):
-        if action == Literal['button']:
-            action = 'button'
-        if action == Literal['step_back']:
-            action = 'step_back'
-        if action == Literal['function']:
-            action = 'function'
-        if action == Literal['show_alert']:
-            action = 'show_alert'
+    def __init__(self, action: str, *args, **kwargs):
+        """action should be 'step_back' 'function' 'menu' 'show_alert'"""
         self.action = action
         self.args = args
         self.kwargs = kwargs
@@ -17,3 +10,11 @@ class CallbackData:
 class FunctionCallbackData(CallbackData):
     def __init__(self, function: Callable, *args, **kwargs):
         super().__init__('function', function, *args, **kwargs)
+
+class MenuCallbackData(CallbackData):
+    def __init__(self, menu: str, *args, **kwargs):
+        super().__init__('menu', menu, *args, **kwargs)
+
+class StepBackCallbackData(CallbackData):
+    def __init__(self):
+        super().__init__('step_back')

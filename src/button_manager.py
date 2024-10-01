@@ -1,7 +1,7 @@
 from telegram.ext import CallbackQueryHandler, CallbackContext
 from telegram import CallbackQuery, InputMedia, InputMediaPhoto, Update, InlineKeyboardButton, InlineKeyboardMarkup
 from .bot_manager import BotManager
-from .button import Button
+from .menu import Menu
 from tg_bot_base.src.callback_data import CallbackData
 
 class UnknownButtonExeption(BaseException):
@@ -19,12 +19,13 @@ class ButtonManager:
             user_id: int = query.from_user.id
             await query.answer()
             __callback_data = self.bot_manager.user_local_data.get(user_id, "__callback_data")
+            
             if not __callback_data:
                 return
             if len(__callback_data) <= int(query.data):
                 return
             data: CallbackData = __callback_data[int(query.data)]
-            if data.action == "button":
+            if data.action == "menu":
                 await bot_manager.button_manager.simulate_switch_to_button(*data.args, query=query)
             elif data.action == "step_back":
                 await bot_manager.button_manager.simulate_step_back(query=query)
@@ -65,18 +66,18 @@ class ButtonManager:
         await query.edit_message_text(**button.to_dict(user_id=user_id,bot_manager=self.bot_manager))
     async def simulate_show_alert(self, query: CallbackQuery, text: str):
         await query.answer(text=text, show_alert=True)
-    def add(self, button: Button):
+    def add(self, button: Menu):
         button.button_manager = self
         self.__button_dict__[button.name] = button
-    def add_many(self, *buttons):
+    def add_many(self, *buttons: list[Menu]):
         for button in buttons:
             self.add(button)
-    def get(self, name: str) -> Button:
+    def get(self, name: str) -> Menu:
         result = self.__button_dict__.get(name)
         if result==None:
             raise UnknownButtonExeption(f"Unknown button name {name}")
         return result
-    def get_clone(self, name: str) -> Button:
+    def get_clone(self, name: str) -> Menu:
         return self.get(name).clone()
     def get_callback_query_handler(self) -> CallbackQueryHandler:
         return CallbackQueryHandler(self.handle_callback)
