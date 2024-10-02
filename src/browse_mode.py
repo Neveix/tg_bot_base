@@ -30,7 +30,8 @@ class BrowseMode:
             if input_media_list:
                 await bot.edit_message_media(media=input_media_list[0], chat_id=chat_id, message_id=message.id-1)
             await bot.edit_message_text(chat_id=chat_id, text=text, message_id=message.id)
-            await bot.edit_message_reply_markup(chat_id=chat_id, message_id=message.id,reply_markup=reply_markup)
+            await bot.edit_message_reply_markup(chat_id=chat_id, 
+                message_id=message.id, reply_markup=reply_markup)
         elif mode == BrowseMode.RETURN:
             result = {}
             result["bot"] = bot

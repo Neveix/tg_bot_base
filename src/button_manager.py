@@ -39,15 +39,15 @@ class ButtonManager:
             elif data.action == "show_alert":
                 await bot_manager.button_manager.simulate_show_alert(query=query, text = data.args[0])
         self.handle_callback = handle_callback
-    async def simulate_switch_to_button(self, button_name: str, query: CallbackQuery):
+    async def simulate_switch_to_menu(self, menu_name: str, query: CallbackQuery):
         user_id = query.from_user.id
         try:
-            button = self.bot_manager.button_manager.get_clone(button_name)
+            button = self.bot_manager.button_manager.get_clone(menu_name)
         except UnknownButtonExeption:
             return
         __directory_stack = self.bot_manager.user_local_data.get(user_id,"__directory_stack", [])
-        if __directory_stack[-1] != button_name:
-            __directory_stack.append(button_name)
+        if __directory_stack[-1] != menu_name:
+            __directory_stack.append(menu_name)
         button_dict = button.to_dict(user_id=user_id,bot_manager=self.bot_manager)
         button_text_and_markup = {}
         button_text_and_markup["text"]= button_dict.get("text")
