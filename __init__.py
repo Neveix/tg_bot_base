@@ -10,3 +10,4 @@ from .src import UserGlobalData
 from .src import DataBaseManager
 from .src import UserLocalData
 from .src import CallbackData, FunctionCallbackData, MenuCallbackData, StepBackCallbackData
+from .src import BrowseMode

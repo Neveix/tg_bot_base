@@ -28,7 +28,8 @@ class MessageManager:
                     message=update.message, 
                     bot_manager=self.bot_manager,
                     update=update,
-                    context=context
+                    context=context,
+                    user_id=update.message.from_user.id
                 )
         self.handle_message = handle_message
     async def get_message_and_run_method(self, user_id: int, function: Callable):
