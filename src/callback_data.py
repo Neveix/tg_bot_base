@@ -17,4 +17,5 @@ class MenuCallbackData(CallbackData):
 
 class StepBackCallbackData(CallbackData):
     def __init__(self):
+        "init without args"
         super().__init__('step_back')

@@ -26,7 +26,7 @@ class ButtonManager:
                 return
             data: CallbackData = __callback_data[int(query.data)]
             if data.action == "menu":
-                await bot_manager.button_manager.simulate_switch_to_button(*data.args, query=query)
+                await bot_manager.button_manager.simulate_switch_to_menu(*data.args, query=query)
             elif data.action == "step_back":
                 await bot_manager.button_manager.simulate_step_back(query=query)
             elif data.action == "function":
