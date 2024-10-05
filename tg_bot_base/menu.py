@@ -1,6 +1,6 @@
 from typing import Any, Callable
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto
-from tg_bot_base.src.callback_data import CallbackData
+from .callback_data import CallbackData
 
 class Menu:
     

@@ -2,7 +2,7 @@ from telegram.ext import CallbackQueryHandler, CallbackContext
 from telegram import CallbackQuery, InputMedia, InputMediaPhoto, Update, InlineKeyboardButton, InlineKeyboardMarkup
 from .bot_manager import BotManager
 from .menu import Menu
-from tg_bot_base.src.callback_data import CallbackData
+from .callback_data import CallbackData
 
 class UnknownButtonExeption(BaseException):
     pass
