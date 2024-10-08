@@ -41,8 +41,12 @@ class MessageManager:
     def get_message_handler(self):
         from telegram.ext import MessageHandler
         return MessageHandler(None, self.handle_message)
-    async def reply_message_button(self, button_name: str, update: Update):
-        button = self.bot_manager.button_manager.get_clone(button_name)
+    async def reply_message_button(self, menu_name: str, update: Update):
+        from .button_manager import UnknownButtonExeption
+        try:
+            button = self.bot_manager.button_manager.get_clone(menu_name)
+        except UnknownButtonExeption:
+            return
         user_id = update.message.from_user.id
         if self.bot_manager.user_local_data.get(user_id,"__directory_stack",[])[-1] != button.name:
             self.bot_manager.user_local_data.append(user_id, "__directory_stack",button.name)

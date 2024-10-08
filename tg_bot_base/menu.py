@@ -54,7 +54,7 @@ class Menu:
         else:
             return self.photos
     @staticmethod
-    def buttons_to_inline_keyboard(buttons: dict[str, Any], set_callback_data: bool=True, **kwargs) -> InlineKeyboardMarkup:
+    def buttons_to_inline_keyboard(buttons: list[list[str, CallbackData]], set_callback_data: bool=True, **kwargs) -> InlineKeyboardMarkup:
         reply_markup = []
         __callback_data = []
         for old_line in buttons:

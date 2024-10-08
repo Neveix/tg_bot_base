@@ -10,6 +10,7 @@ tg_bot_base/command_manager.py
 tg_bot_base/menu.py
 tg_bot_base/message_manager.py
 tg_bot_base/saveable_photo_size.py
+tg_bot_base/user_global_data.py
 tg_bot_base/user_local_data.py
 tg_bot_base.egg-info/PKG-INFO
 tg_bot_base.egg-info/SOURCES.txt

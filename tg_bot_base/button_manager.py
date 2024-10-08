@@ -66,11 +66,11 @@ class ButtonManager:
         await query.edit_message_text(**button.to_dict(user_id=user_id,bot_manager=self.bot_manager))
     async def simulate_show_alert(self, query: CallbackQuery, text: str):
         await query.answer(text=text, show_alert=True)
-    def add(self, button: Menu):
-        button.button_manager = self
-        self.__button_dict__[button.name] = button
-    def add_many(self, *buttons: list[Menu]):
-        for button in buttons:
+    def add(self, menu: Menu):
+        menu.button_manager = self
+        self.__button_dict__[menu.name] = menu
+    def add_many(self, *menus: list[Menu]):
+        for button in menus:
             self.add(button)
     def get(self, name: str) -> Menu:
         result = self.__button_dict__.get(name)
