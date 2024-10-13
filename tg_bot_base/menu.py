@@ -74,12 +74,11 @@ class Menu:
             kwargs.get("bot_manager").user_local_data.set(kwargs.get("user_id"), "__callback_data", __callback_data)
         return InlineKeyboardMarkup(reply_markup)
     def to_dict(self, **kwargs) -> dict:
-        user_id = kwargs.get("user_id")
         result = {}
         result["text"] = self.get_text(**kwargs)
         result["reply_markup"] = Menu.buttons_to_inline_keyboard(self.get_buttons(**kwargs),**kwargs)
         photos = self.get_photos(**kwargs)
-        if photos != None:
+        if photos is not None:
             photos = list(map(lambda photo: InputMediaPhoto(media=photo),photos))
             result["photos"] = photos
         return result
