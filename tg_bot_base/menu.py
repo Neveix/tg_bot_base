@@ -3,12 +3,35 @@ from telegram import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto
 from .callback_data import CallbackData
 from .evaluated_menu import EvaluatedMenuDefault, EvaluatedMenuPhoto
 
+def buttons_are_correct(buttons: list[list[list[str, CallbackData] | Callable]] | Callable | None) -> bool:
+    if buttons is None or buttons is Callable:
+        return True
+    if buttons is not list:
+        return False
+    for line in buttons:
+        if line is not list:
+            return False
+        for button in line:
+            if button is not list or button is not Callable:
+                return False
+            if button is Callable:
+                continue
+            if button[0] is not str or \
+                button[1] is not CallbackData:
+                return False
+    return True
+
+class ButtonsAreNotCorrect(Exception):
+    pass
+
 class Menu:
     def __init__(self, name: str, text: str | Callable | None, 
             buttons: list[list[list[str, CallbackData] | Callable]] | Callable | None = None, photo=None):
         from .button_manager import ButtonManager
         self.name = name
         self.text = text
+        if not buttons_are_correct(buttons):
+            raise ButtonsAreNotCorrect
         self.buttons = buttons
         self.photo = photo
         self.button_manager: ButtonManager = None
