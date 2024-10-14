@@ -1,6 +1,7 @@
 from typing import Callable
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto
 from .callback_data import CallbackData
+from .evaluated_menu import EvaluatedMenu, EvaluatedMenuDefault, EvaluatedMenuPhoto
 
 class Menu:
     def __init__(self, name: str, text: str | Callable, 
@@ -82,3 +83,9 @@ class Menu:
             photos = list(map(lambda photo: InputMediaPhoto(media=photo),photos))
             result["photos"] = photos
         return result
+    def to_evaluated_menu(self, **kwargs) -> EvaluatedMenuDefault | EvaluatedMenuPhoto:
+        if self.photos is not None:
+            return EvaluatedMenuPhoto(photos = self.get_photos(**kwargs))
+        else:
+            reply_markup = Menu.buttons_to_inline_keyboard(self.get_buttons(**kwargs),**kwargs)
+            return EvaluatedMenuDefault(self.get_text(**kwargs), reply_markup)

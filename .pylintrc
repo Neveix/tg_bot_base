@@ -7,3 +7,4 @@ disable=
     ,C0303 # trailing-whitespace
     ,C0301 # line-too-long
     ,C0304 # missing-final-newline
+    ,R0903 # too-few-public-methods
