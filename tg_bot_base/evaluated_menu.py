@@ -11,26 +11,37 @@ class EvaluatedMenu:
         self.photo = photo
         self.sended_message: Message = None
     def clone(self) -> "EvaluatedMenu":
+        result = None
+        if isinstance(self, EvaluatedMenuPhoto):
+            result = EvaluatedMenuPhoto(self.photo)
         if isinstance(self, EvaluatedMenuDefault):
-            return EvaluatedMenuDefault.clone(self)
-        return EvaluatedMenuPhoto.clone(self)
+            result = EvaluatedMenuDefault(self.text, self.reply_markup)
+        result.sended_message = self.sended_message
+        return result
     async def send(self, bot: Bot, chat_id: int):
-        if isinstance(self, EvaluatedMenuDefault):
-            await EvaluatedMenuDefault.send(self, bot, chat_id)
-        else:
+        if isinstance(self, EvaluatedMenuPhoto):
             await EvaluatedMenuPhoto.send(self, bot, chat_id)
-    async def edit_message(self, bot: Bot, chat_id: int, message_id: int):
-        if isinstance(self, EvaluatedMenuDefault):
-            await EvaluatedMenuDefault.edit_message(self, bot, chat_id, message_id)
         else:
+            await EvaluatedMenuDefault.send(self, bot, chat_id)
+    async def edit_message(self, bot: Bot, chat_id: int, message_id: int):
+        if isinstance(self, EvaluatedMenuPhoto):
             await EvaluatedMenuPhoto.edit_message(self, bot, chat_id, message_id)
+        else:
+            await EvaluatedMenuDefault.edit_message(self, bot, chat_id, message_id)
 
+class TextIsNoneException(Exception):
+    pass
+
+class ReplyMarkupIsNoneException(Exception):
+    pass
 
 class EvaluatedMenuDefault(EvaluatedMenu):
     def __init__(self, text: str, reply_markup: InlineKeyboardMarkup):
+        if text is None:
+            raise TextIsNoneException()
+        if reply_markup is None:
+            raise ReplyMarkupIsNoneException()
         super().__init__(text = text,reply_markup = reply_markup)
-    def clone(self) -> "EvaluatedMenuDefault":
-        return EvaluatedMenuDefault(self.text, self.reply_markup)
     async def send(self, bot: Bot, chat_id: int):
         self.sended_message = await bot.send_message(chat_id, text = self.text, reply_markup = self.reply_markup)
     async def edit_message(self, bot: Bot, chat_id: int, message_id: int):
@@ -39,11 +50,13 @@ class EvaluatedMenuDefault(EvaluatedMenu):
     def __repr__(self) -> str:
         return f"""EvaluatedMenuDefault (text = {self.text})"""
         
+class PhotoIsNone(Exception):
+    pass
 class EvaluatedMenuPhoto(EvaluatedMenu):
-    def __init__(self, photo: list[InputMediaPhoto]):
+    def __init__(self, photo: InputMediaPhoto):
+        if photo is None:
+            raise PhotoIsNone()
         super().__init__(photo=photo)
-    def clone(self) -> "EvaluatedMenuPhoto":
-        return EvaluatedMenuPhoto(self.photo)
     async def send(self, bot: Bot, chat_id: int):
         self.sended_message = await bot.send_media_group(chat_id, self.photo)[0]
     async def edit_message(self, bot: Bot, chat_id: int, message_id: int):
