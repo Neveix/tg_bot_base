@@ -30,7 +30,7 @@ new_screen must be not None here"""
         if not equal:
             await self.edit_screen(user_id, new_screen)
     async def send_screen(self, user_id: int, new_screen: list[EvaluatedMenu]):
-        async for menu in new_screen:
+        for menu in new_screen:
             await menu.send(self.bot_manager.bot, chat_id = user_id)
     async def edit_screen(self, user_id: int, new_screen: list[EvaluatedMenu]):
         old_screen = self.get_screen(user_id)
