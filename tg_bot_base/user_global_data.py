@@ -46,16 +46,16 @@ class UserGlobalData:
         from json import dumps
         from json import loads
         if len(selected) == 0:
-            list = [value]
-            list_str = dumps(list)
+            data_list = [value]
+            list_str = dumps(data_list)
             cur.execute(f"INSERT INTO {self.table_name} (user_id,{field}) VALUES ({user_id},?)", (list_str,))
         else:
             list_str = selected[0][0]
-            List = []
-            if list_str != None:
-                List = loads(list_str)
-            List.append(value)
-            list_str = dumps(List)
+            loaded_list = []
+            if list_str is not None:
+                loaded_list = loads(list_str)
+            loaded_list.append(value)
+            list_str = dumps(loaded_list)
             cur.execute(f"UPDATE {self.table_name} SET {field} = ? WHERE user_id = {user_id}", (list_str,))
         cur.close()
         self.con.commit()
@@ -66,9 +66,9 @@ class UserGlobalData:
         from json import loads
         if row_count > 0:
             list_str = cur.execute(f"SELECT {field} FROM {self.table_name} WHERE user_id = {user_id}").fetchall()[0][0]
-            List: list = loads(list_str)
-            List.remove(value)
-            list_str = dumps(List)
+            loaded_list: list = loads(list_str)
+            loaded_list.remove(value)
+            list_str = dumps(loaded_list)
             cur.execute(f"UPDATE {self.table_name} SET {field} = ? WHERE user_id = {user_id}", (list_str,))
         cur.close()
         self.con.commit()

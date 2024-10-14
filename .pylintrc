@@ -9,3 +9,6 @@ disable=
     ,C0304 # missing-final-newline
     ,R0903 # too-few-public-methods
     ,E1133 # not-an-iterable
+    ,R0401 # Cyclic import
+    ,R0917 # Too many positional arguments
+    ,R0913 # Too many arguments

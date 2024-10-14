@@ -41,18 +41,15 @@ class Menu:
     def get_text(self, **kwargs):
         if callable(self.text):
             return self.text(**kwargs)
-        else:
-            return self.text
+        return self.text
     def get_buttons(self, **kwargs):
         if callable(self.buttons):
             return self.buttons(**kwargs)
-        else:
-            return self.buttons
+        return self.buttons
     def get_photo(self, **kwargs) -> list[str]:
         if callable(self.photo):
             return self.photo(**kwargs)
-        else:
-            return self.photo
+        return self.photo
     @staticmethod
     def buttons_to_inline_keyboard(buttons: list[list[str, CallbackData]], 
             set_callback_data: bool=True, **kwargs) -> InlineKeyboardMarkup:
@@ -86,6 +83,6 @@ class Menu:
     def to_evaluated_menu(self, **kwargs) -> EvaluatedMenuDefault | EvaluatedMenuPhoto:
         if self.photo is not None:
             return EvaluatedMenuPhoto(photo = self.get_photo(**kwargs))
-        else:
-            reply_markup = Menu.buttons_to_inline_keyboard(self.get_buttons(**kwargs),**kwargs)
-            return EvaluatedMenuDefault(self.get_text(**kwargs), reply_markup)
+        reply_markup = Menu.buttons_to_inline_keyboard(self.get_buttons(**kwargs),**kwargs)
+        return EvaluatedMenuDefault(self.get_text(**kwargs), reply_markup)
+            

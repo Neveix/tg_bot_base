@@ -13,8 +13,7 @@ class EvaluatedMenu:
     def clone(self) -> "EvaluatedMenu":
         if isinstance(self, EvaluatedMenuDefault):
             return EvaluatedMenuDefault.clone(self)
-        else:
-            return EvaluatedMenuPhoto.clone(self)
+        return EvaluatedMenuPhoto.clone(self)
     async def send(self, bot: Bot, chat_id: int):
         if isinstance(self, EvaluatedMenuDefault):
             await EvaluatedMenuDefault.send(self, bot, chat_id)

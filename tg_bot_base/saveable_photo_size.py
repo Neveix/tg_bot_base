@@ -2,12 +2,13 @@ from telegram import PhotoSize
 
 
 class SaveablePhotoSize(PhotoSize):
-    
+    @staticmethod
     def from_photo_size(photo_size: PhotoSize) -> "SaveablePhotoSize":
         return SaveablePhotoSize(**photo_size.to_dict())
     def to_string(self) -> str:
         s = self
         return ",".join([s.file_id,s.file_unique_id,str(s.width),str(s.height),str(s.file_size)])
+    @staticmethod
     def from_string(string: str) -> "SaveablePhotoSize":
         s = string.split(",")
         s4 = None

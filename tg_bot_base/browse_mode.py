@@ -15,10 +15,10 @@ class BrowseMode:
         input_media_list = menu.photo
         chat_id = -1
         message = None
-        if update.callback_query != None:
+        if update.callback_query is not None:
             chat_id = update.callback_query.message.chat.id
             message = update.callback_query.message
-        elif update.message != None:
+        elif update.message is not None:
             chat_id = update.message.chat.id
             message = update.message
         else:

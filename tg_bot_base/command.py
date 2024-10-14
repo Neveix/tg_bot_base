@@ -1,6 +1,6 @@
-from telegram.ext import CommandHandler
-
 from typing import Callable
+
+from telegram.ext import CommandHandler
 
 class Command:
     def __init__(self, name: str, action: Callable):
