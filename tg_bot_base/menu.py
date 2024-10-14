@@ -1,7 +1,7 @@
 from typing import Callable
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto
 from .callback_data import CallbackData
-from .evaluated_menu import EvaluatedMenu, EvaluatedMenuDefault, EvaluatedMenuPhoto
+from .evaluated_menu import EvaluatedMenuDefault, EvaluatedMenuPhoto
 
 class Menu:
     def __init__(self, name: str, text: str | Callable, 
