@@ -1,4 +1,4 @@
-
+from telegram import Bot
 
 class BotManager:
     def __init__(self):
@@ -12,3 +12,6 @@ class BotManager:
         self.user_global_data: UserGlobalData = None
         from . import MessageManager
         self.message_manager = MessageManager(self)
+        self.bot = None
+    def set_bot(self, bot: Bot):
+        self.bot = bot
