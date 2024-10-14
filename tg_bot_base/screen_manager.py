@@ -38,7 +38,7 @@ new_screen must be not None here"""
         from .evaluated_menu import EvaluatedMenuHasNotSendedMessage
         for i, new_menu in enumerate(new_screen):
             if old_screen[len_diff+i].sended_message is None:
-                raise EvaluatedMenuHasNotSendedMessage()
+                raise EvaluatedMenuHasNotSendedMessage(old_screen[len_diff+i])
             message_id = old_screen[len_diff+i].sended_message.id
             await new_menu.edit_message(self.bot_manager.bot, user_id, message_id)
     def _pure_set_screen(self, user_id: int, new_screen: list[EvaluatedMenu]):
