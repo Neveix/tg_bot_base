@@ -66,7 +66,8 @@ class ButtonManager:
         directory_stack.remove(directory_stack[-1])
         menu = self.bot_manager.button_manager.get_clone(directory_stack[-1])
         # await query.edit_message_text(**button.to_dict(user_id=user_id,bot_manager=self.bot_manager))
-        await self.bot_manager.screen_manager.set_screen(user_id, new_screen=[menu])
+        evaluated_menu = menu.to_evaluated_menu(bot_manager=self.bot_manager, user_id=user_id)
+        await self.bot_manager.screen_manager.set_screen(user_id, new_screen=[evaluated_menu])
     async def simulate_show_alert(self, query: CallbackQuery, text: str):
         await query.answer(text=text, show_alert=True)
     def add(self, menu: Menu):
