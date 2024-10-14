@@ -36,6 +36,8 @@ class EvaluatedMenuDefault(EvaluatedMenu):
     async def edit_message(self, bot: Bot, chat_id: int, message_id: int):
         self.sended_message = await bot.edit_message_text(text = self.text, chat_id = chat_id, message_id = message_id)
         await bot.edit_message_reply_markup(reply_markup = self.reply_markup, chat_id = chat_id, message_id = message_id)
+    def __repr__(self) -> str:
+        return f"""EvaluatedMenuDefault (text = {self.text})"""
         
 class EvaluatedMenuPhoto(EvaluatedMenu):
     def __init__(self, photo: list[InputMediaPhoto]):
@@ -46,3 +48,5 @@ class EvaluatedMenuPhoto(EvaluatedMenu):
         self.sended_message = await bot.send_media_group(chat_id, self.photo)[0]
     async def edit_message(self, bot: Bot, chat_id: int, message_id: int):
         self.sended_message = await bot.edit_message_media(media = self.photo, chat_id = chat_id, message_id = message_id)
+    def __repr__(self) -> str:
+        return f"""EvaluatedMenuPhoto (photo = {self.photo})"""
