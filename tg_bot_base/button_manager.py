@@ -56,7 +56,8 @@ class ButtonManager:
         # photo_ids = button_dict.get("photo")
         # if photo_ids is not None:
         #     await query.edit_message_media(media = photo_ids)
-        await self.bot_manager.screen_manager.set_screen(user_id, new_screen=[menu])
+        evaluated_menu = menu.to_evaluated_menu(bot_manager=self.bot_manager, user_id=user_id)
+        await self.bot_manager.screen_manager.set_screen(user_id, new_screen=[evaluated_menu])
     async def simulate_step_back(self, query: CallbackQuery):
         user_id = query.from_user.id
         directory_stack = self.bot_manager.user_local_data.get(user_id, "__directory_stack")

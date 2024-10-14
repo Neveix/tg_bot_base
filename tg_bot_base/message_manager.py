@@ -52,4 +52,5 @@ class MessageManager:
         if self.bot_manager.user_local_data.get(user_id,"__directory_stack",[])[-1] != menu.name:
             self.bot_manager.user_local_data.append(user_id, "__directory_stack",menu.name)
         # await update.message.reply_text(**menu.to_dict(user_id=user_id,bot_manager=self.bot_manager))
-        await self.bot_manager.screen_manager.set_screen(user_id, new_screen=[menu])
+        evaluated_menu = menu.to_evaluated_menu(bot_manager=self.bot_manager, user_id=user_id)
+        await self.bot_manager.screen_manager.set_screen(user_id, new_screen=[evaluated_menu])
