@@ -5,10 +5,10 @@ class EvaluatedMenuHasNotSendedMessage(Exception):
 
 class EvaluatedMenu:
     def __init__(self, text: str = None, reply_markup: InlineKeyboardMarkup = None, 
-            photos: list[InputMediaPhoto] = None):
+            photo: list[InputMediaPhoto] = None):
         self.text = text
         self.reply_markup = reply_markup
-        self.photos = photos
+        self.photo = photo
         self.sended_message: Message = None
     def clone(self) -> "EvaluatedMenu":
         if isinstance(self, EvaluatedMenuDefault):
@@ -39,11 +39,11 @@ class EvaluatedMenuDefault(EvaluatedMenu):
         await bot.edit_message_reply_markup(reply_markup = self.reply_markup, chat_id = chat_id, message_id = message_id)
         
 class EvaluatedMenuPhoto(EvaluatedMenu):
-    def __init__(self, photos: list[InputMediaPhoto]):
-        super().__init__(photos=photos)
+    def __init__(self, photo: list[InputMediaPhoto]):
+        super().__init__(photo=photo)
     def clone(self) -> "EvaluatedMenuPhoto":
-        return EvaluatedMenuPhoto(self.photos)
+        return EvaluatedMenuPhoto(self.photo)
     async def send(self, bot: Bot, chat_id: int):
-        self.sended_message = await bot.send_media_group(chat_id, self.photos)[0]
+        self.sended_message = await bot.send_media_group(chat_id, self.photo)[0]
     async def edit_message(self, bot: Bot, chat_id: int, message_id: int):
-        self.sended_message = await bot.edit_message_media(media = self.photos[0], chat_id = chat_id, message_id = message_id)
+        self.sended_message = await bot.edit_message_media(media = self.photo, chat_id = chat_id, message_id = message_id)

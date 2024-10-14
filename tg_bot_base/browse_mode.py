@@ -12,7 +12,7 @@ class BrowseMode:
         bot: Bot = context.bot
         text = menu.text
         reply_markup = menu.buttons
-        input_media_list = menu.photos
+        input_media_list = menu.photo
         chat_id = -1
         message = None
         if update.callback_query != None:

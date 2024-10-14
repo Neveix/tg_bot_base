@@ -4,13 +4,13 @@ from .callback_data import CallbackData
 from .evaluated_menu import EvaluatedMenuDefault, EvaluatedMenuPhoto
 
 class Menu:
-    def __init__(self, name: str, text: str | Callable, 
-            buttons: list[list[list[str, CallbackData] | Callable]] | Callable = None, photos=None):
+    def __init__(self, name: str, text: str | Callable | None, 
+            buttons: list[list[list[str, CallbackData] | Callable]] | Callable | None = None, photo=None):
         from .button_manager import ButtonManager
         self.name = name
         self.text = text
         self.buttons = buttons
-        self.photos = photos
+        self.photo = photo
         self.button_manager: ButtonManager = None
     def handle_callback_data(self, button_to_dict: dict[str, object], user_id: int):
         __callback_data = []
@@ -35,7 +35,7 @@ class Menu:
                     newline.append(new_button)
         clone = Menu(self.name,self.text,
             buttons_clone
-            ,photos=self.photos)
+            ,photo=self.photo)
         clone.button_manager = self.button_manager
         return clone
     def get_text(self, **kwargs):
@@ -48,11 +48,11 @@ class Menu:
             return self.buttons(**kwargs)
         else:
             return self.buttons
-    def get_photos(self, **kwargs) -> list[str]:
-        if callable(self.photos):
-            return self.photos(**kwargs)
+    def get_photo(self, **kwargs) -> list[str]:
+        if callable(self.photo):
+            return self.photo(**kwargs)
         else:
-            return self.photos
+            return self.photo
     @staticmethod
     def buttons_to_inline_keyboard(buttons: list[list[str, CallbackData]], 
             set_callback_data: bool=True, **kwargs) -> InlineKeyboardMarkup:
@@ -78,14 +78,14 @@ class Menu:
         result = {}
         result["text"] = self.get_text(**kwargs)
         result["reply_markup"] = Menu.buttons_to_inline_keyboard(self.get_buttons(**kwargs),**kwargs)
-        photos = self.get_photos(**kwargs)
-        if photos is not None:
-            photos = list(map(lambda photo: InputMediaPhoto(media=photo),photos))
-            result["photos"] = photos
+        photo = self.get_photo(**kwargs)
+        if photo is not None:
+            photo = list(map(lambda photo: InputMediaPhoto(media=photo),photo))
+            result["photo"] = photo
         return result
     def to_evaluated_menu(self, **kwargs) -> EvaluatedMenuDefault | EvaluatedMenuPhoto:
-        if self.photos is not None:
-            return EvaluatedMenuPhoto(photos = self.get_photos(**kwargs))
+        if self.photo is not None:
+            return EvaluatedMenuPhoto(photo = self.get_photo(**kwargs))
         else:
             reply_markup = Menu.buttons_to_inline_keyboard(self.get_buttons(**kwargs),**kwargs)
             return EvaluatedMenuDefault(self.get_text(**kwargs), reply_markup)
