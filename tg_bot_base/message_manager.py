@@ -7,10 +7,11 @@ class MessageManager:
         from .bot_manager import BotManager
         self.bot_manager: BotManager = bot_manager
         async def handle_message(update: Update, context: CallbackContext):
+            self.bot_manager.screen_manager.clear_screen(update.message.from_user.id)
             __media_group_id = self.bot_manager.user_local_data.get(
                 update.message.from_user.id,
                 "__media_group_id")
-            if update.message.media_group_id != None:
+            if update.message.media_group_id is not None:
                 if __media_group_id == update.message.media_group_id:
                     return
                 self.bot_manager.user_local_data.set(

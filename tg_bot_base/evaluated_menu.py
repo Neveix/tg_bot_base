@@ -1,5 +1,8 @@
 from telegram import Bot, InlineKeyboardMarkup, InputMediaPhoto, Message
 
+class EvaluatedMenuHasNotSendedMessage(Exception):
+    pass
+
 class EvaluatedMenu:
     def __init__(self, text: str = None, reply_markup: InlineKeyboardMarkup = None, 
             photos: list[InputMediaPhoto] = None):
@@ -19,9 +22,9 @@ class EvaluatedMenu:
             await EvaluatedMenuPhoto.send(self, bot, chat_id)
     async def edit_message(self, bot: Bot, chat_id: int, message_id: int):
         if isinstance(self, EvaluatedMenuDefault):
-            await EvaluatedMenuDefault.send(self, bot, chat_id)
+            await EvaluatedMenuDefault.edit_message(self, bot, chat_id, message_id)
         else:
-            await EvaluatedMenuPhoto.send(self, bot, chat_id)
+            await EvaluatedMenuPhoto.edit_message(self, bot, chat_id, message_id)
 
 
 class EvaluatedMenuDefault(EvaluatedMenu):

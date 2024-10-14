@@ -13,5 +13,7 @@ class BotManager:
         from . import MessageManager
         self.message_manager = MessageManager(self)
         self.bot = None
+        from . import ScreenManager
+        self.screen_manager = ScreenManager(self)
     def set_bot(self, bot: Bot):
         self.bot = bot

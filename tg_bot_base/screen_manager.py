@@ -1,6 +1,7 @@
 
 from .bot_manager import BotManager
 from .evaluated_menu import EvaluatedMenu
+
 class ScreenManager:
     def __init__(self, bot_manager: BotManager):
         self.bot_manager = bot_manager
@@ -34,7 +35,10 @@ new_screen must be not None here"""
     def edit_screen(self, user_id: int, new_screen: list[EvaluatedMenu]):
         old_screen = self.get_screen(user_id)
         len_diff = len(old_screen) - len(new_screen)
+        from .evaluated_menu import EvaluatedMenuHasNotSendedMessage
         for i, new_menu in enumerate(new_screen):
+            if old_screen[len_diff+i].sended_message is None:
+                raise EvaluatedMenuHasNotSendedMessage()
             message_id = old_screen[len_diff+i].sended_message.id
             new_menu.edit_message(self.bot_manager.bot, user_id, message_id)
     def _pure_set_screen(self, user_id: int, new_screen: list[EvaluatedMenu]):
