@@ -1,9 +1,8 @@
-from typing import Any, Callable
+from typing import Callable
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto
 from .callback_data import CallbackData
 
 class Menu:
-    
     def __init__(self, name: str, text: str | Callable, 
             buttons: list[list[list[str, CallbackData] | Callable]] | Callable = None, photos=None):
         from .button_manager import ButtonManager
@@ -54,7 +53,8 @@ class Menu:
         else:
             return self.photos
     @staticmethod
-    def buttons_to_inline_keyboard(buttons: list[list[str, CallbackData]], set_callback_data: bool=True, **kwargs) -> InlineKeyboardMarkup:
+    def buttons_to_inline_keyboard(buttons: list[list[str, CallbackData]], 
+            set_callback_data: bool=True, **kwargs) -> InlineKeyboardMarkup:
         reply_markup = []
         __callback_data = []
         for old_line in buttons:
