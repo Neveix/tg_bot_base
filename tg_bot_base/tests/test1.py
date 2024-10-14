@@ -1,7 +1,6 @@
 import asyncio
 from telegram import InlineKeyboardMarkup, Message
 from .. import ScreenManager, BotManager, EvaluatedMenuDefault
-from ..evaluated_menu import EvaluatedMenuHasNotSendedMessage
 
 
 class TestEvaluatedMenu(EvaluatedMenuDefault):

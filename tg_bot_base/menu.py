@@ -1,28 +1,34 @@
-from typing import Callable
+from typing import Any, Callable
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto
 from .callback_data import CallbackData
 from .evaluated_menu import EvaluatedMenuDefault, EvaluatedMenuPhoto
 
-def buttons_are_correct(buttons: list[list[list[str, CallbackData] | Callable]] | Callable | None) -> bool:
-    if buttons is None or buttons is Callable:
-        return True
-    if buttons is not list:
-        return False
-    for line in buttons:
-        if line is not list:
-            return False
-        for button in line:
-            if button is not list or button is not Callable:
-                return False
-            if button is Callable:
-                continue
-            if button[0] is not str or \
-                button[1] is not CallbackData:
-                return False
-    return True
-
 class ButtonsAreNotCorrect(Exception):
     pass
+
+def buttons_are_correct(buttons: list[list[list[str, CallbackData] | Callable]] | Callable | None,
+        error_mode: bool = True) -> bool:
+    def smart_return_false(error_object: Any) -> bool:
+        if error_mode:
+            raise ButtonsAreNotCorrect(error_object)
+        return False
+    if buttons is None or isinstance(buttons, Callable):
+        return True
+    if not isinstance(buttons, list):
+        return smart_return_false(buttons)
+    for line in buttons:
+        if not isinstance(line, list):
+            return smart_return_false(line)
+        for button in line:
+            if not isinstance(button, list) and not isinstance(button, Callable):
+                return smart_return_false(button)
+            if isinstance(button, Callable):
+                continue
+            if not isinstance(button[0], str):
+                return smart_return_false(button[0])
+            if not isinstance(button[1], CallbackData):
+                return smart_return_false(button[1])
+    return True
 
 class Menu:
     def __init__(self, name: str, text: str | Callable | None, 
@@ -30,8 +36,7 @@ class Menu:
         from .button_manager import ButtonManager
         self.name = name
         self.text = text
-        if not buttons_are_correct(buttons):
-            raise ButtonsAreNotCorrect
+        buttons_are_correct(buttons)
         self.buttons = buttons
         self.photo = photo
         self.button_manager: ButtonManager = None
