@@ -74,7 +74,7 @@ class ButtonManager:
             self.add(button)
     def get(self, name: str) -> Menu:
         result = self.__button_dict__.get(name)
-        if result is not None:
+        if result is None:
             raise UnknownButtonExeption(f"Unknown button name {name}")
         return result
     def get_clone(self, name: str) -> Menu:
