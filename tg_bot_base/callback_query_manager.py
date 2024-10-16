@@ -11,11 +11,14 @@ class UnknownButtonExeption(BaseException):
 class CallbackDataWithNoFunction(BaseException):
     pass
 
-class ButtonManager:
+class CallbackQueryManager:
+    """
+Класс обеспечивает работу обработчика колбэков нажатия на кнопки.
+"""
     def __init__(self, bot_manager: BotManager):
         self.bot_manager: BotManager = bot_manager
         self.screen_dict = {}
-        async def handle_callback(update: Update, context: CallbackContext):
+        async def callback_query_handler(update: Update, context: CallbackContext):
             query = update.callback_query
             user_id: int = query.from_user.id
             await query.answer()
@@ -39,7 +42,7 @@ class ButtonManager:
                     button_manager=self, update=update, context=context, user_id=user_id, *args, **data.kwargs)
             elif data.action == "show_alert":
                 await bot_manager.button_manager.simulate_show_alert(query=query, text = data.args[0])
-        self.handle_callback = handle_callback
+        self.callback_query_handler = callback_query_handler
     async def simulate_switch_to_menu(self, menu_name: str, query: CallbackQuery):
         user_id = query.from_user.id
         try:
@@ -49,14 +52,6 @@ class ButtonManager:
         __directory_stack = self.bot_manager.user_local_data.get(user_id,"__directory_stack", [])
         if __directory_stack[-1] != menu_name:
             __directory_stack.append(menu_name)
-        #button_dict = button.to_dict(user_id=user_id,bot_manager=self.bot_manager)
-        #button_text_and_markup = {}
-        #button_text_and_markup["text"]= button_dict.get("text")
-        #button_text_and_markup["reply_markup"]= button_dict.get("reply_markup")
-        # await query.edit_message_text(**button_text_and_markup)
-        # photo_ids = button_dict.get("photo")
-        # if photo_ids is not None:
-        #     await query.edit_message_media(media = photo_ids)
         evaluated_menu = menu.to_evaluated_menu(bot_manager=self.bot_manager, user_id=user_id)
         await self.bot_manager.screen_manager.set_screen(user_id, new_screen=[evaluated_menu])
     async def simulate_step_back(self, query: CallbackQuery):
@@ -84,7 +79,7 @@ class ButtonManager:
         if result is None:
             raise KeyError(f"Unknown Screen name {name}")
         return result
-    def get_clone(self, name: str) -> Menu:
+    def get_screen_clone(self, name: str) -> Menu:
         return self.get(name).clone()
     def get_callback_query_handler(self) -> CallbackQueryHandler:
-        return CallbackQueryHandler(self.handle_callback)
+        return CallbackQueryHandler(self.callback_query_handler)
