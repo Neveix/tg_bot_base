@@ -4,8 +4,8 @@ class BotManager:
     def __init__(self):
         from . import CommandManager
         self.command_manager = CommandManager(self)
-        from . import ButtonManager
-        self.button_manager = ButtonManager(self)
+        from . import CallbackQueryManager
+        self.callback_query_manager = CallbackQueryManager(self)
         from . import UserLocalData
         self.user_local_data = UserLocalData(self)
         from . import UserGlobalData
@@ -15,5 +15,7 @@ class BotManager:
         self.bot = None
         from . import ScreenManager
         self.screen_manager = ScreenManager(self)
+        from . import UserScreenManager
+        self.user_screen_manager = UserScreenManager
     def set_bot(self, bot: Bot):
         self.bot = bot
