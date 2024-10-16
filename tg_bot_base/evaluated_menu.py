@@ -1,3 +1,4 @@
+from typing import Any
 from telegram import Bot, InlineKeyboardMarkup, InputMediaPhoto, Message
 
 class EvaluatedMenuHasNotSendedMessage(Exception):
@@ -29,18 +30,12 @@ class EvaluatedMenu:
         else:
             await EvaluatedMenuDefault.edit_message(self, bot, chat_id, message_id)
 
-class TextIsNoneException(Exception):
-    pass
-
-class ReplyMarkupIsNoneException(Exception):
-    pass
-
 class EvaluatedMenuDefault(EvaluatedMenu):
     def __init__(self, text: str, reply_markup: InlineKeyboardMarkup):
         if text is None:
-            raise TextIsNoneException()
+            raise ValueError("text is None")
         if reply_markup is None:
-            raise ReplyMarkupIsNoneException()
+            raise ValueError("reply_markup is None")
         super().__init__(text = text,reply_markup = reply_markup)
     async def send(self, bot: Bot, chat_id: int):
         self.sended_message = await bot.send_message(chat_id, text = self.text, reply_markup = self.reply_markup)
@@ -49,6 +44,11 @@ class EvaluatedMenuDefault(EvaluatedMenu):
         await bot.edit_message_reply_markup(reply_markup = self.reply_markup, chat_id = chat_id, message_id = message_id)
     def __repr__(self) -> str:
         return f"""EvaluatedMenuDefault (text = {self.text})"""
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "text" : self.text,
+            "reply_markup" : self.reply_markup
+        }
         
 class PhotoIsNone(Exception):
     pass
@@ -63,3 +63,7 @@ class EvaluatedMenuPhoto(EvaluatedMenu):
         self.sended_message = await bot.edit_message_media(media = self.photo, chat_id = chat_id, message_id = message_id)
     def __repr__(self) -> str:
         return f"""EvaluatedMenuPhoto (photo = {self.photo})"""
+    def to_dict(self) -> dict[str, InputMediaPhoto]:
+        return {
+            "photo" : self.photo
+        }

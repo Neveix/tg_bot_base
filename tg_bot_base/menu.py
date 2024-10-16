@@ -8,11 +8,11 @@ from .button_rows import ButtonRows
 
 class Menu:
     def __init__(self, name: str, text: str | Callable | None, 
-            button_rows: ButtonRows | Callable | None = None, photo: Callable | None = None):
+            button_rows: ButtonRows | Callable | None = None, photo: InputMediaPhoto | Callable | None = None):
         self.name: str = name
         self.text: str | Callable | None = text
-        self.buttons: ButtonRows | Callable | None = button_rows
-        self.photo = photo
+        self.buttons:    ButtonRows | Callable | None = button_rows
+        self.photo: InputMediaPhoto | Callable | None = photo
         from .button_manager import ButtonManager
         self.button_manager: ButtonManager = None
     def handle_callback_data(self, button_to_dict: dict[str, object], user_id: int):
@@ -23,7 +23,7 @@ class Menu:
                 __callback_data.append(button[1])
                 button[1] = len(__callback_data) - 1
         self.button_manager.bot_manager.user_local_data.set(user_id, "__callback_data", __callback_data)
-    def clone(self):
+    def clone(self) -> "Menu":
         buttons_clone = []
         if isinstance(self.buttons, Callable):
             buttons_clone = self.buttons
@@ -34,15 +34,15 @@ class Menu:
             ,photo=self.photo)
         clone.button_manager = self.button_manager
         return clone
-    def get_text(self, **kwargs):
+    def get_text(self, **kwargs) -> str:
         if callable(self.text):
             return self.text(**kwargs)
         return self.text
-    def get_buttons(self, **kwargs):
-        if callable(self.buttons):
+    def get_buttons(self, **kwargs) -> ButtonRows:
+        if isinstance(self.buttons, Callable):
             return self.buttons(**kwargs)
         return self.buttons
-    def get_photo(self, **kwargs) -> list[str]:
+    def get_photo(self, **kwargs) -> InputMediaPhoto:
         if callable(self.photo):
             return self.photo(**kwargs)
         return self.photo
@@ -67,17 +67,10 @@ class Menu:
         if set_callback_data:
             kwargs.get("bot_manager").user_local_data.set(kwargs.get("user_id"), "__callback_data", __callback_data)
         return InlineKeyboardMarkup(reply_markup)
-    def to_dict(self, **kwargs) -> dict:
-        result = {}
-        result["text"] = self.get_text(**kwargs)
-        result["reply_markup"] = Menu.buttons_to_inline_keyboard(self.get_buttons(**kwargs),**kwargs)
-        photo = self.get_photo(**kwargs)
-        if photo is not None:
-            photo = list(map(lambda photo: InputMediaPhoto(media=photo),photo))
-            result["photo"] = photo
-        return result
+    def to_dict(self, **kwargs) -> dict[str, Any]:
+        return self.to_evaluated_menu(**kwargs).to_dict()
     def to_evaluated_menu(self, **kwargs) -> EvaluatedMenuDefault | EvaluatedMenuPhoto:
-        if self.photo is not None:
+        if self.photo:
             return EvaluatedMenuPhoto(photo = self.get_photo(**kwargs))
         reply_markup = Menu.buttons_to_inline_keyboard(self.get_buttons(**kwargs),**kwargs)
         return EvaluatedMenuDefault(self.get_text(**kwargs), reply_markup)
