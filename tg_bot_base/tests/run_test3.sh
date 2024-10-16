@@ -1,0 +1,1 @@
+python3.12 -m tg_bot_base.tests.test3
