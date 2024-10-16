@@ -62,12 +62,9 @@ new_screen must be not None here"""
             __directory_stack.append(screen.name)
         evaluated_menu = screen.to_evaluated_menu(bot_manager=self.bot_manager, user_id=user_id)
         await self.bot_manager.screen_manager.set_screen(user_id, new_screen=[evaluated_menu])
-    async def step_back(self, query: CallbackQuery) -> None:
-        user_id = query.from_user.id
-        directory_stack = self.bot_manager.user_local_data.get(user_id, "__directory_stack")
-        if len(directory_stack) == 1:
+    async def step_back(self, user_id: int) -> None:
+        directory_stack: list = self.bot_manager.user_local_data.get(user_id, "__directory_stack")
+        if len(directory_stack) <= 1:
             return
-        directory_stack.remove(directory_stack[-1])
-        menu = self.bot_manager.screen_manager.get_screen(directory_stack[-1])
-        evaluated_menu = menu.to_evaluated_menu(bot_manager=self.bot_manager, user_id=user_id)
-        await self.bot_manager.screen_manager.set_screen(user_id, new_screen=[evaluated_menu])
+        directory_stack.pop()
+        self.set_user_screen_by_name(user_id, directory_stack[-1])

@@ -1,6 +1,5 @@
 from typing import Any, Callable
-from telegram import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto
-from .callback_data import CallbackData
+from telegram import InlineKeyboardMarkup, InputMediaPhoto
 from .evaluated_menu import EvaluatedMenuDefault, EvaluatedMenuPhoto
 from .button_rows import ButtonRows
 from .bot_manager import BotManager

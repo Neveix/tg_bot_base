@@ -24,16 +24,15 @@ class CallbackQueryManager:
                 screen_name: str = data.args[0]
                 if not isinstance(screen_name, str):
                     raise ValueError(f"{screen_name=} is not str")
-                await bot_manager.user_screen_manager.switch_by_name(screen_name, query=query)
+                await bot_manager.user_screen_manager.set_user_screen_by_name(user_id, screen_name)
             elif data.action == "step_back":
-                await bot_manager.user_screen_manager.step_back(query=query)
+                await bot_manager.user_screen_manager.step_back(user_id)
             elif data.action == "function":
                 function = data.args[0]
                 if not callable(function):
                     raise ValueError("Callback data has no function")
-                args = data.args[1:]
                 await function(bot_manager=self.bot_manager,
-                    update=update, context=context, user_id=user_id, *args, **data.kwargs)
+                    update=update, context=context, user_id=user_id, *data.args[1:], **data.kwargs)
         self.callback_query_handler = callback_query_handler
     def get_handler(self) -> CallbackQueryHandler:
         return CallbackQueryHandler(self.callback_query_handler)
