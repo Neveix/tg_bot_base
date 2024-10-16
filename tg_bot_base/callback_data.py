@@ -6,6 +6,12 @@ class CallbackData:
         self.action = action
         self.args = args
         self.kwargs = kwargs
+    def clone(self) -> "CallbackData":
+        return CallbackData(
+            action = self.action,
+            args = self.args,
+            kwargs = self.kwargs
+        )
 
 class FunctionCallbackData(CallbackData):
     def __init__(self, function: Callable, *args, **kwargs):

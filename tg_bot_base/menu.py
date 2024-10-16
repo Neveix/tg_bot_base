@@ -25,17 +25,10 @@ class Menu:
         self.button_manager.bot_manager.user_local_data.set(user_id, "__callback_data", __callback_data)
     def clone(self):
         buttons_clone = []
-        if callable(self.buttons):
+        if isinstance(self.buttons, Callable):
             buttons_clone = self.buttons
         else:
-            for line in self.buttons:
-                newline = []
-                buttons_clone.append(newline)
-                for button in line:
-                    new_button = button
-                    if not callable(button):
-                        new_button = list(button)
-                    newline.append(new_button)
+            buttons_clone = self.buttons.clone()
         clone = Menu(self.name,self.text,
             buttons_clone
             ,photo=self.photo)
