@@ -22,5 +22,4 @@ tg_bot_base/user_screen_manager.py
 tg_bot_base.egg-info/PKG-INFO
 tg_bot_base.egg-info/SOURCES.txt
 tg_bot_base.egg-info/dependency_links.txt
-tg_bot_base.egg-info/requires.txt
 tg_bot_base.egg-info/top_level.txt

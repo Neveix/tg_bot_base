@@ -7,5 +7,5 @@ setup(
    author='Neveix',
    author_email='neveix2003@mail.ru',
    packages=['tg_bot_base'],
-   install_requires=['python-telegram-bot']
+   install_requires=[]
 )

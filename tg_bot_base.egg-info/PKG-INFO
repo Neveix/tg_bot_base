@@ -4,4 +4,3 @@ Version: 1.2.6
 Summary: It is useful for creating simple telegram bots
 Author: Neveix
 Author-email: neveix2003@mail.ru
-Requires-Dist: python-telegram-bot
