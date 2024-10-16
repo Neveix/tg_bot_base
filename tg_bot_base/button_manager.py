@@ -3,6 +3,7 @@ from telegram import CallbackQuery, Update
 from .bot_manager import BotManager
 from .menu import Menu
 from .callback_data import CallbackData
+from .screen import Screen
 
 class UnknownButtonExeption(BaseException):
     pass
@@ -13,7 +14,7 @@ class CallbackDataWithNoFunction(BaseException):
 class ButtonManager:
     def __init__(self, bot_manager: BotManager):
         self.bot_manager: BotManager = bot_manager
-        self.__button_dict__ = {}
+        self.screen_dict = {}
         async def handle_callback(update: Update, context: CallbackContext):
             query = update.callback_query
             user_id: int = query.from_user.id
@@ -69,16 +70,19 @@ class ButtonManager:
         await self.bot_manager.screen_manager.set_screen(user_id, new_screen=[evaluated_menu])
     async def simulate_show_alert(self, query: CallbackQuery, text: str):
         await query.answer(text=text, show_alert=True)
-    def add(self, menu: Menu):
-        menu.button_manager = self
-        self.__button_dict__[menu.name] = menu
-    def add_many(self, *menus: list[Menu]):
-        for button in menus:
-            self.add(button)
+    def append_screen(self, screen: Screen):
+        if not isinstance(screen, Screen):
+            raise ValueError(f"{screen=} wrong type")
+        for menu in screen.menus:
+            menu.button_manager = self
+        self.screen_dict[screen.name] = screen
+    def extend_screen(self, *screens: list[Screen]):
+        for screen in screens:
+            self.append_screen(screen)
     def get(self, name: str) -> Menu:
-        result = self.__button_dict__.get(name)
+        result = self.screen_dict.get(name)
         if result is None:
-            raise UnknownButtonExeption(f"Unknown button name {name}")
+            raise KeyError(f"Unknown Screen name {name}")
         return result
     def get_clone(self, name: str) -> Menu:
         return self.get(name).clone()
