@@ -2,43 +2,18 @@ from typing import Any, Callable
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto
 from .callback_data import CallbackData
 from .evaluated_menu import EvaluatedMenuDefault, EvaluatedMenuPhoto
+from .button_rows import ButtonRows
 
-class ButtonsAreNotCorrect(Exception):
-    pass
 
-def buttons_are_correct(buttons: list[list[list[str, CallbackData] | Callable]] | Callable | None,
-        error_mode: bool = True) -> bool:
-    def smart_return_false(error_object: Any) -> bool:
-        if error_mode:
-            raise ButtonsAreNotCorrect(error_object)
-        return False
-    if buttons is None or isinstance(buttons, Callable):
-        return True
-    if not isinstance(buttons, list):
-        return smart_return_false(buttons)
-    for line in buttons:
-        if not isinstance(line, list):
-            return smart_return_false(line)
-        for button in line:
-            if not isinstance(button, list) and not isinstance(button, Callable):
-                return smart_return_false(button)
-            if isinstance(button, Callable):
-                continue
-            if not isinstance(button[0], str):
-                return smart_return_false(button[0])
-            if not isinstance(button[1], CallbackData):
-                return smart_return_false(button[1])
-    return True
 
 class Menu:
     def __init__(self, name: str, text: str | Callable | None, 
-            buttons: list[list[list[str, CallbackData] | Callable]] | Callable | None = None, photo=None):
-        from .button_manager import ButtonManager
-        self.name = name
-        self.text = text
-        buttons_are_correct(buttons)
-        self.buttons = buttons
+            button_rows: ButtonRows | Callable | None = None, photo: Callable | None = None):
+        self.name: str = name
+        self.text: str | Callable | None = text
+        self.buttons: ButtonRows | Callable | None = button_rows
         self.photo = photo
+        from .button_manager import ButtonManager
         self.button_manager: ButtonManager = None
     def handle_callback_data(self, button_to_dict: dict[str, object], user_id: int):
         __callback_data = []
