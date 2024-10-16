@@ -16,6 +16,6 @@ class BotManager:
         from . import ScreenManager
         self.screen_manager = ScreenManager(self)
         from . import UserScreenManager
-        self.user_screen_manager = UserScreenManager
+        self.user_screen_manager = UserScreenManager(self)
     def set_bot(self, bot: Bot):
         self.bot = bot
