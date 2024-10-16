@@ -33,8 +33,7 @@ new_screen must be not None here"""
             await self.edit_screen(user_id, new_screen)
     async def set_user_screen_by_name(self, user_id: int, screen_name: str):
         __directory_stack = self.bot_manager.user_local_data.get(user_id,"__directory_stack", [])
-        if __directory_stack[-1] != screen_name:
-            __directory_stack.append(screen_name)
+        __directory_stack.append(screen_name)
         screen = self.bot_manager.screen_manager.get_screen(screen_name)
         evaluated_screen = screen.to_evaluated_screen(bot_manager = self.bot_manager, user_id = user_id)
         await self.set_user_screen(user_id, evaluated_screen)
