@@ -2,7 +2,7 @@ from setuptools import setup # type: ignore
 
 setup(
    name='tg_bot_base',
-   version='1.2.8',
+   version='1.2.9',
    description='It is useful for creating simple telegram bots',
    author='Neveix',
    author_email='neveix2003@mail.ru',

@@ -40,8 +40,9 @@ class EvaluatedMenuDefault(EvaluatedMenu):
     async def send(self, bot: Bot, chat_id: int):
         self.sended_message = await bot.send_message(chat_id, text = self.text, reply_markup = self.reply_markup)
     async def edit_message(self, bot: Bot, chat_id: int, message_id: int):
-        self.sended_message = await bot.edit_message_text(text = self.text, chat_id = chat_id, message_id = message_id)
-        await bot.edit_message_reply_markup(reply_markup = self.reply_markup, chat_id = chat_id, message_id = message_id)
+        self.sended_message = await bot.edit_message_text(
+            text = self.text, chat_id = chat_id, message_id = message_id,
+            reply_markup = self.reply_markup)
     def __repr__(self) -> str:
         return f"""EvaluatedMenuDefault (text = {self.text})"""
     def to_dict(self) -> dict[str, Any]:
