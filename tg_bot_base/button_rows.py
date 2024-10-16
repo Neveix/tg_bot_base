@@ -29,7 +29,7 @@ class Button:
 class ButtonRow:
     def __init__(self, *buttons: Button):
         self.buttons: list[Button] = []
-        self.extend(buttons)
+        self.extend(*buttons)
     def extend(self, *buttons: Button) -> "ButtonRow":
         self.buttons.extend(buttons)
         return self
@@ -42,7 +42,7 @@ class ButtonRow:
 class ButtonRows:
     def __init__(self, *rows: ButtonRow):
         self.rows: list[ButtonRow] = []
-        self.extend(rows)
+        self.extend(*rows)
     def extend(self, *rows: ButtonRow) -> "ButtonRow":
         self.rows.extend(rows)
         return self
@@ -58,17 +58,9 @@ class ButtonRows:
         for old_line in self.rows:
             line = []
             for old_button in old_line.buttons:
-                old_button_text = None
-                old_button_callback_data = None
-                if callable(old_button):
-                    old_button_dict = old_button.to_dict(**kwargs)
-                    old_button_text = old_button_dict["text"]
-                    old_button_callback_data = old_button_dict["callback_data"]
-                else:
-                    old_button_text = old_button[0]
-                    old_button_callback_data = old_button[1]
-                __callback_data.append(old_button_callback_data)
-                line.append(InlineKeyboardButton(text = old_button_text, callback_data = len(__callback_data)-1))
+                old_button_dict = old_button.to_dict(**kwargs)
+                __callback_data.append(old_button_dict["callback_data"])
+                line.append(InlineKeyboardButton(text = old_button_dict["text"], callback_data = len(__callback_data)-1))
             reply_markup.append(line)
         if set_callback_data:
             kwargs.get("bot_manager").user_local_data.set(kwargs.get("user_id"), "__callback_data", __callback_data)
