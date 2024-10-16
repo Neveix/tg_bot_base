@@ -6,9 +6,8 @@ from .button_rows import ButtonRows
 from .bot_manager import BotManager
 
 class Menu:
-    def __init__(self, name: str, text: str | Callable | None, 
+    def __init__(self, text: str | Callable | None, 
             button_rows: ButtonRows | Callable | None = None, photo: InputMediaPhoto | Callable | None = None):
-        self.name: str = name
         self.text: str | Callable | None = text
         self.buttons:    ButtonRows | Callable | None = button_rows
         self.photo: InputMediaPhoto | Callable | None = photo
@@ -27,7 +26,7 @@ class Menu:
             buttons_clone = self.buttons
         else:
             buttons_clone = self.buttons.clone()
-        clone = Menu(self.name,self.text,
+        clone = Menu(self.text,
             buttons_clone
             ,photo=self.photo)
         clone.bot_manager = self.bot_manager
