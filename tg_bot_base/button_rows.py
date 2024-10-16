@@ -1,4 +1,3 @@
-from multiprocessing import Value
 from .callback_data import CallbackData
 
 class Button:
@@ -17,10 +16,7 @@ class ButtonRow:
         self.buttons: list[Button] = []
         self.extend(buttons)
     def extend(self, *buttons: Button) -> "ButtonRow":
-        for button in buttons:
-            if not isinstance(button, Button):
-                raise ValueError("button is not of type Button")
-            self.buttons.append(button)
+        self.buttons.extend(buttons)
         return self
     def clone(self) -> "ButtonRow":
         return ButtonRow().\
@@ -33,10 +29,7 @@ class ButtonRows:
         self.rows: list[ButtonRow] = []
         self.extend(rows)
     def extend(self, *rows: ButtonRow) -> "ButtonRow":
-        for row in rows:
-            if not isinstance(row, ButtonRow):
-                raise ValueError("row is not of type ButtonRow")
-            self.rows.append(row)
+        self.rows.extend(rows)
         return self
     def clone(self) -> "ButtonRows":
         return ButtonRows().\
