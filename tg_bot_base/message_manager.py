@@ -43,14 +43,14 @@ class MessageManager:
         from telegram.ext import MessageHandler
         return MessageHandler(None, self.handle_message)
     async def reply_message_menu(self, menu_name: str, update: Update) -> None:
-        from .button_manager import UnknownButtonExeption
-        try:
-            menu = self.bot_manager.button_manager.get_clone(menu_name)
-        except UnknownButtonExeption:
-            return
-        user_id = update.message.from_user.id
-        if self.bot_manager.user_local_data.get(user_id,"__directory_stack",[])[-1] != menu.name:
-            self.bot_manager.user_local_data.append(user_id, "__directory_stack",menu.name)
-        # await update.message.reply_text(**menu.to_dict(user_id=user_id,bot_manager=self.bot_manager))
-        evaluated_menu = menu.to_evaluated_menu(bot_manager=self.bot_manager, user_id=user_id)
-        await self.bot_manager.screen_manager.set_screen(user_id, new_screen=[evaluated_menu])
+        pass
+        # try:
+        #     screen = self.bot_manager.screen_manager.get_screen_clone(menu_name)
+        # except UnknownButtonExeption:
+        #     return
+        # user_id = update.message.from_user.id
+        # if self.bot_manager.user_local_data.get(user_id,"__directory_stack",[])[-1] != screen.name:
+        #     self.bot_manager.user_local_data.append(user_id, "__directory_stack",screen.name)
+        # # await update.message.reply_text(**menu.to_dict(user_id=user_id,bot_manager=self.bot_manager))
+        # evaluated_menu = screen.to_evaluated_menu(bot_manager=self.bot_manager, user_id=user_id)
+        # await self.bot_manager.screen_manager.set_screen(user_id, new_screen=[evaluated_menu])

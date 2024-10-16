@@ -3,8 +3,7 @@ from telegram import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto
 from .callback_data import CallbackData
 from .evaluated_menu import EvaluatedMenuDefault, EvaluatedMenuPhoto
 from .button_rows import ButtonRows
-
-
+from .bot_manager import BotManager
 
 class Menu:
     def __init__(self, name: str, text: str | Callable | None, 
@@ -13,8 +12,7 @@ class Menu:
         self.text: str | Callable | None = text
         self.buttons:    ButtonRows | Callable | None = button_rows
         self.photo: InputMediaPhoto | Callable | None = photo
-        from .button_manager import ButtonManager
-        self.button_manager: ButtonManager = None
+        self.bot_manager: BotManager = None
     def handle_callback_data(self, button_to_dict: dict[str, object], user_id: int):
         __callback_data = []
         buttons: InlineKeyboardMarkup = button_to_dict.get("reply_markup")
@@ -22,7 +20,7 @@ class Menu:
             for button in line:
                 __callback_data.append(button[1])
                 button[1] = len(__callback_data) - 1
-        self.button_manager.bot_manager.user_local_data.set(user_id, "__callback_data", __callback_data)
+        self.bot_manager.user_local_data.set(user_id, "__callback_data", __callback_data)
     def clone(self) -> "Menu":
         buttons_clone = []
         if isinstance(self.buttons, Callable):
@@ -32,7 +30,7 @@ class Menu:
         clone = Menu(self.name,self.text,
             buttons_clone
             ,photo=self.photo)
-        clone.button_manager = self.button_manager
+        clone.bot_manager = self.bot_manager
         return clone
     def get_text(self, **kwargs) -> str:
         if callable(self.text):

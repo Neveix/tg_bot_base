@@ -62,6 +62,6 @@ new_screen must be not None here"""
         if len(directory_stack) == 1:
             return
         directory_stack.remove(directory_stack[-1])
-        menu = self.bot_manager.button_manager.get_clone(directory_stack[-1])
+        menu = self.bot_manager.screen_manager.get_screen(directory_stack[-1])
         evaluated_menu = menu.to_evaluated_menu(bot_manager=self.bot_manager, user_id=user_id)
         await self.bot_manager.screen_manager.set_screen(user_id, new_screen=[evaluated_menu])

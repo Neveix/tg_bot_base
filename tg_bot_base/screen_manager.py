@@ -14,7 +14,7 @@ class ScreenManager:
         if not isinstance(screen, Screen):
             raise ValueError(f"{screen=} wrong type")
         for menu in screen.menus:
-            menu.button_manager = self
+            menu.bot_manager = self.bot_manager
         self.screen_dict[screen.name] = screen
     def extend_screen(self, *screens: list[Screen]):
         for screen in screens:
