@@ -3,13 +3,13 @@ from .menu import Menu
 from .evaluated_screen import EvaluatedScreen
 
 class Screen:
-    def __init__(self, name: str, *menus: Tuple[Menu]):
+    def __init__(self, name: str, *menus: Menu):
         if not isinstance(menus, Tuple):
             raise ValueError(f"{menus=} is not Tuple")
         self.name = name
         self.menus: list[Menu] = []
         self.extend(*menus)
-    def extend(self, *menus: Tuple[Menu]):
+    def extend(self, *menus: Menu):
         for menu in menus:
             if not isinstance(menu, Menu):
                 raise ValueError(f"{menu=} is not of type {Menu}")
