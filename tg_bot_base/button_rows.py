@@ -33,6 +33,9 @@ class ButtonRow:
     def extend(self, *buttons: Button) -> "ButtonRow":
         self.buttons.extend(buttons)
         return self
+    def append(self, button: Button) -> "ButtonRow":
+        self.buttons.append(button)
+        return self
     def clone(self) -> "ButtonRow":
         return ButtonRow().\
             extend(
@@ -43,8 +46,11 @@ class ButtonRows:
     def __init__(self, *rows: ButtonRow):
         self.rows: list[ButtonRow] = []
         self.extend(*rows)
-    def extend(self, *rows: ButtonRow) -> "ButtonRow":
+    def extend(self, *rows: ButtonRow) -> "ButtonRows":
         self.rows.extend(rows)
+        return self
+    def append(self, row: ButtonRow) -> "ButtonRows":
+        self.rows.append(row)
         return self
     def clone(self) -> "ButtonRows":
         return ButtonRows().\
