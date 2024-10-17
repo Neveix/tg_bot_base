@@ -4,6 +4,8 @@ from .evaluated_menu import EvaluatedMenuDefault, EvaluatedMenuPhoto
 from .button_rows import ButtonRows
 from .bot_manager import BotManager
 
+
+
 class Menu:
     def __init__(self, text: str | Callable | None, 
             button_rows: ButtonRows | Callable | None = None, photo: InputMediaPhoto | Callable | None = None):
