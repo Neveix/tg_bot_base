@@ -13,13 +13,12 @@ class CallbackQueryManager:
             query = update.callback_query
             user_id: int = query.from_user.id
             await query.answer()
-            __callback_data = self.bot_manager.user_local_data.get(user_id, "__callback_data")
-            
-            if not __callback_data:
+            callback_data = self.bot_manager.user_data_manager.get(user_id).callback_data
+            if not callback_data:
                 return
-            if len(__callback_data) <= int(query.data):
+            if len(callback_data) <= int(query.data):
                 return
-            data: CallbackData = __callback_data[int(query.data)]
+            data: CallbackData = callback_data[int(query.data)]
             if data.action == "menu":
                 screen_name: str = data.args[0]
                 if not isinstance(screen_name, str):

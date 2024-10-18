@@ -16,6 +16,7 @@ tg_bot_base/py.typed
 tg_bot_base/saveable_photo_size.py
 tg_bot_base/screen.py
 tg_bot_base/screen_manager.py
+tg_bot_base/user_data.py
 tg_bot_base/user_global_data.py
 tg_bot_base/user_local_data.py
 tg_bot_base/user_screen_manager.py

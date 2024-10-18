@@ -16,14 +16,6 @@ class Menu:
         self.buttons:    ButtonRows | Callable | None = button_rows
         self.photo: InputMediaPhoto | Callable | None = photo
         self.bot_manager: BotManager = None
-    def handle_callback_data(self, button_to_dict: dict[str, object], user_id: int):
-        __callback_data = []
-        buttons: InlineKeyboardMarkup = button_to_dict.get("reply_markup")
-        for line in buttons:
-            for button in line:
-                __callback_data.append(button[1])
-                button[1] = len(__callback_data) - 1
-        self.bot_manager.user_local_data.set(user_id, "__callback_data", __callback_data)
     def clone(self) -> "Menu":
         buttons_clone = []
         if isinstance(self.buttons, Callable):

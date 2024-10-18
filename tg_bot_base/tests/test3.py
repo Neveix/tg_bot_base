@@ -1,7 +1,7 @@
-from .. import Screen, Menu, Button, ButtonRow, ButtonRows
+from .. import StaticScreen, Menu, Button, ButtonRow, ButtonRows
 from .. import StepBackCallbackData as SBCD
 
-screen = Screen("welcome",
+screen = StaticScreen(
     Menu("Welcome!!!!",
         ButtonRows(
             ButtonRow(
@@ -20,5 +20,5 @@ screen = Screen("welcome",
                 Button("Matrices", SBCD())
             )
         )
-    )
+    ), name = "welcome"
 )

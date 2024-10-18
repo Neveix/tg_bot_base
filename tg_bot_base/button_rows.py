@@ -60,14 +60,17 @@ class ButtonRows:
     def buttons_to_inline_keyboard(self, 
             set_callback_data: bool=True, **kwargs) -> InlineKeyboardMarkup:
         reply_markup = []
-        __callback_data = []
+        from .bot_manager import BotManager
+        bot_manager: BotManager = kwargs.get("bot_manager")
+        user_id: int = kwargs.get("user_id")
+        callback_data = []
         for old_line in self.rows:
             line = []
             for old_button in old_line.buttons:
                 old_button_dict = old_button.to_dict(**kwargs)
-                __callback_data.append(old_button_dict["callback_data"])
-                line.append(InlineKeyboardButton(text = old_button_dict["text"], callback_data = len(__callback_data)-1))
+                callback_data.append(old_button_dict["callback_data"])
+                line.append(InlineKeyboardButton(text = old_button_dict["text"], callback_data = len(callback_data)-1))
             reply_markup.append(line)
         if set_callback_data:
-            kwargs.get("bot_manager").user_local_data.set(kwargs.get("user_id"), "__callback_data", __callback_data)
+            bot_manager.user_data_manager.get(user_id).callback_data = callback_data
         return InlineKeyboardMarkup(reply_markup)
