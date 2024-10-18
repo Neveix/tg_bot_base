@@ -7,8 +7,11 @@ from .bot_manager import BotManager
 
 
 class Menu:
-    def __init__(self, text: str | Callable | None, 
-            button_rows: ButtonRows | Callable | None = None, photo: InputMediaPhoto | Callable | None = None):
+    def __init__(self, 
+            text: str | Callable[[BotManager, int], str] | None = None, 
+            button_rows: ButtonRows | Callable[[BotManager, int], ButtonRows] | None = None, 
+            photo: InputMediaPhoto | Callable[[BotManager, int], InputMediaPhoto] | None = None
+        ):
         self.text: str | Callable | None = text
         self.buttons:    ButtonRows | Callable | None = button_rows
         self.photo: InputMediaPhoto | Callable | None = photo
