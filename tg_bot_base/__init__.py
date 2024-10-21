@@ -6,7 +6,6 @@ from .command import Command
 from .user_data import UserData, UserDataManager
 from .saveable_photo_size import SaveablePhotoSize
 from .callback_data import CallbackData, FunctionCallbackData, MenuCallbackData, StepBackCallbackData
-from .browse_mode import BrowseMode
 from .evaluated_menu import EvaluatedMenu, EvaluatedMenuDefault, EvaluatedMenuPhoto
 from .screen_manager import ScreenManager
 from .evaluated_screen import EvaluatedScreen
