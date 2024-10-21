@@ -29,6 +29,10 @@ class EvaluatedMenu:
             await EvaluatedMenuPhoto.edit_message(self, bot, chat_id, message_id)
         else:
             await EvaluatedMenuDefault.edit_message(self, bot, chat_id, message_id)
+    def __eq__(self, other: "EvaluatedMenu"):
+        return self.text == other.text and \
+            self.reply_markup == other.reply_markup and \
+            self.photo == other.photo
 
 class EvaluatedMenuDefault(EvaluatedMenu):
     def __init__(self, text: str, reply_markup: InlineKeyboardMarkup):

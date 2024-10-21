@@ -41,9 +41,11 @@ new_screen must be not None here"""
         len_diff = len(old_screen.menus) - len(new_screen.menus)
         from .evaluated_menu import EvaluatedMenuHasNotSendedMessage
         for i, new_menu in enumerate(new_screen.menus):
-            if old_screen.menus[len_diff+i].sended_message is None:
-                old_menu = old_screen.menus[len_diff+i]
+            old_menu = old_screen.menus[len_diff+i]
+            if old_menu.sended_message is None:
                 raise EvaluatedMenuHasNotSendedMessage(old_menu)
+            if new_menu == old_menu:
+                continue
             message_id = old_screen.menus[len_diff+i].sended_message.id
             await new_menu.edit_message(self.bot_manager.bot, user_id, message_id)
     async def step_back(self, user_id: int) -> None:
