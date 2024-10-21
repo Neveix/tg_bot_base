@@ -59,7 +59,7 @@ class EvaluatedMenuPhoto(EvaluatedMenu):
             raise PhotoIsNone()
         super().__init__(photo=photo)
     async def send(self, bot: Bot, chat_id: int):
-        self.sended_message = await bot.send_media_group(chat_id, [self.photo])
+        self.sended_message = (await bot.send_media_group(chat_id, [self.photo]))[0]
     async def edit_message(self, bot: Bot, chat_id: int, message_id: int):
         self.sended_message = await bot.edit_message_media(media = self.photo, chat_id = chat_id, message_id = message_id)
     def __repr__(self) -> str:

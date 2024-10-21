@@ -32,6 +32,7 @@ class CallbackQueryManager:
                     raise ValueError("Callback data has no function")
                 await function(bot_manager=self.bot_manager,
                     update=update, context=context, user_id=user_id, *data.args[1:], **data.kwargs)
+                await update.callback_query.answer()
         self.callback_query_handler = callback_query_handler
     def get_handler(self) -> CallbackQueryHandler:
         return CallbackQueryHandler(self.callback_query_handler)
