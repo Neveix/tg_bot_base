@@ -11,13 +11,15 @@ class UserScreenManager:
             return None
         return screen.clone()
     def clear_user_screen(self, user_id: int):
-        self.bot_manager.user_data_manager.get(user_id).screen = None
+        user_data = self.bot_manager.user_data_manager.get(user_id)
+        user_data.screen = None
     async def set_user_screen(self, user_id: int, new_screen: EvaluatedScreen):
         """Sets the screen and send/edit messages.\n
 new_screen must be not None here"""
         old_screen = self.get_user_screen(user_id)
         if old_screen is None or len(new_screen.menus) > len(old_screen.menus):
-            self.bot_manager.user_data_manager.get(user_id).screen = new_screen
+            user_data = self.bot_manager.user_data_manager.get(user_id)
+            user_data.screen = new_screen
             await self.send_screen(user_id, new_screen)
             return
         len_diff = len(old_screen.menus) - len(new_screen.menus)
@@ -35,7 +37,7 @@ new_screen must be not None here"""
         await self.set_user_screen(user_id, evaluated_screen)
     async def send_screen(self, user_id: int, new_screen: EvaluatedScreen):
         for menu in new_screen.menus:
-            await menu.send(self.bot_manager.bot, chat_id = user_id)
+            await menu.send(self.bot_manager, chat_id = user_id)
     async def edit_screen(self, user_id: int, new_screen: EvaluatedScreen):
         old_screen = self.get_user_screen(user_id)
         len_diff = len(old_screen.menus) - len(new_screen.menus)
@@ -47,7 +49,7 @@ new_screen must be not None here"""
             if new_menu == old_menu:
                 continue
             message_id = old_screen.menus[len_diff+i].sended_message.id
-            await new_menu.edit_message(self.bot_manager.bot, user_id, message_id)
+            await new_menu.edit_message(self.bot_manager, user_id, message_id)
     async def step_back(self, user_id: int) -> None:
         directory_stack = self.bot_manager.user_data_manager.get(user_id).directory_stack
         if len(directory_stack) <= 1:

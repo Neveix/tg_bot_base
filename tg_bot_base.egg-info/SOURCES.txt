@@ -2,7 +2,6 @@ README.md
 setup.py
 tg_bot_base/__init__.py
 tg_bot_base/bot_manager.py
-tg_bot_base/browse_mode.py
 tg_bot_base/button_rows.py
 tg_bot_base/callback_data.py
 tg_bot_base/callback_query_manager.py

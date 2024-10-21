@@ -57,7 +57,7 @@ class ButtonRows:
             extend(
                 [row.clone() for row in self.rows]
             )
-    def buttons_to_inline_keyboard(self, 
+    def to_inline_keyboard(self, 
             set_callback_data: bool=True, **kwargs) -> InlineKeyboardMarkup:
         reply_markup = []
         from .bot_manager import BotManager
@@ -72,5 +72,6 @@ class ButtonRows:
                 line.append(InlineKeyboardButton(text = old_button_dict["text"], callback_data = len(callback_data)-1))
             reply_markup.append(line)
         if set_callback_data:
-            bot_manager.user_data_manager.get(user_id).callback_data = callback_data
+            user_data = bot_manager.user_data_manager.get(user_id)
+            user_data.callback_data = callback_data
         return InlineKeyboardMarkup(reply_markup)

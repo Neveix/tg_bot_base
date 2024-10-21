@@ -44,6 +44,6 @@ class Menu:
     def to_evaluated_menu(self, **kwargs) -> EvaluatedMenuDefault | EvaluatedMenuPhoto:
         if self.photo:
             return EvaluatedMenuPhoto(photo = self.get_photo(**kwargs))
-        reply_markup = self.get_buttons(**kwargs).buttons_to_inline_keyboard(**kwargs)
+        reply_markup = self.get_buttons(**kwargs).to_inline_keyboard(**kwargs)
         return EvaluatedMenuDefault(self.get_text(**kwargs), reply_markup)
             
