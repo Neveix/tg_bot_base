@@ -18,7 +18,6 @@ tg_bot_base/screen.py
 tg_bot_base/screen_manager.py
 tg_bot_base/user_data.py
 tg_bot_base/user_global_data.py
-tg_bot_base/user_local_data.py
 tg_bot_base/user_screen_manager.py
 tg_bot_base.egg-info/PKG-INFO
 tg_bot_base.egg-info/SOURCES.txt

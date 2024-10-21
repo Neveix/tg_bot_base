@@ -6,7 +6,7 @@ class EvaluatedMenuHasNotSendedMessage(Exception):
 
 class EvaluatedMenu:
     def __init__(self, text: str = None, reply_markup: InlineKeyboardMarkup = None, 
-            photo: list[InputMediaPhoto] = None):
+            photo: InputMediaPhoto = None):
         self.text = text
         self.reply_markup = reply_markup
         self.photo = photo
@@ -59,7 +59,7 @@ class EvaluatedMenuPhoto(EvaluatedMenu):
             raise PhotoIsNone()
         super().__init__(photo=photo)
     async def send(self, bot: Bot, chat_id: int):
-        self.sended_message = await bot.send_media_group(chat_id, self.photo)[0]
+        self.sended_message = await bot.send_media_group(chat_id, [self.photo])
     async def edit_message(self, bot: Bot, chat_id: int, message_id: int):
         self.sended_message = await bot.edit_message_media(media = self.photo, chat_id = chat_id, message_id = message_id)
     def __repr__(self) -> str:
