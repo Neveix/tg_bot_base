@@ -8,3 +8,5 @@ class EvaluatedScreen:
         self.menus.extend(menus)
     def clone(self) -> "EvaluatedScreen":
         return EvaluatedScreen(*[menu.clone() for menu in self.menus])
+    def __repr__(self):
+        return f"EvaluatedScreen({",".join([str(menu) for menu in self.menus])})"

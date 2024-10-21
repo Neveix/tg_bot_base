@@ -12,6 +12,12 @@ class CallbackData:
             args = self.args,
             kwargs = self.kwargs
         )
+    def __eq__(self, other: "CallbackData"):
+        return (
+            self.action == other.action and \
+            self.args == other.args and \
+            self.kwargs == other.kwargs
+        )
 
 class FunctionCallbackData(CallbackData):
     def __init__(self, function: Callable, *args, **kwargs):

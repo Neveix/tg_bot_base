@@ -14,11 +14,12 @@ class EvaluatedMenu:
         self.photo = photo
         self.sended_message: Message = None
     def clone(self) -> "EvaluatedMenu":
-        result = None
         if isinstance(self, EvaluatedMenuPhoto):
             result = EvaluatedMenuPhoto(self.photo)
-        if isinstance(self, EvaluatedMenuDefault):
+        elif isinstance(self, EvaluatedMenuDefault):
             result = EvaluatedMenuDefault(self.text, self.button_rows)
+        else:
+            raise TypeError(f"{self} was wrong type {type(self)}")
         result.sended_message = self.sended_message
         return result
     async def send(self, bot_manager: BotManager, chat_id: int):
@@ -32,16 +33,24 @@ class EvaluatedMenu:
         else:
             await EvaluatedMenuDefault.edit_message(self, bot_manager, chat_id, message_id)
     def __eq__(self, other: "EvaluatedMenu"):
-        return self.text == other.text and \
+        list_of_photos = [self.photo, other.photo]
+        photos_are_none = all(map(lambda photo: photo is None, list_of_photos))
+        photos_are_photos = all(map(lambda photo: isinstance(photo, InputMediaPhoto), list_of_photos))
+        photos_are_equal_photos = False
+        if photos_are_photos:
+            photos_are_equal_photos = self.photo.media == other.photo.media
+        photos_are_equal = photos_are_equal_photos or photos_are_none
+        result = self.text is other.text and \
             self.button_rows == other.button_rows and \
-            self.photo is other.photo
+            photos_are_equal
+        return result
 
 class EvaluatedMenuDefault(EvaluatedMenu):
     def __init__(self, text: str, button_rows: ButtonRows):
         if text is None:
             raise ValueError("text is None")
         if button_rows is None:
-            raise ValueError("reply_markup is None")
+            raise ValueError("button_rows is None")
         super().__init__(text = text, button_rows = button_rows)
     async def send(self, bot_manager: BotManager, chat_id: int):
         bot: Bot = bot_manager.bot

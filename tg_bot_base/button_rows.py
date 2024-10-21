@@ -24,6 +24,11 @@ class Button:
         else:
             result["callback_data"] = self.callback_data(**kwargs)
         return result
+    def __eq__(self, other: "Button"):
+        return (
+            self.text == other.text and \
+            self.callback_data == other.callback_data
+        )
             
 
 class ButtonRow:
@@ -41,6 +46,14 @@ class ButtonRow:
             extend(
                 [button.clone() for button in self.buttons]
             )
+    def __eq__(self, other: "ButtonRow"):
+        return all(
+            map(
+                lambda button1, button2: button1 == button2,
+                 self.buttons
+                ,other.buttons
+            )
+        )
 
 class ButtonRows:
     def __init__(self, *rows: ButtonRow):
@@ -57,6 +70,14 @@ class ButtonRows:
             extend(
                 [row.clone() for row in self.rows]
             )
+    def __eq__(self, other: "ButtonRows"):
+        return all(
+            map(
+                lambda row1, row2: row1 == row2,
+                self.rows,
+                other.rows
+            )
+        )
     def to_inline_keyboard(self, 
             set_callback_data: bool=True, **kwargs) -> InlineKeyboardMarkup:
         reply_markup = []
