@@ -10,7 +10,7 @@ class UserData:
         self.user_id = user_id
         self.callback_data: list[str] = []
         self.media_group_id: str = None
-        self.after_input: Callable[[Message, BotManager, int, Update, CallbackContext], Coroutine[Any, Any, None]] = None
+        self.after_input: Callable[[Message, BotManager, int, Update, CallbackContext], Coroutine[Any, Any, None]] | None = None
         self.directory_stack: list[str] = []
         from .evaluated_screen import EvaluatedScreen
         self.screen: EvaluatedScreen = None
