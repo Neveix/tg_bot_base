@@ -52,7 +52,7 @@ new_screen must be not None here"""
             message_id = old_screen.menus[len_diff+i].sended_message.id
             await new_menu.edit_message(self.bot_manager, user_id, message_id)
         user_data = self.bot_manager.user_data_manager.get(user_id)
-        user_data.screen = new_screen
+        user_data.screen.menus[-len(new_screen.menus):] = new_screen.menus
     async def step_back(self, user_id: int) -> None:
         directory_stack = self.bot_manager.user_data_manager.get(user_id).directory_stack
         if len(directory_stack) <= 1:
