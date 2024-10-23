@@ -30,6 +30,11 @@ new_screen must be not None here"""
         screen = self.bot_manager.screen_manager.get_screen(screen_name)
         evaluated_screen = screen.to_evaluated_screen(bot_manager = self.bot_manager, user_id = user_id)
         await self.set_user_screen(user_id, evaluated_screen)
+    async def update_current_screen(self, user_id: int):
+        directory_stack = self.bot_manager.user_data_manager.get(user_id).directory_stack
+        if len(directory_stack)==0:
+            raise ValueError("directory_stack was of length 0")
+        await self.set_user_screen_by_name(user_id, directory_stack[-1])
     async def send_screen(self, user_id: int, new_screen: EvaluatedScreen):
         for menu in new_screen.menus:
             await menu.send(self.bot_manager, chat_id = user_id)

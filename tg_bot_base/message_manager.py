@@ -8,7 +8,7 @@ class MessageManager:
         self.bot_manager: BotManager = bot_manager
         async def handle_message(update: Update, context: CallbackContext):
             # Очищаем экран
-            self.bot_manager.screen_manager.clear_screen(update.message.from_user.id)
+            self.bot_manager.user_screen_manager.clear_user_screen(update.message.from_user.id)
             media_group_id = self.bot_manager.user_data_manager.get(
                 update.message.from_user.id).media_group_id
             # Если у сообщения есть media
@@ -22,8 +22,7 @@ class MessageManager:
             # Получаем функцию, которую нужно вызвать после сообщения
             after_input = self.bot_manager.user_data_manager.get(
                 update.message.from_user.id).after_input
-            # Если её можно вызвать (она не None):
-            if callable(after_input):
+            if after_input is not None:
                 # Удалем её из данных пользователя
                 self.bot_manager.user_data_manager.get(
                     update.message.from_user.id).after_input = None

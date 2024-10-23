@@ -19,7 +19,8 @@ class EvaluatedMenu:
         elif isinstance(self, EvaluatedMenuDefault):
             result = EvaluatedMenuDefault(self.text, self.button_rows)
         else:
-            raise TypeError(f"{self} was wrong type {type(self)}")
+            raise TypeError(f"{self} was wrong type {type(self)}, \
+use EvaluatedMenuDefault or EvaluatedMenuPhoto instead")
         result.sended_message = self.sended_message
         return result
     async def send(self, bot_manager: BotManager, chat_id: int):
