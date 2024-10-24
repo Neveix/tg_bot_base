@@ -2,13 +2,14 @@ from typing import TYPE_CHECKING, Any, Callable, Coroutine
 
 from telegram import Update, Message
 from telegram.ext import CallbackContext
+from .callback_data import CallbackData
 if TYPE_CHECKING:
     from .bot_manager import BotManager
 
 class UserData:
     def __init__(self, user_id: int):
         self.user_id = user_id
-        self.callback_data: list[str] = []
+        self.callback_data: list[CallbackData] = []
         self.media_group_id: str = None
         self.after_input: Callable[[Message, BotManager, int, Update, CallbackContext], Coroutine[Any, Any, None]] | None = None
         self.directory_stack: list[str] = []
