@@ -36,7 +36,6 @@ class MessageManager:
         self.handle_message = handle_message
     async def get_message_and_run_method(self, user_id: int, function: Callable):
         user_data = self.bot_manager.user_data_manager.get(user_id)
-        user_data.callback_data = None
         user_data.after_input = function
     def get_message_handler(self):
         from telegram.ext import MessageHandler
