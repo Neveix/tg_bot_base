@@ -13,3 +13,4 @@ from .screen import Screen, StaticScreen, DynamicScreen
 from .user_screen_manager import UserScreenManager
 from .callback_query_manager import CallbackQueryManager
 from .button_rows import Button, ButtonRow, ButtonRows
+from .telegram_interface import TelegramInterface

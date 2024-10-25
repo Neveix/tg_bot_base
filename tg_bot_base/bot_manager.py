@@ -15,5 +15,7 @@ class BotManager:
         self.screen_manager = ScreenManager(self)
         from . import UserScreenManager
         self.user_screen_manager = UserScreenManager(self)
+        from . import TelegramInterface
+        self.telegram_interface = TelegramInterface(self)
     def set_bot(self, bot: Bot):
         self.bot = bot
