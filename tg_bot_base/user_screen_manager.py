@@ -37,7 +37,7 @@ new_screen must be not None here"""
         await self.set_user_screen_by_name(user_id, directory_stack[-1])
     async def send_screen(self, user_id: int, new_screen: EvaluatedScreen):
         for menu in new_screen.menus:
-            await menu.send(self.bot_manager, user_id)
+            await menu.send_message(self.bot_manager, user_id)
     async def edit_screen(self, user_id: int, new_screen: EvaluatedScreen):
         old_screen = self.get_user_screen(user_id)
         len_diff = len(old_screen.menus) - len(new_screen.menus)

@@ -23,10 +23,10 @@ class EvaluatedMenu:
 use EvaluatedMenuDefault or EvaluatedMenuPhoto instead")
         result.sended_message = self.sended_message
         return result
-    async def send(self, bot_manager: BotManager, user_id: int):
-        pass
+    async def send_message(self, bot_manager: BotManager, user_id: int):
+        raise TypeError(f"called send message as {type(self)=}")
     async def edit_message(self, bot_manager: BotManager, user_id: int, message_id: int):
-        pass
+        raise TypeError(f"called edit_message as {type(self)=}")
     def __eq__(self, other: "EvaluatedMenu"):
         list_of_photos = [self.photo, other.photo]
         photos_are_none = all(map(lambda photo: photo is None, list_of_photos))
@@ -79,7 +79,7 @@ class EvaluatedMenuPhoto(EvaluatedMenu):
         if photo is None:
             raise PhotoIsNone()
         super().__init__(photo=photo)
-    async def send(self, bot_manager: BotManager, user_id: int):
+    async def send_message(self, bot_manager: BotManager, user_id: int):
         self.sended_message = (await bot_manager.telegram_interface.send_media_group(
             user_id = user_id,
             media_list = [self.photo]

@@ -10,12 +10,12 @@ class BotManager:
         self.user_data_manager = UserDataManager(self)
         from . import MessageManager
         self.message_manager = MessageManager(self)
-        self.bot = None
         from . import ScreenManager
         self.screen_manager = ScreenManager(self)
         from . import UserScreenManager
         self.user_screen_manager = UserScreenManager(self)
         from . import TelegramInterface
         self.telegram_interface = TelegramInterface(self)
+        self.bot: Bot | None = None
     def set_bot(self, bot: Bot):
         self.bot = bot
