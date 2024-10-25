@@ -1,5 +1,5 @@
 from typing import Any, Callable
-from telegram import InlineKeyboardMarkup, InputMediaPhoto
+from telegram import InputMediaPhoto
 from .evaluated_menu import EvaluatedMenuDefault, EvaluatedMenuPhoto
 from .button_rows import ButtonRows
 from .bot_manager import BotManager
@@ -10,11 +10,13 @@ class Menu:
     def __init__(self, 
             text: str | Callable[[BotManager, int], str] | None = None, 
             button_rows: ButtonRows | Callable[[BotManager, int], ButtonRows] | None = None, 
-            photo: InputMediaPhoto | Callable[[BotManager, int], InputMediaPhoto] | None = None
+            photo: InputMediaPhoto | Callable[[BotManager, int], InputMediaPhoto] | None = None,
+            parse_mode: str | None = None
         ):
         self.text: str | Callable | None = text
         self.buttons:    ButtonRows | Callable | None = button_rows
         self.photo: InputMediaPhoto | Callable | None = photo
+        self.parse_mode = parse_mode
         self.bot_manager: BotManager = None
     def clone(self) -> "Menu":
         buttons_clone = []
@@ -44,5 +46,5 @@ class Menu:
     def to_evaluated_menu(self, **kwargs) -> EvaluatedMenuDefault | EvaluatedMenuPhoto:
         if self.photo:
             return EvaluatedMenuPhoto(photo = self.get_photo(**kwargs))
-        return EvaluatedMenuDefault(self.get_text(**kwargs), self.get_buttons(**kwargs))
+        return EvaluatedMenuDefault(self.get_text(**kwargs), self.get_buttons(**kwargs), parse_mode = self.parse_mode)
             

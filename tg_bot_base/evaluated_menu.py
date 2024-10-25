@@ -1,5 +1,5 @@
 from typing import Any
-from telegram import Bot, InputMediaPhoto, Message
+from telegram import InputMediaPhoto, Message
 from .button_rows import ButtonRows
 from .bot_manager import BotManager
 
@@ -42,7 +42,7 @@ use EvaluatedMenuDefault or EvaluatedMenuPhoto instead")
 
 class EvaluatedMenuDefault(EvaluatedMenu):
     def __init__(self, text: str, button_rows: ButtonRows, 
-                 parse_mode: str | None = None):
+            parse_mode: str | None = None):
         if text is None:
             raise ValueError("text is None")
         if button_rows is None:
