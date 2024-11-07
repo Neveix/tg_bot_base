@@ -4,8 +4,6 @@ from .evaluated_menu import EvaluatedMenuDefault, EvaluatedMenuPhoto
 from .button_rows import ButtonRows
 from .bot_manager import BotManager
 
-
-
 class Menu:
     def __init__(self, 
             text: str | Callable[[BotManager, int], str] | None = None, 
@@ -45,6 +43,10 @@ class Menu:
         return self.to_evaluated_menu(**kwargs).to_dict()
     def to_evaluated_menu(self, **kwargs) -> EvaluatedMenuDefault | EvaluatedMenuPhoto:
         if self.photo:
-            return EvaluatedMenuPhoto(photo = self.get_photo(**kwargs))
-        return EvaluatedMenuDefault(self.get_text(**kwargs), self.get_buttons(**kwargs), parse_mode = self.parse_mode)
+            return EvaluatedMenuPhoto(
+                photo = self.get_photo(**kwargs))
+        return EvaluatedMenuDefault(
+            self.get_text(**kwargs), 
+            self.get_buttons(**kwargs), 
+            parse_mode = self.parse_mode)
             
