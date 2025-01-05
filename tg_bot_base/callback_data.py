@@ -34,5 +34,4 @@ class StepBackCallbackData(CallbackData):
 
 class URLCallbackData(CallbackData):
     def __init__(self, url: str):
-        "init without args"
         super().__init__('url', url=url)
