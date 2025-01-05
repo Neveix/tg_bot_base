@@ -33,6 +33,8 @@ class CallbackQueryManager:
                 await function(bot_manager=self.bot_manager,
                     update=update, context=context, user_id=user_id, *data.args[1:], **data.kwargs)
                 await update.callback_query.answer()
+            elif data.action == "url":
+                url = data.kwargs["url"]
         self.callback_query_handler = callback_query_handler
     def get_handler(self) -> CallbackQueryHandler:
         return CallbackQueryHandler(self.callback_query_handler)

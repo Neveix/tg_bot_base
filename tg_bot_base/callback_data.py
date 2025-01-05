@@ -2,7 +2,7 @@ from typing import Callable
 
 class CallbackData:
     def __init__(self, action: str, *args, **kwargs):
-        """action should be 'step_back' 'function' 'menu' 'show_alert'"""
+        """base for several classes, deprecated to use manually"""
         self.action = action
         self.args = args
         self.kwargs = kwargs
@@ -31,3 +31,8 @@ class StepBackCallbackData(CallbackData):
     def __init__(self):
         "init without args"
         super().__init__('step_back')
+
+class URLCallbackData(CallbackData):
+    def __init__(self, url: str):
+        "init without args"
+        super().__init__('url', url=url)

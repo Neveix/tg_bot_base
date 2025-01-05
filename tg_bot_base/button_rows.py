@@ -89,8 +89,15 @@ class ButtonRows:
             line = []
             for old_button in old_line.buttons:
                 old_button_dict = old_button.to_dict(**kwargs)
-                callback_data.append(old_button_dict["callback_data"])
-                line.append(InlineKeyboardButton(text = old_button_dict["text"], callback_data = len(callback_data)-1))
+                old_callback_data: CallbackData = old_button_dict["callback_data"]
+                callback_data.append(old_callback_data)
+                IKBkwargs = {
+                     "text" : old_button_dict["text"]
+                    ,"callback_data" : len(callback_data)-1
+                }
+                if old_callback_data.action == "url":
+                    IKBkwargs["url"] = old_callback_data.kwargs["url"]
+                line.append(InlineKeyboardButton(**IKBkwargs))
             reply_markup.append(line)
         if set_callback_data:
             user_data = bot_manager.user_data_manager.get(user_id)
