@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 class UserData:
     def __init__(self, user_id: int):
         self.user_id = user_id
-        self.callback_data: list[CallbackData] = []
+        self.callback_data: dict[str, CallbackData] = {}
         self.media_group_id: str = None
         self.after_input: Callable[[Message, BotManager, int, Update, CallbackContext], Coroutine[Any, Any, None]] | None = None
         self.directory_stack: list[str] = []

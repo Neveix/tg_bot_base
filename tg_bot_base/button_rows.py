@@ -1,5 +1,5 @@
-from typing import Callable
-
+from typing import Any, Callable
+from uuid import uuid4
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from .callback_data import CallbackData
 
@@ -13,7 +13,7 @@ class Button:
         self.callback_data = callback_data
     def clone(self) -> "Button":
         return Button(self.text, self.callback_data.clone())
-    def to_dict(self, **kwargs):
+    def to_dict(self, **kwargs) -> dict[str, Any]:
         result = {}
         if isinstance(self.text, str):
             result["text"] = self.text
@@ -84,16 +84,17 @@ class ButtonRows:
         from .bot_manager import BotManager
         bot_manager: BotManager = kwargs.get("bot_manager")
         user_id: int = kwargs.get("user_id")
-        callback_data = []
+        callback_data = {}
         for old_line in self.rows:
             line = []
             for old_button in old_line.buttons:
                 old_button_dict = old_button.to_dict(**kwargs)
                 old_callback_data: CallbackData = old_button_dict["callback_data"]
-                callback_data.append(old_callback_data)
+                uuid_code = str(uuid4())
+                callback_data[uuid_code] = old_callback_data
                 IKBkwargs = {
                      "text" : old_button_dict["text"]
-                    ,"callback_data" : len(callback_data)-1
+                    ,"callback_data" : uuid_code
                 }
                 if old_callback_data.action == "url":
                     IKBkwargs["url"] = old_callback_data.kwargs["url"]

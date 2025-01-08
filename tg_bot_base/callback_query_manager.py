@@ -16,9 +16,9 @@ class CallbackQueryManager:
             callback_data = self.bot_manager.user_data_manager.get(user_id).callback_data
             if not callback_data:
                 return
-            if len(callback_data) <= int(query.data):
+            if query.data not in callback_data:
                 return
-            data: CallbackData = callback_data[int(query.data)]
+            data: CallbackData = callback_data[query.data]
             if data.action == "menu":
                 screen_name: str = data.args[0]
                 if not isinstance(screen_name, str):
