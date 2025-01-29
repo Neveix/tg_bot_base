@@ -1,5 +1,5 @@
 from typing import Any, Callable
-from telegram import InputMediaPhoto
+from .equitypes.input_media_photo import InputMediaPhoto
 from .evaluated_menu import EvaluatedMenuDefault, EvaluatedMenuPhoto
 from .button_rows import ButtonRows
 from .bot_manager import BotManager

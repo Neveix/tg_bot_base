@@ -1,6 +1,6 @@
 from typing import Any, Callable
 from uuid import uuid4
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from .equitypes.inline_keyboard_markup import InlineKeyboardButton, InlineKeyboardMarkup
 from .callback_data import CallbackData
 
 class Button:

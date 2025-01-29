@@ -1,7 +1,5 @@
 from typing import Callable
 
-from telegram.ext import CommandHandler
-
 class Command:
     def __init__(self, name: str, action: Callable):
         self.name = name
@@ -11,5 +9,4 @@ class Command:
         except AttributeError:
             self.command_manager = None
 
-    def to_command_handler(self) -> CommandHandler:
-        return CommandHandler(self.name, self.action)
+    def to_command_handler(self): ...

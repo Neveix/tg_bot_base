@@ -1,5 +1,3 @@
-from telegram.ext import CallbackContext, CallbackQueryHandler
-from telegram import Update
 from .bot_manager import BotManager
 from .callback_data import CallbackData
 
@@ -9,16 +7,13 @@ class CallbackQueryManager:
 """
     def __init__(self, bot_manager: BotManager):
         self.bot_manager: BotManager = bot_manager
-        async def callback_query_handler(update: Update, context: CallbackContext):
-            query = update.callback_query
-            user_id: int = query.from_user.id
-            await query.answer()
+        async def callback_query_handler(query_data: str, user_id: int, **kwargs):
             callback_data = self.bot_manager.user_data_manager.get(user_id).callback_data
             if not callback_data:
                 return
-            if query.data not in callback_data:
+            if query_data not in callback_data:
                 return
-            data: CallbackData = callback_data[query.data]
+            data: CallbackData = callback_data[query_data]
             if data.action == "menu":
                 screen_name: str = data.args[0]
                 if not isinstance(screen_name, str):
@@ -30,11 +25,14 @@ class CallbackQueryManager:
                 function = data.args[0]
                 if not callable(function):
                     raise ValueError("Callback data has no function")
+                for kwarg in kwargs:
+                    if kwarg in data.kwargs:
+                        raise ValueError(
+f"FunctionCallbackData kwarg '{kwarg}' intersects with CallbackQueryHandler's kwarg.\
+Please change the name of your kwarg.")
                 await function(bot_manager=self.bot_manager,
-                    update=update, context=context, user_id=user_id, *data.args[1:], **data.kwargs)
-                await update.callback_query.answer()
+                    **kwargs, user_id=user_id, *data.args[1:], **data.kwargs)
             elif data.action == "url":
                 url = data.kwargs["url"]
         self.callback_query_handler = callback_query_handler
-    def get_handler(self) -> CallbackQueryHandler:
-        return CallbackQueryHandler(self.callback_query_handler)
+    def get_handler(self): ...

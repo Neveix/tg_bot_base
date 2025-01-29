@@ -1,6 +1,7 @@
 from typing import Any
 from abc import ABC, abstractmethod
-from telegram import InputMediaPhoto, Message
+from telegram import Message
+from .equitypes.input_media_photo import InputMediaPhoto
 from .button_rows import ButtonRows
 from .bot_manager import BotManager
 

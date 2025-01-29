@@ -1,4 +1,4 @@
-from telegram import Bot
+
 
 class BotManager:
     def __init__(self):
@@ -16,6 +16,3 @@ class BotManager:
         self.user_screen_manager = UserScreenManager(self)
         from . import TelegramInterface
         self.telegram_interface = TelegramInterface(self)
-        self.bot: Bot | None = None
-    def set_bot(self, bot: Bot):
-        self.bot = bot
