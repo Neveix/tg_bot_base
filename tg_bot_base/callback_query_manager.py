@@ -1,3 +1,4 @@
+from typing import Callable
 from telegram.ext import CallbackContext, CallbackQueryHandler
 from telegram import Update
 from .bot_manager import BotManager
@@ -8,6 +9,7 @@ class CallbackQueryManager:
 Класс обеспечивает работу обработчика колбэков нажатия на кнопки.
 """
     def __init__(self, bot_manager: BotManager):
+        self.dummy_handle_func: Callable[[Update, CallbackContext], None]
         self.bot_manager: BotManager = bot_manager
         async def callback_query_handler(update: Update, context: CallbackContext):
             query = update.callback_query
@@ -15,8 +17,10 @@ class CallbackQueryManager:
             await query.answer()
             callback_data = self.bot_manager.user_data_manager.get(user_id).callback_data
             if not callback_data:
+                self.dummy_handle_func(update, context)
                 return
             if query.data not in callback_data:
+                self.dummy_handle_func(update, context)
                 return
             data: CallbackData = callback_data[query.data]
             if data.action == "menu":
