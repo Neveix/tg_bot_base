@@ -19,10 +19,10 @@ class CallbackQueryManager:
             
             callback_data = self.bot_manager.user_data_manager.get(user_id).callback_data
             if not callback_data:
-                self.dummy_handle_func(update, context)
+                await self.dummy_handle_func(update, context)
                 return
             if query.data not in callback_data:
-                self.dummy_handle_func(update, context)
+                await self.dummy_handle_func(update, context)
                 return
             
             data: CallbackData = callback_data[query.data]
