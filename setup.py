@@ -7,5 +7,11 @@ setup(
    author='Neveix',
    author_email='neveix2003@mail.ru',
    packages=['tg_bot_base'],
-   install_requires=[]
+   install_requires=[],
+   extras_require={
+      'ptb': [
+         # Дополнительные зависимости для расширения
+         'python-telegram-bot[job-queue]>=21.9',
+      ],
+   },
 )
