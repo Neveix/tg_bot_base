@@ -55,14 +55,14 @@ class EvaluatedMenuDefault(EvaluatedMenu):
         super().__init__(text = text, button_rows = button_rows)
         self.parse_mode = parse_mode
     async def send_message(self, bot_manager: "BotManager", user_id: int) -> None:
-        self.sended_message = await bot_manager.telegram_interface.send_message(
+        self.sended_message = await bot_manager.tg_interface.send_message(
             user_id = user_id,
             text = self.text,
             button_rows = self.button_rows,
             parse_mode = self.parse_mode
         )
     async def edit_message(self, bot_manager: "BotManager", user_id: int, message_id: int) -> None:
-        self.sended_message = await bot_manager.telegram_interface.edit_message(
+        self.sended_message = await bot_manager.tg_interface.edit_message(
             message_id = message_id,
             user_id = user_id,
             text = self.text,
@@ -82,12 +82,12 @@ class EvaluatedMenuPhoto(EvaluatedMenu):
             raise ValueError("photo is None")
         super().__init__(photo=photo)
     async def send_message(self, bot_manager: "BotManager", user_id: int) -> None:
-        self.sended_message = (await bot_manager.telegram_interface.send_media_group(
+        self.sended_message = (await bot_manager.tg_interface.send_media_group(
             user_id = user_id,
             media_list = [self.photo]
         ))[0]
     async def edit_message(self, bot_manager: "BotManager", user_id: int, message_id: int) -> None:
-        self.sended_message = await bot_manager.telegram_interface.edit_message_media(
+        self.sended_message = await bot_manager.tg_interface.edit_message_media(
             user_id = user_id,
             message_id = message_id,
             photo = self.photo

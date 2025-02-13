@@ -13,19 +13,10 @@ class CallbackQueryManager:
         self.dummy_handle_func: Callable[[Update, CallbackContext], None]
         self.bot_manager: "BotManager" = bot_manager
         
-        async def callback_query_handler(update: Update, context: CallbackContext, **kwargs):
-            query = update.callback_query
-            user_id: int = query.from_user.id
-            await query.answer()
+        async def callback_query_handler(user_id: int, query_data: str):
             callback_data = self.bot_manager.user_data_manager.get(user_id).callback_data
-            if not callback_data:
-                await self.dummy_handle_func(update, context)
-                return
-            if query.data not in callback_data:
-                await self.dummy_handle_func(update, context)
-                return
+            data: CallbackData = callback_data[query_data]
             
-            data: CallbackData = callback_data[query.data]
             if data.action == "menu":
                 screen_name: str = data.args[0]
                 if not isinstance(screen_name, str):
@@ -39,15 +30,8 @@ class CallbackQueryManager:
                 function = data.args[0]
                 if not callable(function):
                     raise ValueError("Callback data has no function")
-                for kwarg in kwargs:
-                    if kwarg in data.kwargs:
-                        raise ValueError(
-f"FunctionCallbackData kwarg '{kwarg}' intersects with CallbackQueryHandler's kwarg.\
-Please change the name of your kwarg.")
                 await function(*data.args[1:], bot_manager=self.bot_manager,
-                    **kwargs, user_id=user_id, **data.kwargs)
-            elif data.action == "url":
-                url = data.kwargs["url"]
+                    user_id=user_id, **data.kwargs)
         self.callback_query_handler = callback_query_handler
     def get_handler(self) -> CallbackQueryHandler:
         return CallbackQueryHandler(self.callback_query_handler)
