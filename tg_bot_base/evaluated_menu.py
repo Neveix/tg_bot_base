@@ -1,8 +1,9 @@
-from typing import Any
+from typing import Any, TYPE_CHECKING
 from abc import ABC, abstractmethod
 from telegram import InputMediaPhoto, Message
 from .button_rows import ButtonRows
-from .bot_manager import BotManager
+if TYPE_CHECKING:
+    from .bot_manager import BotManager
 
 class EvaluatedMenuHasNotSendedMessage(Exception):
     pass
@@ -25,10 +26,10 @@ class EvaluatedMenu(ABC):
         result.sended_message = self.sended_message
         return result
     @abstractmethod
-    async def send_message(self, bot_manager: BotManager, user_id: int) -> None:
+    async def send_message(self, bot_manager: "BotManager", user_id: int) -> None:
         pass
     @abstractmethod
-    async def edit_message(self, bot_manager: BotManager, user_id: int, message_id: int) -> None:
+    async def edit_message(self, bot_manager: "BotManager", user_id: int, message_id: int) -> None:
         pass
     def __eq__(self, other: "EvaluatedMenu"):
         list_of_photos = [self.photo, other.photo]
@@ -52,14 +53,14 @@ class EvaluatedMenuDefault(EvaluatedMenu):
             raise ValueError("button_rows is None")
         super().__init__(text = text, button_rows = button_rows)
         self.parse_mode = parse_mode
-    async def send_message(self, bot_manager: BotManager, user_id: int) -> None:
+    async def send_message(self, bot_manager: "BotManager", user_id: int) -> None:
         self.sended_message = await bot_manager.telegram_interface.send_message(
             user_id = user_id,
             text = self.text,
             button_rows = self.button_rows,
             parse_mode = self.parse_mode
         )
-    async def edit_message(self, bot_manager: BotManager, user_id: int, message_id: int) -> None:
+    async def edit_message(self, bot_manager: "BotManager", user_id: int, message_id: int) -> None:
         self.sended_message = await bot_manager.telegram_interface.edit_message(
             message_id = message_id,
             user_id = user_id,
@@ -79,12 +80,12 @@ class EvaluatedMenuPhoto(EvaluatedMenu):
         if photo is None:
             raise ValueError("photo is None")
         super().__init__(photo=photo)
-    async def send_message(self, bot_manager: BotManager, user_id: int) -> None:
+    async def send_message(self, bot_manager: "BotManager", user_id: int) -> None:
         self.sended_message = (await bot_manager.telegram_interface.send_media_group(
             user_id = user_id,
             media_list = [self.photo]
         ))[0]
-    async def edit_message(self, bot_manager: BotManager, user_id: int, message_id: int) -> None:
+    async def edit_message(self, bot_manager: "BotManager", user_id: int, message_id: int) -> None:
         self.sended_message = await bot_manager.telegram_interface.edit_message_media(
             user_id = user_id,
             message_id = message_id,

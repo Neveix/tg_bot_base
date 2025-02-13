@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, Any, Callable, Coroutine
 from telegram import Update, Message
 from telegram.ext import CallbackContext
 from .callback_data import CallbackData
+from .evaluated_screen import EvaluatedScreen
 if TYPE_CHECKING:
     from .bot_manager import BotManager
 
@@ -13,7 +14,6 @@ class UserData:
         self.media_group_id: str = None
         self.after_input: Callable[[Message, BotManager, int, Update, CallbackContext], Coroutine[Any, Any, None]] | None = None
         self.directory_stack: list[str] = []
-        from .evaluated_screen import EvaluatedScreen
         self.screen: EvaluatedScreen = None
 
 class UserDataManager:

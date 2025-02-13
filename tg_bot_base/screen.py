@@ -1,7 +1,8 @@
-from typing import Callable, Iterable
-from .bot_manager import BotManager
+from typing import Callable, Iterable, TYPE_CHECKING
 from .menu import Menu
 from .evaluated_screen import EvaluatedScreen
+if TYPE_CHECKING:
+    from .bot_manager import BotManager
 
 class Screen:
     """Базовый класс для Статического и Динамического экранов. 
@@ -28,7 +29,7 @@ class StaticScreen(Screen):
         self.extend(*menus)
 class DynamicScreen(Screen):
     def __init__(self, 
-            function: Callable[[BotManager, int], Iterable[Menu]], 
+            function: Callable[["BotManager", int], Iterable[Menu]], 
             name: str | None = None):
         super().__init__(name)
         self.function = function

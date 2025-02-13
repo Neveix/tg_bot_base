@@ -1,16 +1,17 @@
-from typing import Callable
+from typing import Callable, TYPE_CHECKING
 from telegram.ext import CallbackContext, CallbackQueryHandler
 from telegram import Update
-from .bot_manager import BotManager
 from .callback_data import CallbackData
+if TYPE_CHECKING:
+    from .bot_manager import BotManager
 
 class CallbackQueryManager:
     """
 Класс обеспечивает работу обработчика колбэков нажатия на кнопки.
 """
-    def __init__(self, bot_manager: BotManager):
+    def __init__(self, bot_manager: "BotManager"):
         self.dummy_handle_func: Callable[[Update, CallbackContext], None]
-        self.bot_manager: BotManager = bot_manager
+        self.bot_manager: "BotManager" = bot_manager
         
         async def callback_query_handler(update: Update, context: CallbackContext):
             query = update.callback_query

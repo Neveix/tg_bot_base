@@ -1,11 +1,13 @@
-from typing import Callable
+from typing import Callable, TYPE_CHECKING
 from telegram import Update
 from telegram.ext import CallbackContext
+from telegram.ext import MessageHandler
+if TYPE_CHECKING:
+    from .bot_manager import BotManager
 
 class MessageManager:
     def __init__(self, bot_manager):
-        from .bot_manager import BotManager
-        self.bot_manager: BotManager = bot_manager
+        self.bot_manager: "BotManager" = bot_manager
         async def handle_message(update: Update, context: CallbackContext):
             # Очищаем экран
             self.bot_manager.user_screen_manager.clear_user_screen(update.message.from_user.id)
@@ -38,5 +40,4 @@ class MessageManager:
         user_data = self.bot_manager.user_data_manager.get(user_id)
         user_data.after_input = function
     def get_handler(self):
-        from telegram.ext import MessageHandler
         return MessageHandler(None, self.handle_message)

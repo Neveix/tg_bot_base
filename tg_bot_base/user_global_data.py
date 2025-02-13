@@ -1,5 +1,7 @@
 import sqlite3
 from typing import Any
+from json import dumps
+from json import loads
 
 class UserGlobalData:
     def __init__(self, path: str):
@@ -43,8 +45,6 @@ class UserGlobalData:
     def add_to_list(self, user_id: int, field: str, value: Any):
         cur = self.con.cursor() 
         selected = cur.execute(f"SELECT {field} FROM {self.table_name} WHERE user_id = {user_id}").fetchall()
-        from json import dumps
-        from json import loads
         if len(selected) == 0:
             data_list = [value]
             list_str = dumps(data_list)
@@ -62,8 +62,6 @@ class UserGlobalData:
     def remove_from_list(self, user_id: int, field: str, value: Any):
         cur = self.con.cursor() 
         row_count = cur.execute(f"SELECT count() FROM {self.table_name} WHERE user_id = {user_id}").fetchall()[0][0]
-        from json import dumps
-        from json import loads
         if row_count > 0:
             list_str = cur.execute(f"SELECT {field} FROM {self.table_name} WHERE user_id = {user_id}").fetchall()[0][0]
             loaded_list: list = loads(list_str)

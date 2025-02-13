@@ -1,7 +1,9 @@
-from typing import Any, Callable
+from typing import Any, Callable, TYPE_CHECKING
 from uuid import uuid4
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from .callback_data import CallbackData
+if TYPE_CHECKING:
+    from .bot_manager import BotManager
 
 class Button:
     def __init__(self, text: str | Callable, callback_data: CallbackData | Callable):
@@ -81,8 +83,7 @@ class ButtonRows:
     def to_inline_keyboard(self, 
             set_callback_data: bool=True, **kwargs) -> InlineKeyboardMarkup:
         reply_markup = []
-        from .bot_manager import BotManager
-        bot_manager: BotManager = kwargs.get("bot_manager")
+        bot_manager: "BotManager" = kwargs.get("bot_manager")
         user_id: int = kwargs.get("user_id")
         callback_data = {}
         for old_line in self.rows:

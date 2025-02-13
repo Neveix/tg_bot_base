@@ -1,13 +1,15 @@
 
-from .bot_manager import BotManager
+from typing import TYPE_CHECKING
 from .screen import Screen
+if TYPE_CHECKING:
+    from .bot_manager import BotManager
 
 class ScreenManager:
     """
 Класс для управления сохранёнными экранами
 Позволяет их добавлять, получать, получать копии.
 """
-    def __init__(self, bot_manager: BotManager):
+    def __init__(self, bot_manager: "BotManager"):
         self.bot_manager = bot_manager
         self.screen_dict = {}
     def append_screen(self, screen: Screen):
