@@ -1,10 +1,11 @@
-from typing import Sequence
-
+from typing import Sequence, TYPE_CHECKING
 from telegram import InputMedia
-from .bot_manager import BotManager
 from .button_rows import ButtonRows
+if TYPE_CHECKING:
+    from .bot_manager import BotManager
+
 class TelegramInterface:
-    def __init__(self, bot_manager: BotManager):
+    def __init__(self, bot_manager: "BotManager"):
         self.bot_manager = bot_manager
 
     async def send_message(self, user_id: int, text: str, 
