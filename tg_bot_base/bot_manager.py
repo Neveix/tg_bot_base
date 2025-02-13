@@ -1,18 +1,18 @@
+from .command_manager import CommandManager
+from .callback_query_manager import CallbackQueryManager
+from .user_data import UserDataManager
+from .message_manager import MessageManager
+from .screen_manager import ScreenManager
+from .user_screen_manager import UserScreenManager
+from .telegram_interface import TelegramInterface
 
 
 class BotManager:
     def __init__(self):
-        from . import CommandManager
         self.command_manager = CommandManager(self)
-        from . import CallbackQueryManager
         self.callback_query_manager = CallbackQueryManager(self)
-        from . import UserDataManager
         self.user_data_manager = UserDataManager(self)
-        from . import MessageManager
         self.message_manager = MessageManager(self)
-        from . import ScreenManager
         self.screen_manager = ScreenManager(self)
-        from . import UserScreenManager
         self.user_screen_manager = UserScreenManager(self)
-        from . import TelegramInterface
         self.telegram_interface = TelegramInterface(self)

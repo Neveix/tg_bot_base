@@ -1,21 +1,22 @@
-from typing import Any, Callable
-from .equitypes.input_media_photo import InputMediaPhoto
+from typing import Any, Callable, TYPE_CHECKING
+from telegram import InputMediaPhoto
 from .evaluated_menu import EvaluatedMenuDefault, EvaluatedMenuPhoto
 from .button_rows import ButtonRows
-from .bot_manager import BotManager
+if TYPE_CHECKING:
+    from .bot_manager import BotManager
 
 class Menu:
     def __init__(self, 
-            text: str | Callable[[BotManager, int], str] | None = None, 
-            button_rows: ButtonRows | Callable[[BotManager, int], ButtonRows] | None = None, 
-            photo: InputMediaPhoto | Callable[[BotManager, int], InputMediaPhoto] | None = None,
+            text: str | Callable[["BotManager", int], str] | None = None, 
+            button_rows: ButtonRows | Callable[["BotManager", int], ButtonRows] | None = None, 
+            photo: InputMediaPhoto | Callable[["BotManager", int], InputMediaPhoto] | None = None,
             parse_mode: str | None = None
         ):
         self.text: str | Callable | None = text
         self.buttons:    ButtonRows | Callable | None = button_rows
         self.photo: InputMediaPhoto | Callable | None = photo
         self.parse_mode = parse_mode
-        self.bot_manager: BotManager = None
+        self.bot_manager: "BotManager" = None
     def clone(self) -> "Menu":
         buttons_clone = []
         if isinstance(self.buttons, Callable):

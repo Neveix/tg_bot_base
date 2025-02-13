@@ -1,8 +1,11 @@
-from .bot_manager import BotManager
+from typing import TYPE_CHECKING
 from .evaluated_screen import EvaluatedScreen
+from .evaluated_menu import EvaluatedMenuHasNotSendedMessage
+if TYPE_CHECKING:
+    from .bot_manager import BotManager
 
 class UserScreenManager:
-    def __init__(self, bot_manager: BotManager):
+    def __init__(self, bot_manager: "BotManager"):
         self.bot_manager = bot_manager
     def get_user_screen(self, user_id: int) -> EvaluatedScreen | None:
         """If self.screen is not None, returns copy if list of Evaluated Menus."""
@@ -41,7 +44,6 @@ new_screen must be not None here"""
     async def edit_screen(self, user_id: int, new_screen: EvaluatedScreen):
         old_screen = self.get_user_screen(user_id)
         len_diff = len(old_screen.menus) - len(new_screen.menus)
-        from .evaluated_menu import EvaluatedMenuHasNotSendedMessage
         for i, new_menu in enumerate(new_screen.menus):
             old_menu = old_screen.menus[len_diff+i]
             if old_menu.sended_message is None:
