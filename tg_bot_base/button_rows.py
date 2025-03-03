@@ -1,6 +1,5 @@
 from typing import Any, Callable, TYPE_CHECKING
 from uuid import uuid4
-from .equitypes.inline_keyboard_markup import InlineKeyboardButton, InlineKeyboardMarkup
 from .callback_data import CallbackData
 if TYPE_CHECKING:
     from .bot_manager import BotManager
@@ -80,28 +79,28 @@ class ButtonRows:
                 other.rows
             )
         )
-    def to_inline_keyboard(self, 
-            set_callback_data: bool=True, **kwargs) -> InlineKeyboardMarkup:
-        reply_markup = []
-        bot_manager: "BotManager" = kwargs.get("bot_manager")
-        user_id: int = kwargs.get("user_id")
-        callback_data = {}
-        for old_line in self.rows:
-            line = []
-            for old_button in old_line.buttons:
-                old_button_dict = old_button.to_dict(**kwargs)
-                old_callback_data: CallbackData = old_button_dict["callback_data"]
-                uuid_code = str(uuid4())
-                callback_data[uuid_code] = old_callback_data
-                IKBkwargs = {
-                     "text" : old_button_dict["text"]
-                    ,"callback_data" : uuid_code
-                }
-                if old_callback_data.action == "url":
-                    IKBkwargs["url"] = old_callback_data.kwargs["url"]
-                line.append(InlineKeyboardButton(**IKBkwargs))
-            reply_markup.append(line)
-        if set_callback_data:
-            user_data = bot_manager.user_data_manager.get(user_id)
-            user_data.callback_data = callback_data
-        return InlineKeyboardMarkup(reply_markup)
+    # def to_inline_keyboard(self, 
+    #         set_callback_data: bool=True, **kwargs) -> InlineKeyboardMarkup:
+    #     reply_markup = []
+    #     bot_manager: "BotManager" = kwargs.get("bot_manager")
+    #     user_id: int = kwargs.get("user_id")
+    #     callback_data = {}
+    #     for old_line in self.rows:
+    #         line = []
+    #         for old_button in old_line.buttons:
+    #             old_button_dict = old_button.to_dict(**kwargs)
+    #             old_callback_data: CallbackData = old_button_dict["callback_data"]
+    #             uuid_code = str(uuid4())
+    #             callback_data[uuid_code] = old_callback_data
+    #             IKBkwargs = {
+    #                  "text" : old_button_dict["text"]
+    #                 ,"callback_data" : uuid_code
+    #             }
+    #             if old_callback_data.action == "url":
+    #                 IKBkwargs["url"] = old_callback_data.kwargs["url"]
+    #             line.append(InlineKeyboardButton(**IKBkwargs))
+    #         reply_markup.append(line)
+    #     if set_callback_data:
+    #         user_data = bot_manager.user_data_manager.get(user_id)
+    #         user_data.callback_data = callback_data
+    #     return InlineKeyboardMarkup(reply_markup)

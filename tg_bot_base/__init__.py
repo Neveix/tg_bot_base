@@ -37,7 +37,7 @@ from .evaluated_menu import EvaluatedMenu, EvaluatedMenuDefault, EvaluatedMenuPh
 from .screen_manager import ScreenManager
 from .evaluated_screen import EvaluatedScreen
 from .screen import Screen, StaticScreen, DynamicScreen
-from .user_screen_manager import UserScreenManager
+from .user_screen import UserScreenManager
 from .callback_query_manager import CallbackQueryManager
 from .button_rows import Button, ButtonRow, ButtonRows
 from .tg_interface import TgInterface

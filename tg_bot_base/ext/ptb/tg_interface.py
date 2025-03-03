@@ -1,8 +1,8 @@
 from typing import Sequence, TYPE_CHECKING
 from telegram import InputMedia
-from .button_rows import ButtonRows
+from ...button_rows import ButtonRows
 if TYPE_CHECKING:
-    from .bot_manager import BotManager
+    from ...bot_manager import BotManager
 
 class TelegramInterface:
     def __init__(self, bot_manager: "BotManager"):
