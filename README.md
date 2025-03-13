@@ -1,4 +1,4 @@
-# tg_bot_base
+  tg_bot_base
 tg_bot_base (далее - TBB) - это Python библиотека для упрощения создания телеграм ботов на базе Python-Telegram-Bot (далее - PTB).
 При этом планируется сделать TBB независимым от PTB.
 
@@ -30,10 +30,42 @@ TBB исключает такую возможность: Клавиатура, 
 
 ### Использование
 #### Краткий обзор
+##### BotManager
 Как было сказано ранее, в TBB "ключевой фигурой" является BotManager.
 Для использования и возможности детальной настройки вашего бота, рекомендуется создать подкласс от BotManager.
 
-TODO: репозиторий с базовым проектом
+##### Application & Bot
+Во время инициализации объектов PTB, таких как Application, Bot, следует также инициализировать BotManager. Далее присвойте атрибутам объекта bot_manager - bot'у и application'у соответствующие значения созданных вами объектов Bot и Application.
+
+bot пригодится для того, чтобы отправлять сообщения вручную и для того, чтобы TBB сам мог отправлять эти сообщения. Его методы, меняющие экран, используют атрибут bot у bot_manager.
+
+`from telegram.ext import Application, Bot
+from src.managers.bot_manager import BotManager
+
+application = Application().token(your_token).build()
+
+bot = application.bot
+
+bot_manager = BotManager()
+
+bot_manager.bot = bot
+bot_manager.application = application`
+
+##### Обработчики событий
+Добавьте обработчики событий в бот
+TODO: дописать
+
+##### Создание вашего первого экрана
+###### Создание файлов 
+В субдиректории src/screen/
+создайте файл __init__.py, main.py, welcome.py
+
+__init__.py пустой
+
+main.py будет нужен для подключения всех экранов из других файлов в нём
+
+welcome.py Нужен для вашего первого экрана.
+
 
 
 
