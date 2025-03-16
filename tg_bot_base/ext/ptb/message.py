@@ -1,21 +1,16 @@
-from abc import ABC, abstractmethod
+from tg_bot_base.message import Message as BaseMessage
 
-class Message(ABC):
+class Message(BaseMessage):
     def __init__(self): ...
 
-    @abstractmethod
     async def send(self, user_id: int): ...
     
-    @abstractmethod
     async def edit(self, user_id: int): ...
     
-    @abstractmethod
     async def delete(self, user_id: int): ...
     
-    @abstractmethod
     def __eq__(self, other: "Message"): ...
     
-    @abstractmethod
     def clone(self): ...
 
 

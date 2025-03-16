@@ -27,6 +27,7 @@ class StaticScreen(Screen):
     def __init__(self, *menus: Menu, name: str | None = None):
         super().__init__(name = name)
         self.extend(*menus)
+
 class DynamicScreen(Screen):
     def __init__(self, 
             function: Callable[["BotManager", int], Iterable[Menu]], 
