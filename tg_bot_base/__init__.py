@@ -34,7 +34,7 @@ from .saveable_photo_size import SaveablePhotoSize
 from .callback_data import CallbackData, FunctionCallbackData, MenuCallbackData, \
     StepBackCallbackData, URLCallbackData
 from .evaluated_menu import EvaluatedMenu, EvaluatedMenuDefault, EvaluatedMenuPhoto
-from .screen_manager import ScreenManager
+from .old_screen_manager import ScreenManager
 from .evaluated_screen import EvaluatedScreen
 from .screen import Screen, StaticScreen, DynamicScreen
 from .user_screen import UserScreenManager

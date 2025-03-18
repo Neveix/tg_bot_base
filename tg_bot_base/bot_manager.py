@@ -1,18 +1,54 @@
-
-from .callback_query_manager import CallbackQueryManager
+from abc import abstractmethod, ABC
+from tg_bot_base import CallbackData
+from .callback_data import GoToScreen, RunFunc, StepBack
 from .user_data import UserDataManager
-from .message_manager import MessageManager
-from .screen_manager import ScreenManager
-from .user_screen import UserScreenManager
+from .user_screen import UserScreen
 
 
-class BotManager:
+class BotManager(ABC):
     def __init__(self):
-        self.callback_query_manager = CallbackQueryManager(self)
-        self.user_data_manager = UserDataManager(self)
-        self.message_manager = MessageManager(self)
-        self.screen_manager = ScreenManager(self)
-        self.user_screen_manager = UserScreenManager(self)
+        self.user_data: UserDataManager = None
+        self.screen: UserScreen = None
         
+    @staticmethod
+    def build():
+        self = BotManager()
+        user_data = UserDataManager()
+        screen = UserScreen()
+        self.user_data = user_data
+        self.screen = screen
+
+    @abstractmethod
+    def get_message_handler(self): ...
+
+    async def handle_message(self, user_id: int):
+        user_data = self.user_data.get(user_id)
+        self.screen.clear(user_id)
+        
+        after_input = user_data.after_input
+        if after_input is not None:
+            user_data.after_input = None
+            await after_input(user_id=user_id)
+            # TODO: Добавить kwargs и тип FuncData
+
+    @abstractmethod
+    def get_callback_query_handler(self): ...
+    
+    async def _handle_callback_query(self, user_id: int, query_data: str):
+        callback_data = self.user_data.get(user_id).callback_data
+        data: CallbackData = callback_data[query_data]
+        
+        if isinstance(data, GoToScreen):
+            await self.screen.set_by_name(user_id, data.screen_name)
+        
+        elif isinstance(data, StepBack):
+            await self.screen.step_back(user_id)
+            
+        elif isinstance(data, RunFunc):
+            await data.function(user_id=user_id, **data.kwargs)
+            
+    
+
+
     
     

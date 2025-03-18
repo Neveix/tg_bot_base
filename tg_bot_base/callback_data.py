@@ -1,37 +1,50 @@
 from typing import Callable
+from abc import ABC
 
-class CallbackData:
-    def __init__(self, action: str, *args, **kwargs):
-        """base for several classes, deprecated to use manually"""
-        self.action = action
-        self.args = args
+class CallbackData(ABC):
+    pass 
+
+class RunFunc(CallbackData):
+    def __init__(self, function: Callable, **kwargs):
+        """Использование:  
+            function - Функция для выполнения при нажатии кнопки  
+            **kwargs - keyword аргументы функции
+        """
+        if not isinstance(function, Callable):
+            raise ValueError(f"{function=} is not Callable")
+        self.function = function
         self.kwargs = kwargs
-    def clone(self) -> "CallbackData":
-        return CallbackData(
-            action = self.action,
-            args = self.args,
-            kwargs = self.kwargs
-        )
-    def __eq__(self, other: "CallbackData"):
-        return (
-            self.action == other.action and \
-            self.args == other.args and \
-            self.kwargs == other.kwargs
-        )
+    
+    def clone(self):
+        return RunFunc(self.function, **self.kwargs)
+    
+    def __eq__(self, other: "RunFunc"):
+        return isinstance(other, RunFunc) and \
+            self.function == other.function and self.kwargs == other.kwargs
+        
 
-class FunctionCallbackData(CallbackData):
-    def __init__(self, function: Callable, *args, **kwargs):
-        super().__init__('function', function, *args, **kwargs)
+class GoToScreen(CallbackData):
+    def __init__(self, screen_name: str):
+        if not isinstance(screen_name, str):
+            raise ValueError(f"{screen_name=} is not str")
+        self.screen_name = screen_name
+    
+    def clone(self):
+        return GoToScreen(self.screen_name)
+    
+    def __eq__(self, other: "GoToScreen"):
+        return isinstance(other, GoToScreen) and \
+            self.screen_name == other.screen_name
 
-class MenuCallbackData(CallbackData):
-    def __init__(self, menu: str, *args, **kwargs):
-        super().__init__('menu', menu, *args, **kwargs)
+class StepBack(CallbackData):
+    pass
 
-class StepBackCallbackData(CallbackData):
-    def __init__(self):
-        "init without args"
-        super().__init__('step_back')
+    def clone(self):
+        return StepBack()
+    
+    def __eq__(self, other: "StepBack"):
+        return isinstance(other, StepBack)
 
-class URLCallbackData(CallbackData):
-    def __init__(self, url: str):
-        super().__init__('url', url=url)
+# class URLCallbackData(CallbackData):
+#     def __init__(self, url: str):
+#         self.url = url

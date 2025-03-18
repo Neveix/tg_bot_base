@@ -1,44 +1,44 @@
+from abc import ABC, abstractmethod
 from typing import Callable, Iterable, TYPE_CHECKING
-from .menu import Menu
-from .evaluated_screen import EvaluatedScreen
-if TYPE_CHECKING:
-    from .bot_manager import BotManager
+from .message import Message
 
-class Screen:
-    """Базовый класс для Статического и Динамического экранов. 
-Его использование не предполагается"""
-    def __init__(self, name: str | None = None):
+class Screen(ABC):
+    def __init__(self, name: str = None):
         self.name = name
-        self.menus: list[Menu] = []
-    def append(self, menu: Menu):
-        if not isinstance(menu, Menu):
-            raise ValueError(f"{menu=} is not of type {Menu}")
-        self.menus.append(menu)
-    def extend(self, *menus: Menu):
-        for menu in menus:
-            self.append(menu)
-    def to_evaluated_screen(self, **kwargs) -> EvaluatedScreen:
-        return EvaluatedScreen(
-            *[menu.to_evaluated_menu(**kwargs) for menu in self.menus]
-        )
+        self.messages: list[Message] = []
+    
+    def append(self, message: Message):
+        if not isinstance(message, Message):
+            raise ValueError(f"{message=} is not Message")
+        self.messages.append(message)
+    
+    def extend(self, messages: list[Message]):
+        for message in messages:
+            if not isinstance(message, Message):
+                raise ValueError(f"{message=} is not Message")
+        self.messages.extend(messages)
+    
+    @abstractmethod
+    def evaluate(self): ...
 
 class StaticScreen(Screen):
-    """Статический экран с фиксированным количеством Меню"""
-    def __init__(self, *menus: Menu, name: str | None = None):
+    def __init__(self, name: str, *messages: Message):
         super().__init__(name = name)
-        self.extend(*menus)
+        self.extend(messages)
+    
+    def evaluate(self): ...
 
 class DynamicScreen(Screen):
-    def __init__(self, 
-            function: Callable[["BotManager", int], Iterable[Menu]], 
-            name: str | None = None):
+    def __init__(self, name: str, 
+            function: Callable[[int], Iterable[Message]]):
         super().__init__(name)
         self.function = function
-    def to_evaluated_screen(self, **kwargs):
-        self.menus = self.function(**kwargs)
+    def evaluate(self, **kwargs):
+        self.messages = self.function(**kwargs)
         if not isinstance(self.menus, Iterable):
-            raise ValueError(f"Dynamic Screen function output = {self.menus} is not Iterable")
-        for menu in self.menus:
-            if not isinstance(menu, Menu):
-                raise ValueError(f"Dynamic Screen function output contains {menu} of wrong type, expected Menu")
-        return super().to_evaluated_screen(**kwargs)
+            raise ValueError(
+f"Dynamic Screen function output = {self.menus} is not Iterable")
+        for message in self.messages:
+            if not isinstance(message, Message):
+                raise ValueError(
+f"Dynamic Screen function output contains {message} of wrong type, expected Message")
