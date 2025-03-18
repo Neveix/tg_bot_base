@@ -1,6 +1,5 @@
 from abc import abstractmethod, ABC
-from tg_bot_base import CallbackData
-from .callback_data import GoToScreen, RunFunc, StepBack
+from .callback_data import GoToScreen, RunFunc, StepBack, CallbackData
 from .user_data import UserDataManager
 from .user_screen import UserScreen
 
@@ -10,13 +9,12 @@ class BotManager(ABC):
         self.user_data: UserDataManager = None
         self.screen: UserScreen = None
         
-    @staticmethod
-    def build():
-        self = BotManager()
+    def build(self):
         user_data = UserDataManager()
-        screen = UserScreen()
+        screen = UserScreen(user_data)
         self.user_data = user_data
         self.screen = screen
+        return self
 
     @abstractmethod
     def get_message_handler(self): ...
@@ -36,7 +34,9 @@ class BotManager(ABC):
     
     async def _handle_callback_query(self, user_id: int, query_data: str):
         callback_data = self.user_data.get(user_id).callback_data
-        data: CallbackData = callback_data[query_data]
+        data: CallbackData = callback_data.get(query_data)
+        if data is None:
+            return
         
         if isinstance(data, GoToScreen):
             await self.screen.set_by_name(user_id, data.screen_name)

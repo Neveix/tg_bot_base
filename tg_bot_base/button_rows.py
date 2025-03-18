@@ -1,3 +1,5 @@
+from abc import abstractmethod
+from uuid import uuid4
 from .callback_data import CallbackData
 
 class Button:
@@ -14,7 +16,22 @@ class Button:
 
     def __eq__(self, other: "Button"):
         return (self.text == other.text and \
-            self.callback_data == other.callback_data)  
+            self.callback_data == other.callback_data)
+        
+    def prepare(self) -> "PreparedButton":
+        return PreparedButton(self.text, str(uuid4()))
+    
+class PreparedButton(Button):
+    def __init__(self, text: str, callback_data: str):
+        if not isinstance(text, str):
+            raise ValueError(f"{text=} expected str")
+        if not isinstance(callback_data, str):
+            raise ValueError(f"{callback_data=} expected str")
+        self.text = text
+        self.callback_data = callback_data
+    
+    def clone(self) -> "PreparedButton":
+        return PreparedButton(self.text, self.callback_data)
 
 class ButtonRow:
     def __init__(self, *buttons: Button):
@@ -44,6 +61,7 @@ class ButtonRows:
     def __init__(self, *rows: ButtonRow):
         self.rows: list[ButtonRow] = []
         self.extend(rows)
+        self.is_prepared = False
     
     def extend(self, rows: list[ButtonRow]):
         self.rows.extend(rows)
@@ -52,9 +70,25 @@ class ButtonRows:
         self.rows.append(row)
     
     def clone(self) -> "ButtonRows":
-        return ButtonRows().\
-            extend([row.clone() for row in self.rows])
+        return ButtonRows(*[row.clone() for row in self.rows])
     
     def __eq__(self, other: "ButtonRows"):
         return all([row1 == row2
             for row1, row2 in zip(self.rows,other.rows)])
+    
+    @abstractmethod
+    def to_reply_markup(self): ...
+    
+    def prepare(self) -> dict[str, CallbackData]:
+        print("button_rows.prepare called")
+        self.is_prepared = True
+        callback_data = {}
+        for row in self.rows:
+            new_buttons = []
+            for button in row.buttons:
+                print(f"{button=}")
+                prepared = button.prepare()
+                callback_data[prepared.callback_data] = button.callback_data
+                new_buttons.append(prepared)
+            row.buttons = new_buttons
+        return callback_data

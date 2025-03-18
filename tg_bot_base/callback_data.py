@@ -1,8 +1,9 @@
 from typing import Callable
-from abc import ABC
+from abc import ABC, abstractmethod
 
 class CallbackData(ABC):
-    pass 
+    @abstractmethod
+    def clone(self): ...
 
 class RunFunc(CallbackData):
     def __init__(self, function: Callable, **kwargs):
