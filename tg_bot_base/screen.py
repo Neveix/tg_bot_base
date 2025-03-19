@@ -31,7 +31,6 @@ class StaticScreen(Screen):
         self.extend(messages)
     
     def evaluate(self):
-        print(f"Screen {self.name} evaluate called")
         items = []
         messages = []
         for message in self.messages:

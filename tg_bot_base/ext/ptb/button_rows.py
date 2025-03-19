@@ -33,7 +33,6 @@ class PreparedButton(BasePreparedButton):
 
 class Button(BaseButton):
     def prepare(self) -> "PreparedButton":
-        print("called prepare from ext!!!")
         return PreparedButton(self.text, str(uuid4()))
     
     def clone(self) -> "Button":

@@ -80,13 +80,11 @@ class ButtonRows:
     def to_reply_markup(self): ...
     
     def prepare(self) -> dict[str, CallbackData]:
-        print("button_rows.prepare called")
         self.is_prepared = True
         callback_data = {}
         for row in self.rows:
             new_buttons = []
             for button in row.buttons:
-                print(f"{button=}")
                 prepared = button.prepare()
                 callback_data[prepared.callback_data] = button.callback_data
                 new_buttons.append(prepared)

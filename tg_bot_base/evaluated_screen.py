@@ -5,7 +5,7 @@ class EvaluatedScreen:
         self.messages: list[Message] = []
         self.extend(messages)
     
-    def extend(self, messages: Message):
+    def extend(self, messages: list[Message]):
         self.messages.extend(messages)
     
     def clone(self) -> "EvaluatedScreen":
