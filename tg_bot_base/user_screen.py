@@ -32,6 +32,7 @@ class UserScreen(ABC):
         evaluated_screen, callback_data_dict = screen.evaluate()
         
         user_data.callback_data = callback_data_dict
+        # TODO: переместить callback_data в set или ещё куда-то
         
         await self.set(user_id, evaluated_screen)
     

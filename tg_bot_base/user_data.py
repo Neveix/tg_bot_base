@@ -1,7 +1,4 @@
-from typing import Any, Callable, Coroutine
-
-from telegram import Update, Message
-from telegram.ext import CallbackContext
+from .func_data import FuncData
 from .callback_data import CallbackData
 from .evaluated_screen import EvaluatedScreen
 
@@ -10,7 +7,7 @@ class UserData:
         self.user_id = user_id
         self.callback_data: dict[str, CallbackData] = {}
         self.media_group_id: str = None
-        self.after_input: Callable[[Message, int, Update, CallbackContext], Coroutine[Any, Any, None]] | None = None
+        self.after_input: FuncData = None
         self.directory_stack: list[str] = []
         self.screen: EvaluatedScreen = None
 

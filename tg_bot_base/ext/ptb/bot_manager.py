@@ -1,5 +1,5 @@
 from telegram import Update
-from telegram.ext import Application, CallbackQueryHandler
+from telegram.ext import Application, CallbackQueryHandler, MessageHandler
 from ...user_data import UserDataManager
 from ...bot_manager import BotManager as BaseBotManager
 from .user_screen import UserScreen
@@ -27,4 +27,9 @@ class BotManager(BaseBotManager):
             
 
     def get_message_handler(self):
-        pass
+        async def callback(update: Update, _):
+            user_id = update.message.from_user.id
+            await self._handle_message(user_id, update=update
+                , message=update.message)
+            
+        return MessageHandler(None, callback)

@@ -1,8 +1,8 @@
 from abc import abstractmethod, ABC
+from .func_data import FuncData
 from .callback_data import GoToScreen, RunFunc, StepBack, CallbackData
 from .user_data import UserDataManager
 from .user_screen import UserScreen
-
 
 class BotManager(ABC):
     def __init__(self):
@@ -19,15 +19,18 @@ class BotManager(ABC):
     @abstractmethod
     def get_message_handler(self): ...
 
-    async def handle_message(self, user_id: int):
+    async def _handle_message(self, user_id: int, **kwargs):
         user_data = self.user_data.get(user_id)
         self.screen.clear(user_id)
         
-        after_input = user_data.after_input
-        if after_input is not None:
+        after_input: FuncData = user_data.after_input
+        if after_input is None:
+            return
+        
+        if user_data.after_input.one_time:
             user_data.after_input = None
-            await after_input(user_id=user_id)
-            # TODO: Добавить kwargs и тип FuncData
+        await after_input.function(user_id=user_id
+            , **after_input.kwargs, **kwargs)
 
     @abstractmethod
     def get_callback_query_handler(self): ...
@@ -46,8 +49,6 @@ class BotManager(ABC):
             
         elif isinstance(data, RunFunc):
             await data.function(user_id=user_id, **data.kwargs)
-            
-    
 
 
     
