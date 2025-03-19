@@ -26,8 +26,8 @@ class UserScreen(BaseUserScreen):
             new_screen.extend([old_message])
         
         for message in send:
-            tasks.append(
-                send_message(message, user_id, self.bot, new_screen))
+            new_message = await message.send(user_id, self.bot)
+            new_screen.extend([new_message])
             
         await gather(*tasks)
         
@@ -36,8 +36,3 @@ class UserScreen(BaseUserScreen):
     async def _send_screen(self, user_id: int, new_screen: EvaluatedScreen):
         for message in new_screen.messages:
             await message.send(user_id, self.bot)
-
-async def send_message(message: Message, user_id: int
-        , bot: Bot, new_screen: EvaluatedScreen):
-    new_message = await message.send(user_id, bot)
-    new_screen.extend([new_message])

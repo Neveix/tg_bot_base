@@ -73,13 +73,14 @@ class SentSimpleMessage(BaseSentSimpleMessage, HasButtonRows):
     def change(self, message: SimpleMessage):
         self.text = message.text
         self.button_rows = message.button_rows
+        
     
     async def edit(self, bot: Bot):
         orig = self.ptb_message
         reply_markup = self.get_reply_markup()
         if orig.text == self.text and orig.reply_markup == reply_markup:
             return
-        await bot.edit_message_text(
+        self.ptb_message = await bot.edit_message_text(
             text = self.text,
             reply_markup = reply_markup,
             chat_id=self.ptb_message.chat_id,
