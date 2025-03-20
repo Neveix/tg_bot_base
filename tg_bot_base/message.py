@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 from .callback_data import CallbackData
-
 from .button_rows import ButtonRows
 
 class SentMessage(ABC):
@@ -10,7 +9,7 @@ class SentMessage(ABC):
     async def change(self, message: "Message"): ...
     
     @abstractmethod
-    async def edit(self): ...
+    async def edit(self) -> "SentMessage": ...
     
     @abstractmethod
     async def delete(self): ...
@@ -23,7 +22,7 @@ class SentMessage(ABC):
 
 class Message(ABC):
     @abstractmethod
-    async def send(self, user_id: int): ...
+    async def send(self, user_id: int) -> SentMessage: ...
     
     @abstractmethod
     def __eq__(self, other: "Message"): ...
@@ -31,11 +30,10 @@ class Message(ABC):
     @abstractmethod
     def clone(self) -> "Message": ...
 
-    def prepare(self) -> dict[str, CallbackData]:
-        if self.button_rows is not None:
-            self.button_rows: ButtonRows
-            return self.button_rows.prepare()
-        return {}
+    def get_callback_data(self) -> list[CallbackData]:
+        if self.button_rows is None:
+            return []
+        return self.button_rows.get_callback_data()
 
 class AudioMessage(Message):
     def __init__(self, audio: Any, caption: str, button_rows: ButtonRows = None):

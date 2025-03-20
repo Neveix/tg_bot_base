@@ -21,11 +21,13 @@ class BotManager(ABC):
 
     async def _handle_message(self, user_id: int, **kwargs):
         user_data = self.user_data.get(user_id)
-        self.screen.clear(user_id)
+        await self.delete_message(**kwargs)
         
         after_input: FuncData = user_data.after_input
         if after_input is None:
             return
+        
+        await self.screen.clear(user_id)
         
         if user_data.after_input.one_time:
             user_data.after_input = None
@@ -35,9 +37,12 @@ class BotManager(ABC):
     @abstractmethod
     def get_callback_query_handler(self): ...
     
+    @abstractmethod
+    async def delete_message(self, message): ...
+    
     async def _handle_callback_query(self, user_id: int, query_data: str):
-        callback_data = self.user_data.get(user_id).callback_data
-        data: CallbackData = callback_data.get(query_data)
+        mapping = self.user_data.get(user_id).callback_mapping
+        data: CallbackData = mapping.get_by_uuid(query_data)
         if data is None:
             return
         

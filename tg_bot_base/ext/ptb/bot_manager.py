@@ -1,4 +1,5 @@
 from telegram import Update
+from telegram import Message as TgMessage
 from telegram.ext import Application, CallbackQueryHandler, MessageHandler
 from ...user_data import UserDataManager
 from ...bot_manager import BotManager as BaseBotManager
@@ -24,7 +25,6 @@ class BotManager(BaseBotManager):
             await self._handle_callback_query(user_id, query_data)
             await update.callback_query.answer()
         return CallbackQueryHandler(callback)
-            
 
     def get_message_handler(self):
         async def callback(update: Update, _):
@@ -33,3 +33,6 @@ class BotManager(BaseBotManager):
                 , message=update.message)
             
         return MessageHandler(None, callback)
+    
+    async def delete_message(self, message: TgMessage, **kwargs):
+        await message.delete()

@@ -5,6 +5,8 @@ from typing import Any, Self
 from telegram import Bot, InputFile
 from telegram import Message as PTBMessage
 import telegram
+
+from ...callback_data import CallbackDataMapping
 from ...button_rows import ButtonRows
 from ...message import Message          as BaseMessage
 from ...message import AudioMessage     as BaseAudioMessage
@@ -14,7 +16,7 @@ from ...message import SimpleMessage    as BaseSimpleMessage
 from ...message import VideoNoteMessage as BaseVideoNoteMessage
 from ...message import PhotoMessage     as BasePhotoMessage
 
-from ...message import Message              as BaseSentMessage
+from ...message import SentMessage          as BaseSentMessage
 from ...message import SentAudioMessage     as BaseSentAudioMessage
 from ...message import SentVideoMessage     as BaseSentVideoMessage
 from ...message import SentDocumentMessage  as BaseSentDocumentMessage
@@ -23,9 +25,9 @@ from ...message import SentVideoNoteMessage as BaseSentVideoNoteMessage
 from ...message import SentPhotoMessage     as BaseSentPhotoMessage
 
 class HasButtonRows(ABC):
-    def get_reply_markup(self):
+    def get_reply_markup(self, mapping: CallbackDataMapping):
         if self.button_rows:
-            return self.button_rows.to_reply_markup()
+            return self.button_rows.to_reply_markup(mapping)
         return None
 
 class AudioMessage(BaseAudioMessage, HasButtonRows):
@@ -38,9 +40,9 @@ class AudioMessage(BaseAudioMessage, HasButtonRows):
 class DocumentMessage(BaseDocumentMessage): ...
 
 class SimpleMessage(BaseSimpleMessage, HasButtonRows):
-    async def send(self, user_id: int, bot: Bot):
+    async def send(self, user_id: int, bot: Bot, mapping: CallbackDataMapping):
         ptb_message = await bot.send_message(user_id, self.text
-            , reply_markup=self.get_reply_markup())
+            , reply_markup=self.get_reply_markup(mapping))
         return SentSimpleMessage(
             self.text, self.button_rows, ptb_message)
     
@@ -75,9 +77,9 @@ class SentSimpleMessage(BaseSentSimpleMessage, HasButtonRows):
         self.button_rows = message.button_rows
         
     
-    async def edit(self, bot: Bot):
+    async def edit(self, bot: Bot, mapping: CallbackDataMapping):
         orig = self.ptb_message
-        reply_markup = self.get_reply_markup()
+        reply_markup = self.get_reply_markup(mapping)
         if orig.text == self.text and orig.reply_markup == reply_markup:
             return
         self.ptb_message = await bot.edit_message_text(

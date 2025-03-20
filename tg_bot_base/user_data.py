@@ -1,15 +1,15 @@
 from .func_data import FuncData
-from .callback_data import CallbackData
-from .evaluated_screen import EvaluatedScreen
+from .callback_data import CallbackData, CallbackDataMapping
+from .screen import SentScreen
 
 class UserData:
     def __init__(self, user_id: int):
         self.user_id = user_id
-        self.callback_data: dict[str, CallbackData] = {}
+        self.callback_mapping = CallbackDataMapping()
         self.media_group_id: str = None
         self.after_input: FuncData = None
         self.directory_stack: list[str] = []
-        self.screen: EvaluatedScreen = None
+        self.screen: SentScreen = None
 
 class UserDataManager:
     def __init__(self):

@@ -1,26 +1,28 @@
 from abc import ABC, abstractmethod
 from email import message
 from typing import Type
-from .screen import Screen
+from uuid import uuid4
+
+from .callback_data import CallbackDataMapping
+from .screen import ProtoScreen, SentScreen
 from .message import Message, SentMessage
 from .user_data import UserDataManager
-from .evaluated_screen import EvaluatedScreen
+from .screen import ReadyScreen
 
 class UserScreen(ABC):
     def __init__(self, user_data: UserDataManager):
         self.user_data = user_data
-        self.screen_dict: dict[str, Screen] = {}
+        self.screen_dict: dict[str, ProtoScreen] = {}
     
-    def append_screen(self, screen: Screen):
+    def append_screen(self, screen: ProtoScreen):
         self.screen_dict[screen.name] = screen
     
-    def extend_screen(self, screens: list[Screen]):
+    def extend_screen(self, screens: list[ProtoScreen]):
         for screen in screens:
             self.append_screen(screen)
     
-    def clear(self, user_id: int):
-        user_data = self.user_data.get(user_id)
-        user_data.screen = None
+    @abstractmethod
+    async def clear(self, user_id: int): ...
     
     async def set_by_name(self, user_id: int, screen_name: str):
         user_data = self.user_data.get(user_id)
@@ -29,10 +31,7 @@ class UserScreen(ABC):
             directory_stack.append(screen_name)
         
         screen = self.screen_dict.get(screen_name)
-        evaluated_screen, callback_data_dict = screen.evaluate()
-        
-        user_data.callback_data = callback_data_dict
-        # TODO: переместить callback_data в set или ещё куда-то
+        evaluated_screen = screen.evaluate()
         
         await self.set(user_id, evaluated_screen)
     
@@ -48,22 +47,28 @@ class UserScreen(ABC):
         directory_stack.pop()
         await self.set_by_name(user_id, directory_stack[-1])
     
-    def _get(self, user_id: int) -> EvaluatedScreen | None:
-        screen: EvaluatedScreen = self.user_data.get(user_id).screen
+    def _get(self, user_id: int) -> ReadyScreen | None:
+        screen = self.user_data.get(user_id).screen
         if screen is None:
             return None
         return screen.clone()
     
-    @abstractmethod
-    async def _send_screen(self, user_id: int, new_screen: EvaluatedScreen):
-        ...
+    def _map_callback_data(self, user_id: int, screen: ReadyScreen
+            ) -> CallbackDataMapping:
+        mapping = CallbackDataMapping()
+        callback_data_list = screen.get_callback_data()
+        for callback_data in callback_data_list:
+            uuid = str(uuid4())
+            mapping.add(callback_data, uuid)
+        self.user_data.get(user_id).callback_mapping = mapping
+        return mapping
         
     @abstractmethod
-    async def set(self, user_id: int, new_screen: EvaluatedScreen):
+    async def set(self, user_id: int, new_screen: ReadyScreen):
         ...
     
     @staticmethod
-    def calc_screen_difference(screen1: EvaluatedScreen, screen2: EvaluatedScreen):
+    def calc_screen_difference(screen1: SentScreen, screen2: ReadyScreen):
         messages1 = []
         if screen1:
             messages1 = screen1.messages
