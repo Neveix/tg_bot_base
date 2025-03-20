@@ -8,6 +8,7 @@ class BotManager(ABC):
     def __init__(self):
         self.user_data: UserDataManager = None
         self.screen: UserScreen = None
+        self.config_delete_old_messages = True
         
     def build(self):
         user_data = UserDataManager()
@@ -21,13 +22,14 @@ class BotManager(ABC):
 
     async def _handle_message(self, user_id: int, **kwargs):
         user_data = self.user_data.get(user_id)
-        await self.delete_message(**kwargs)
+        if self.config_delete_old_messages:
+            await self.delete_message(**kwargs)
         
         after_input: FuncData = user_data.after_input
         if after_input is None:
             return
         
-        await self.screen.clear(user_id)
+        await self.screen.clear(user_id, self.config_delete_old_messages)
         
         if user_data.after_input.one_time:
             user_data.after_input = None

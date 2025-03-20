@@ -11,10 +11,10 @@ class UserScreen(BaseUserScreen):
         super().__init__(user_data)
         self.bot = bot
     
-    async def clear(self, user_id: int):
+    async def clear(self, user_id: int, delete_messages: bool):
         user_data = self.user_data.get(user_id)
         screen = user_data.screen
-        if screen:
+        if screen and delete_messages:
             await screen.delete(self.bot)
         user_data.screen = None
     
@@ -35,7 +35,6 @@ class UserScreen(BaseUserScreen):
             new_screen.extend([old_message])
         
         for message in send:
-            print(f"попытка отправить сообщение: {message.text}")
             new_message = await message.send(user_id, self.bot, mapping)
             new_screen.extend([new_message])
             

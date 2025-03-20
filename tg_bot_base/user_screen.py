@@ -22,7 +22,7 @@ class UserScreen(ABC):
             self.append_screen(screen)
     
     @abstractmethod
-    async def clear(self, user_id: int): ...
+    async def clear(self, user_id: int, delete_messages: bool): ...
     
     async def set_by_name(self, user_id: int, screen_name: str):
         user_data = self.user_data.get(user_id)
