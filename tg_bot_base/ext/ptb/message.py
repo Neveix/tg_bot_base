@@ -66,6 +66,8 @@ class SentAudioMessage(BaseSentAudioMessage, HasButtonRows): ...
 
 class SentDocumentMessage(BaseSentDocumentMessage, HasButtonRows): ...
 
+# TODO: Добавить поддержку других типов сообщений
+
 class SentSimpleMessage(BaseSentSimpleMessage, HasButtonRows):
     def __init__(self, text: str, button_rows: ButtonRows
         , ptb_message: PTBMessage):
@@ -75,7 +77,6 @@ class SentSimpleMessage(BaseSentSimpleMessage, HasButtonRows):
     def change(self, message: SimpleMessage):
         self.text = message.text
         self.button_rows = message.button_rows
-        
     
     async def edit(self, bot: Bot, mapping: CallbackDataMapping):
         orig = self.ptb_message
