@@ -17,7 +17,7 @@ if any("ptb" in arg for arg in sys.argv):
 
 setup(
    name="tg_bot_base",
-   version="1.4.1",
+   version="1.4.2",
    description="It is useful for creating simple telegram bots",
    author="Neveix",
    author_email="neveix2003@mail.ru",
