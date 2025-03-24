@@ -8,11 +8,11 @@ extras_require = {
    ],}
 
 package_data = {
-   "my_library": ["*.py"],
+   "tg_bot_base": ["*.py"],
 }
 
 if any("ptb" in arg for arg in sys.argv):
-   package_data["my_library"].extend(["ext/*.py", "ext/ptb/*.py"])
+   package_data["tg_bot_base"].extend(["ext/*.py", "ext/ptb/*.py"])
 
 
 setup(
