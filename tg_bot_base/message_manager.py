@@ -1,7 +1,7 @@
 from typing import Callable, TYPE_CHECKING
 from telegram import Update
-from telegram.ext import CallbackContext
-from telegram.ext import MessageHandler
+from telegram.ext import MessageHandler, CallbackContext
+from telegram.ext import filters
 if TYPE_CHECKING:
     from .bot_manager import BotManager
 
@@ -40,4 +40,4 @@ class MessageManager:
         user_data = self.bot_manager.user_data_manager.get(user_id)
         user_data.after_input = function
     def get_handler(self):
-        return MessageHandler(None, self.handle_message)
+        return MessageHandler(~filters.COMMAND, self.handle_message)
