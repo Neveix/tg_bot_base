@@ -11,13 +11,6 @@ class BotManager(BaseBotManager):
         self.bot = application.bot
         self.application = application
     
-    def build(self):
-        user_data = UserDataManager()
-        screen = UserScreen(user_data, self.bot)
-        self.user_data = user_data
-        self.screen = screen
-        return self
-    
     def get_callback_query_handler(self):
         async def callback(update: Update, _):
             user_id = update.callback_query.from_user.id

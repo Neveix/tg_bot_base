@@ -3,13 +3,14 @@ from uuid import uuid4
 from .callback_data import CallbackData
 
 class Button:
-    def __init__(self, text: str, callback_data: CallbackData):
-        if not isinstance(text, str) or len(text) < 1:
-            raise ValueError(f"{text=} is not str or its length is wrong")
-        if not isinstance(callback_data, CallbackData):
-            raise ValueError(f"{callback_data=} is not CallbackData")
+    def __init__(self, text: str, callback_data: CallbackData, url: str = None):
+        assert isinstance(text, str) and len(text) < 1
+        assert isinstance(callback_data, CallbackData)
+        assert not url or url and isinstance(url, str)
+        
         self.text = text
         self.callback_data = callback_data
+        self.url = url
     
     def clone(self) -> "Button":
         return Button(self.text, self.callback_data.clone())

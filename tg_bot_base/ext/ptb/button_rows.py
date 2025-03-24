@@ -26,7 +26,7 @@ class Button(BaseButton):
             ) -> InlineKeyboardButton:
         uuid = mapping.get_by_callback(self.callback_data)
         return InlineKeyboardButton(self.text
-            , callback_data = uuid)
+            , callback_data = uuid, url = self.url)
     
     def clone(self) -> "Button":
         return Button(self.text, self.callback_data.clone())

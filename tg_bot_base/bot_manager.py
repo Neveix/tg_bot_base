@@ -6,22 +6,25 @@ from .user_screen import UserScreen
 
 class BotManager(ABC):
     def __init__(self):
-        self.user_data: UserDataManager = None
+        self.system_user_data: UserDataManager = None
         self.screen: UserScreen = None
         self.config_delete_old_messages = True
         
     def build(self):
         user_data = UserDataManager()
         screen = UserScreen(user_data)
-        self.user_data = user_data
+        self.system_user_data = user_data
         self.screen = screen
         return self
+    
+    def get_system_user_data(self, user_id: int):
+        return self.system_user_data.get(user_id)
 
     @abstractmethod
     def get_message_handler(self): ...
 
     async def _handle_message(self, user_id: int, **kwargs):
-        user_data = self.user_data.get(user_id)
+        user_data = self.get_system_user_data(user_id)
         if self.config_delete_old_messages:
             await self.delete_message(**kwargs)
         
@@ -43,7 +46,7 @@ class BotManager(ABC):
     async def delete_message(self, message): ...
     
     async def _handle_callback_query(self, user_id: int, query_data: str):
-        mapping = self.user_data.get(user_id).callback_mapping
+        mapping = self.get_system_user_data(user_id).callback_mapping
         data: CallbackData = mapping.get_by_uuid(query_data)
         if data is None:
             return
