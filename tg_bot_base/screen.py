@@ -37,7 +37,9 @@ class SentScreen(HasCallbackData):
     
     @abstractmethod
     async def delete(self): ...
-        
+    
+    @abstractmethod
+    def get_unsent(self): ...
 
 class ProtoScreen(ABC):
     def __init__(self, name: str = None):

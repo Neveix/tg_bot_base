@@ -4,13 +4,14 @@ from typing import Any
 from .callback_data import CallbackData
 from .button_rows import ButtonRows
 
-class SentMessage(ABC):
+class CanBeEdited(ABC):
     @abstractmethod
     async def change(self, message: "Message"): ...
     
     @abstractmethod
-    async def edit(self) -> "SentMessage": ...
-    
+    async def edit(self) -> "CanBeEdited": ...
+
+class SentMessage(ABC):
     @abstractmethod
     async def delete(self): ...
     
@@ -19,6 +20,9 @@ class SentMessage(ABC):
     
     @abstractmethod
     def clone(self): ...
+    
+    @abstractmethod
+    def get_unsent(self): ...
 
 class Message(ABC):
     @abstractmethod
@@ -36,84 +40,94 @@ class Message(ABC):
         return self.button_rows.get_callback_data()
 
 class AudioMessage(Message):
-    def __init__(self, audio: Any, caption: str, button_rows: ButtonRows = None):
+    def __init__(self, caption: str, button_rows: ButtonRows = None, 
+            parse_mode: str = None):
+        self.parse_mode = parse_mode
         self.caption = caption
         self.button_rows = button_rows
-        self.audio = audio
-        self.category = "audio"
+        self.category = "media"
 
 class DocumentMessage(Message):
-    def __init__(self, document: Any, caption: str, button_rows: ButtonRows = None):
+    def __init__(self, caption: str, button_rows: ButtonRows = None, 
+            parse_mode: str = None):
+        self.parse_mode = parse_mode
         self.caption = caption
         self.button_rows = button_rows
-        self.document = document
-        self.category = "document"
+        self.category = "media"
 
 class SimpleMessage(Message):
-    def __init__(self, text: str, button_rows: ButtonRows = None):
+    def __init__(self, text: str, button_rows: ButtonRows = None, 
+            parse_mode: str = None):
+        self.parse_mode = parse_mode
         self.text = text
         self.button_rows = button_rows
         self.category = "simple"
 
 class PhotoMessage(Message):
-    def __init__(self, photo: Any, caption: str, button_rows: ButtonRows = None):
+    def __init__(self, caption: str, button_rows: ButtonRows = None, 
+            parse_mode: str = None):
+        self.parse_mode = parse_mode
         self.caption = caption
         self.button_rows = button_rows
-        self.photo = photo
-        self.category = "photo"
+        self.category = "media"
 
 class VideoMessage(Message):
-    def __init__(self, video: Any, caption: str, button_rows: ButtonRows = None):
+    def __init__(self, caption: str, button_rows: ButtonRows = None, 
+            parse_mode: str = None):
+        self.parse_mode = parse_mode
         self.caption = caption
         self.button_rows = button_rows
-        self.video = video
-        self.category = "video"
+        self.category = "media"
 
 class VideoNoteMessage(Message):
-    def __init__(self, video_note: Any, caption: str, button_rows: ButtonRows = None):
+    def __init__(self, caption: str, button_rows: ButtonRows = None):
         self.caption = caption
         self.button_rows = button_rows
-        self.video_note = video_note
         self.category = "video_note"
 
-class SentAudioMessage(SentMessage):
-    def __init__(self, audio: Any, caption: str, button_rows: ButtonRows = None):
+class SentAudioMessage(SentMessage, CanBeEdited):
+    def __init__(self, caption: str, button_rows: ButtonRows = None, 
+            parse_mode: str = None):
+        self.parse_mode = parse_mode
         self.caption = caption
         self.button_rows = button_rows
-        self.audio = audio
-        self.category = "audio"
+        self.category = "media"
 
-class SentDocumentMessage(SentMessage):
-    def __init__(self, document: Any, caption: str, button_rows: ButtonRows = None):
+class SentDocumentMessage(SentMessage, CanBeEdited):
+    def __init__(self, caption: str, button_rows: ButtonRows = None, 
+            parse_mode: str = None):
+        self.parse_mode = parse_mode
         self.caption = caption
         self.button_rows = button_rows
-        self.document = document
-        self.category = "document"
+        self.category = "media"
         
 
-class SentSimpleMessage(SentMessage):
-    def __init__(self, text: str, button_rows: ButtonRows = None):
+class SentSimpleMessage(SentMessage, CanBeEdited):
+    def __init__(self, text: str, button_rows: ButtonRows = None, 
+            parse_mode: str = None):
+        self.parse_mode = parse_mode
         self.text = text
         self.button_rows = button_rows
         self.category = "simple"
 
-class SentPhotoMessage(SentMessage):
-    def __init__(self, photo: Any, caption: str, button_rows: ButtonRows = None):
+class SentPhotoMessage(SentMessage, CanBeEdited):
+    def __init__(self, caption: str, button_rows: ButtonRows = None, 
+            parse_mode: str = None):
+        self.parse_mode = parse_mode
         self.caption = caption
         self.button_rows = button_rows
-        self.photo = photo
-        self.category = "photo"
+        self.category = "media"
 
-class SentVideoMessage(SentMessage):
-    def __init__(self, video: Any, caption: str, button_rows: ButtonRows = None):
+class SentVideoMessage(SentMessage, CanBeEdited):
+    def __init__(self, caption: str, button_rows: ButtonRows = None, 
+            parse_mode: str = None):
+        self.parse_mode = parse_mode
         self.caption = caption
         self.button_rows = button_rows
-        self.video = video
-        self.category = "video"
+        self.category = "media"
 
 class SentVideoNoteMessage(SentMessage):
-    def __init__(self, video_note: Any, caption: str, button_rows: ButtonRows = None):
+    def __init__(self, caption: str, button_rows: ButtonRows = None):
         self.caption = caption
         self.button_rows = button_rows
-        self.video_note = video_note
         self.category = "video_note"

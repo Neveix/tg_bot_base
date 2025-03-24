@@ -47,7 +47,7 @@ class UserScreen(ABC):
         directory_stack.pop()
         await self.set_by_name(user_id, directory_stack[-1])
     
-    def _get(self, user_id: int) -> ReadyScreen | None:
+    def get(self, user_id: int) -> SentScreen | None:
         screen = self.user_data.get(user_id).screen
         if screen is None:
             return None
@@ -122,10 +122,4 @@ def calc_abstract_difference(start: list[int], end: list[int]):
             indices_send = end[j:]
             break
     indices_delete += list(range(startn,len(start)))
-    # print(f"{start=}")
-    # print(f"{end=}")
-    # print(f"{indices_delete=}")
-    # print(f"{indices_edit=}")
-    # print(f"{indices_send=}")
-    # print()
     return indices_delete, indices_edit, indices_send

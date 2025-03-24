@@ -21,7 +21,7 @@ class UserScreen(BaseUserScreen):
     async def set(self, user_id: int, new_screen: ReadyScreen):
         mapping = self._map_callback_data(user_id, new_screen)
         
-        old_screen = self._get(user_id)
+        old_screen = self.get(user_id)
         user_data = self.user_data.get(user_id)
         delete, edit, send = self.calc_screen_difference(old_screen, new_screen)
         new_screen = SentScreen()
