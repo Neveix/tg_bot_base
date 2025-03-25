@@ -2,11 +2,15 @@ from abc import abstractmethod
 from uuid import uuid4
 from .callback_data import CallbackData
 
+def check(obj, condition: bool):
+    if not condition:
+        raise ValueError(f"{obj=} is wrong")
+
 class Button:
     def __init__(self, text: str, callback_data: CallbackData, url: str = None):
-        assert isinstance(text, str) and len(text) < 1
-        assert isinstance(callback_data, CallbackData)
-        assert not url or url and isinstance(url, str)
+        check( text, isinstance(text, str) and len(text) > 0 )
+        check( callback_data, isinstance(callback_data, CallbackData) )
+        check( url, not url or url and isinstance(url, str) )
         
         self.text = text
         self.callback_data = callback_data

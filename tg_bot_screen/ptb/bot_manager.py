@@ -1,15 +1,23 @@
-from telegram import Update
+from telegram import Update, Bot
 from telegram import Message as TgMessage
 from telegram.ext import Application, CallbackQueryHandler, MessageHandler
-from ...user_data import UserDataManager
-from ...bot_manager import BotManager as BaseBotManager
+
+from ..bot_manager import BotManager as BaseBotManager
 from .user_screen import UserScreen
+from ..user_data import UserDataManager
 
 class BotManager(BaseBotManager):
     def __init__(self, application: Application):
         super().__init__()
-        self.bot = application.bot
+        self.bot: Bot = application.bot
         self.application = application
+    
+    def build(self):
+        user_data = UserDataManager()
+        screen = UserScreen(user_data, self.bot)
+        self.system_user_data = user_data
+        self.screen = screen
+        return self
     
     def get_callback_query_handler(self):
         async def callback(update: Update, _):

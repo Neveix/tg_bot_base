@@ -1,10 +1,10 @@
 from uuid import uuid4
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
-from ...callback_data import CallbackDataMapping
-from ...button_rows import ButtonRows as BaseButtonRows
-from ...button_rows import Button as BaseButton
-from ...button_rows import ButtonRow as BaseButtonRow
+from ..callback_data import CallbackDataMapping
+from ..button_rows import ButtonRows as BaseButtonRows
+from ..button_rows import Button as BaseButton
+from ..button_rows import ButtonRow as BaseButtonRow
 
 
 class ButtonRows(BaseButtonRows):

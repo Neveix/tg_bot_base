@@ -1,10 +1,10 @@
 from asyncio import gather
 from telegram import Bot
 
-from ...screen import ReadyScreen
+from ..screen import ReadyScreen
 from .screen import SentScreen
-from ...user_data import UserData
-from ...user_screen import UserScreen as BaseUserScreen
+from ..user_data import UserData
+from ..user_screen import UserScreen as BaseUserScreen
 
 class UserScreen(BaseUserScreen):
     def __init__(self, user_data: UserData, bot: Bot):

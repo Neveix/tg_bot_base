@@ -1,6 +1,6 @@
 from asyncio import gather
 from telegram import Bot
-from ...screen import ReadyScreen, SentScreen as BaseSentScreen
+from ..screen import ReadyScreen, SentScreen as BaseSentScreen
 
 class SentScreen(BaseSentScreen):   
     def clone(self) -> "SentScreen":

@@ -1,8 +1,12 @@
 from abc import abstractmethod, ABC
+from typing import Callable
+
+from .screen import DynamicScreen
 from .func_data import FuncData
 from .callback_data import GoToScreen, RunFunc, StepBack, CallbackData
 from .user_data import UserDataManager
 from .user_screen import UserScreen
+from .message import Message
 
 class BotManager(ABC):
     def __init__(self):
@@ -59,6 +63,11 @@ class BotManager(ABC):
             
         elif isinstance(data, RunFunc):
             await data.function(user_id=user_id, **data.kwargs)
+    
+    def dynamic_screen(self, name: str):
+        def decorator(func: Callable[[int],list[Message]]):
+            self.screen.append_screen(DynamicScreen(name, func))
+        return decorator
 
 
     

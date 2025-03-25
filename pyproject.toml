@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "tg_bot_screen"
-version = "1.4.2"
+version = "1.4.11"
 authors = [
   { name="Neveix", email="i@neveix.ru" },
 ]
@@ -16,11 +16,8 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
-license = "MIT"
-license-files = ["LICENSE"]
-dependencies = [
-  "python-telegram-bot[job-queue]>=21.9",
-]
+license = {text = "MIT"}
+dependencies = []
 
 [project.urls]
 Homepage = "https://github.com/Neveix/tg_bot_base"
@@ -29,12 +26,3 @@ Issues = "https://github.com/Neveix/tg_bot_base/issues"
 [project.optional-dependencies]
 ptb = ["python-telegram-bot[job-queue]>=21.9"]
 
-[tool.hatch.build.targets.wheel]
-packages = ["tg_bot_screen"]
-
-[tool.hatch.build]
-include = [
-  "src/tg_bot_screen/",
-  "src/tg_bot_screen/ext",
-  "src/tg_bot_screen/ext/ptb"
-]

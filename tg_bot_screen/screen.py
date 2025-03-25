@@ -58,14 +58,14 @@ class ProtoScreen(ABC):
         self.messages.extend(messages)
     
     @abstractmethod
-    def evaluate(self) -> tuple[ReadyScreen, dict[str, CallbackData]]: ...
+    def evaluate(self, user_id: int) -> tuple[ReadyScreen, dict[str, CallbackData]]: ...
 
 class StaticScreen(ProtoScreen):
     def __init__(self, name: str, *messages: Message):
         super().__init__(name = name)
         self.extend(messages)
     
-    def evaluate(self):
+    def evaluate(self, _):
         messages = []
         for message in self.messages:
             new_message = message.clone()

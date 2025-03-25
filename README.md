@@ -26,7 +26,7 @@ TBB исключает такую возможность: Клавиатура, 
 > прочим менеджерам.
 ## Установка и использование
 #### Замените версию на нужную вам.
-`pip install git+https://github.com/Neveix/tg_bot_base.git@v1.4.2`
+`pip install git+https://github.com/Neveix/tg_bot_base.git@v1.4.3`
 
 ### Использование
 #### Краткий обзор

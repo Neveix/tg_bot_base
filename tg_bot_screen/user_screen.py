@@ -31,7 +31,7 @@ class UserScreen(ABC):
             directory_stack.append(screen_name)
         
         screen = self.screen_dict.get(screen_name)
-        evaluated_screen = screen.evaluate()
+        evaluated_screen = screen.evaluate(user_id)
         
         await self.set(user_id, evaluated_screen)
     

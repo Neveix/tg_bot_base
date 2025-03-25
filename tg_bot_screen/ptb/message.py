@@ -6,23 +6,23 @@ from telegram import Bot, InputFile
 from telegram import Message as PTBMessage
 import telegram
 
-from ...callback_data import CallbackDataMapping
-from ...button_rows import ButtonRows
-from ...message import Message          as BaseMessage
-from ...message import AudioMessage     as BaseAudioMessage
-from ...message import VideoMessage     as BaseVideoMessage
-from ...message import DocumentMessage  as BaseDocumentMessage
-from ...message import SimpleMessage    as BaseSimpleMessage
-from ...message import VideoNoteMessage as BaseVideoNoteMessage
-from ...message import PhotoMessage     as BasePhotoMessage
+from ..callback_data import CallbackDataMapping
+from ..button_rows import ButtonRows
+from ..message import Message          as BaseMessage
+from ..message import AudioMessage     as BaseAudioMessage
+from ..message import VideoMessage     as BaseVideoMessage
+from ..message import DocumentMessage  as BaseDocumentMessage
+from ..message import SimpleMessage    as BaseSimpleMessage
+from ..message import VideoNoteMessage as BaseVideoNoteMessage
+from ..message import PhotoMessage     as BasePhotoMessage
 
-from ...message import SentMessage          as BaseSentMessage
-from ...message import SentAudioMessage     as BaseSentAudioMessage
-from ...message import SentVideoMessage     as BaseSentVideoMessage
-from ...message import SentDocumentMessage  as BaseSentDocumentMessage
-from ...message import SentSimpleMessage    as BaseSentSimpleMessage
-from ...message import SentVideoNoteMessage as BaseSentVideoNoteMessage
-from ...message import SentPhotoMessage     as BaseSentPhotoMessage
+from ..message import SentMessage          as BaseSentMessage
+from ..message import SentAudioMessage     as BaseSentAudioMessage
+from ..message import SentVideoMessage     as BaseSentVideoMessage
+from ..message import SentDocumentMessage  as BaseSentDocumentMessage
+from ..message import SentSimpleMessage    as BaseSentSimpleMessage
+from ..message import SentVideoNoteMessage as BaseSentVideoNoteMessage
+from ..message import SentPhotoMessage     as BaseSentPhotoMessage
 
 class HasButtonRows(ABC):
     def get_reply_markup(self, mapping: CallbackDataMapping):
