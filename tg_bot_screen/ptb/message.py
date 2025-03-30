@@ -30,6 +30,10 @@ class HasButtonRows(ABC):
             return self.button_rows.to_reply_markup(mapping)
         return None
 
+class Message(BaseMessage): ...
+
+class SentMessage(BaseSentMessage): ...
+
 class AudioMessage(BaseAudioMessage, HasButtonRows):
     def __init__(self, 
             audio: InputFile | bytes | pathlib.Path | telegram.Audio, 
@@ -62,19 +66,21 @@ class DocumentMessage(BaseDocumentMessage): ...
 class SimpleMessage(BaseSimpleMessage, HasButtonRows):
     async def send(self, user_id: int, bot: Bot, mapping: CallbackDataMapping):
         ptb_message = await bot.send_message(user_id, self.text
-            , reply_markup=self.get_reply_markup(mapping))
+            , reply_markup=self.get_reply_markup(mapping)
+            , parse_mode=self.parse_mode)
         return SentSimpleMessage(
-            self.text, self.button_rows, ptb_message)
+            self.text, self.button_rows, ptb_message, self.parse_mode)
     
     def __eq__(self, other: "SimpleMessage"):
         return self.text == other.text and \
-            self.button_rows == other.button_rows
+            self.button_rows == other.button_rows and \
+            self.parse_mode == other.parse_mode
     
     def clone(self):
         button_rows = None
         if self.button_rows:
             button_rows = self.button_rows.clone()
-        return SimpleMessage(self.text, button_rows)
+        return SimpleMessage(self.text, button_rows, self.parse_mode)
 
 class PhotoMessage(BasePhotoMessage, HasButtonRows): ...
 
@@ -87,7 +93,7 @@ class SentAudioMessage(BaseSentAudioMessage, HasButtonRows):
             audio: str, 
             button_rows: ButtonRows
         , ptb_message: PTBMessage):
-        super().__init__(text, button_rows)
+        super().__init__(button_rows)
         self.ptb_message = ptb_message 
     
     def change(self, message: SimpleMessage):
@@ -128,8 +134,8 @@ class SentDocumentMessage(BaseSentDocumentMessage, HasButtonRows): ...
 
 class SentSimpleMessage(BaseSentSimpleMessage, HasButtonRows):
     def __init__(self, text: str, button_rows: ButtonRows
-        , ptb_message: PTBMessage):
-        super().__init__(text, button_rows)
+        , ptb_message: PTBMessage, parse_mode: str = None):
+        super().__init__(text, button_rows, parse_mode)
         self.ptb_message = ptb_message 
     
     def change(self, message: SimpleMessage):
@@ -144,6 +150,7 @@ class SentSimpleMessage(BaseSentSimpleMessage, HasButtonRows):
         self.ptb_message = await bot.edit_message_text(
             text = self.text,
             reply_markup = reply_markup,
+            parse_mode = self.parse_mode,
             chat_id=self.ptb_message.chat_id,
             message_id=self.ptb_message.message_id)
     
@@ -154,15 +161,18 @@ class SentSimpleMessage(BaseSentSimpleMessage, HasButtonRows):
     
     def __eq__(self, other: Self):
         return self.text == other.text and \
-            self.button_rows == other.button_rows
+            self.button_rows == other.button_rows and \
+            self.parse_mode == other.parse_mode
     
     def clone(self):
-        return SentSimpleMessage(self.text, self.button_rows, self.ptb_message)
+        return SentSimpleMessage(self.text, self.button_rows, self.ptb_message, 
+            self.parse_mode)
 
     def get_unsent(self):
         return SimpleMessage(
               self.text
-            , self.button_rows)
+            , self.button_rows
+            , self.parse_mode)
 
 
 class SentPhotoMessage(BaseSentPhotoMessage, HasButtonRows): ...

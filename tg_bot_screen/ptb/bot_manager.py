@@ -37,3 +37,9 @@ class BotManager(BaseBotManager):
     
     async def delete_message(self, message: TgMessage, **kwargs):
         await message.delete()
+    
+    def add_handlers(self):
+        self.application.add_handlers([
+            self.get_callback_query_handler(),
+            self.get_message_handler()
+        ])

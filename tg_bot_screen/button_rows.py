@@ -8,9 +8,9 @@ def check(obj, condition: bool):
 
 class Button:
     def __init__(self, text: str, callback_data: CallbackData, url: str = None):
-        check( text, isinstance(text, str) and len(text) > 0 )
-        check( callback_data, isinstance(callback_data, CallbackData) )
-        check( url, not url or url and isinstance(url, str) )
+        assert isinstance(text, str),  len(text) > 0 
+        assert isinstance(callback_data, CallbackData) 
+        assert not url or isinstance(url, str) 
         
         self.text = text
         self.callback_data = callback_data

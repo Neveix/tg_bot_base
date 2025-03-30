@@ -15,6 +15,7 @@ class UserScreen(ABC):
         self.screen_dict: dict[str, ProtoScreen] = {}
     
     def append_screen(self, screen: ProtoScreen):
+        assert self.screen_dict.get(screen.name) is None
         self.screen_dict[screen.name] = screen
     
     def extend_screen(self, screens: list[ProtoScreen]):
@@ -24,14 +25,21 @@ class UserScreen(ABC):
     @abstractmethod
     async def clear(self, user_id: int, delete_messages: bool): ...
     
-    async def set_by_name(self, user_id: int, screen_name: str):
+    async def set_by_name(self, user_id: int, screen_name: str, 
+            stack: bool = True, **kwargs):
         user_data = self.user_data.get(user_id)
         directory_stack = user_data.directory_stack
-        if len(directory_stack)==0 or directory_stack[-1] != screen_name:
-            directory_stack.append(screen_name)
+        
+        if not stack:
+            if len(directory_stack)==0 or directory_stack[-1] == screen_name: 
+                return 
+            user_data.directory_stack[-1] = screen_name
+        else:
+            if len(directory_stack)==0 or directory_stack[-1] != screen_name:
+                directory_stack.append(screen_name)
         
         screen = self.screen_dict.get(screen_name)
-        evaluated_screen = screen.evaluate(user_id)
+        evaluated_screen = await screen.evaluate(user_id, sys_user_data=user_data, **kwargs)
         
         await self.set(user_id, evaluated_screen)
     
@@ -40,11 +48,13 @@ class UserScreen(ABC):
         if len(directory_stack) != 0:
             await self.set_by_name(user_id, directory_stack[-1])
     
-    async def step_back(self, user_id: int) -> None:
+    async def step_back(self, user_id: int, times: int = 1) -> None:
         directory_stack = self.user_data.get(user_id).directory_stack
-        if len(directory_stack) <= 1:
-            return
-        directory_stack.pop()
+        for _ in range(times):
+            if len(directory_stack) <= 1:
+                return
+            directory_stack.pop()
+        self.user_data.get(user_id).update_input_session()
         await self.set_by_name(user_id, directory_stack[-1])
     
     def get(self, user_id: int) -> SentScreen | None:
@@ -62,7 +72,15 @@ class UserScreen(ABC):
             mapping.add(callback_data, uuid)
         self.user_data.get(user_id).callback_mapping = mapping
         return mapping
-        
+    
+    @abstractmethod
+    async def buffer(self, user_id: int): ...
+    
+    async def unbuffer(self, user_id: int): 
+        sent_screen = self.user_data.get(user_id).screen_buffer
+        screen = sent_screen.get_unsent()
+        await self.set(user_id, screen)
+    
     @abstractmethod
     async def set(self, user_id: int, new_screen: ReadyScreen):
         ...

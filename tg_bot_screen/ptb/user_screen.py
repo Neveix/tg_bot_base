@@ -41,3 +41,9 @@ class UserScreen(BaseUserScreen):
         await gather(*tasks)
         
         user_data.screen = new_screen
+    
+    async def buffer(self, user_id: int):
+        user_data = self.user_data.get(user_id)
+        user_data.screen_buffer = user_data.screen.clone()
+        
+        await user_data.screen.delete(self.bot)

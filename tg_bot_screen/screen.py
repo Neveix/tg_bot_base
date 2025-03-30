@@ -1,3 +1,4 @@
+from inspect import iscoroutinefunction
 from abc import ABC, abstractmethod
 from typing import Callable, Iterable
 from .callback_data import CallbackData
@@ -58,14 +59,14 @@ class ProtoScreen(ABC):
         self.messages.extend(messages)
     
     @abstractmethod
-    def evaluate(self, user_id: int) -> tuple[ReadyScreen, dict[str, CallbackData]]: ...
+    async def evaluate(self, user_id: int) -> ReadyScreen: ...
 
 class StaticScreen(ProtoScreen):
     def __init__(self, name: str, *messages: Message):
         super().__init__(name = name)
         self.extend(messages)
     
-    def evaluate(self, _):
+    async def evaluate(self, _):
         messages = []
         for message in self.messages:
             new_message = message.clone()
@@ -76,9 +77,11 @@ class DynamicScreen(ProtoScreen):
     def __init__(self, name: str, 
             function: Callable[[int], Iterable[Message]]):
         super().__init__(name)
+        assert iscoroutinefunction(function)
         self.function = function
     
-    def evaluate(self, user_id: int):
-        return ReadyScreen(*self.function(user_id))
+    async def evaluate(self, user_id: int, **kwargs):
+        messages = await self.function(user_id, **kwargs)
+        return ReadyScreen(*messages)
 
 

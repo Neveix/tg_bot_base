@@ -1,9 +1,14 @@
-from typing import Callable
+from types import CoroutineType
+from typing import Any, Callable
 from abc import ABC, abstractmethod
 
 class CallbackData(ABC):
     @abstractmethod
     def clone(self): ...
+
+class Dummy(CallbackData):
+    def clone(self):
+        return Dummy()
 
 class RunFunc(CallbackData):
     def __init__(self, function: Callable, **kwargs):
@@ -11,8 +16,7 @@ class RunFunc(CallbackData):
             function - Функция для выполнения при нажатии кнопки  
             **kwargs - keyword аргументы функции
         """
-        if not isinstance(function, Callable):
-            raise ValueError(f"{function=} is not Callable")
+        assert isinstance(function, Callable)
         self.function = function
         self.kwargs = kwargs
     
@@ -22,13 +26,18 @@ class RunFunc(CallbackData):
     def __eq__(self, other: "RunFunc"):
         return isinstance(other, RunFunc) and \
             self.function == other.function and self.kwargs == other.kwargs
-        
 
 class GoToScreen(CallbackData):
-    def __init__(self, screen_name: str):
-        if not isinstance(screen_name, str):
-            raise ValueError(f"{screen_name=} is not str")
+    def __init__(self, screen_name: str, *
+            , pre_func: Callable[ [int], None ] = None
+            , post_func: Callable[ [int], None ] = None):
+        assert isinstance(screen_name, str)
+        assert pre_func is None or isinstance(pre_func, Callable)
+        assert post_func is None or isinstance(post_func, Callable)
+        
         self.screen_name = screen_name
+        self.pre_func = pre_func
+        self.post_func = post_func
     
     def clone(self):
         return GoToScreen(self.screen_name)
@@ -38,17 +47,17 @@ class GoToScreen(CallbackData):
             self.screen_name == other.screen_name
 
 class StepBack(CallbackData):
-    pass
+    def __init__(self, times: int = 1, clear_input_callback: bool = True,
+            pop_last_input: bool = True):
+        self.times = times
+        self.clear_input_callback = clear_input_callback
+        self.pop_last_input = pop_last_input
 
     def clone(self):
         return StepBack()
     
     def __eq__(self, other: "StepBack"):
         return isinstance(other, StepBack)
-
-# class URLCallbackData(CallbackData):
-#     def __init__(self, url: str):
-#         self.url = url
 
 class CallbackDataMapping:
     def __init__(self):
@@ -67,4 +76,4 @@ class CallbackDataMapping:
         for callback, i_uuid in self.items:
             if uuid == i_uuid:
                 return callback
-        raise KeyError(uuid)
+        return None

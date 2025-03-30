@@ -1,15 +1,15 @@
-from .input_session import InputSession
-from .input_callback import InputCallback
-from .callback_data import CallbackData, CallbackDataMapping
-from .screen import SentScreen
 
-class UserData:
+
+from ..user_data import UserData as BaseUserData, \
+    UserDataManager as BaseUserDataManager
+from .screen import SentScreen
+from .input_session import InputSession
+
+
+
+class UserData(BaseUserData):
     def __init__(self, user_id: int):
-        self.user_id = user_id
-        self.callback_mapping = CallbackDataMapping()
-        self.media_group_id: str = None
-        self.input_callback: InputCallback = None
-        self.directory_stack: list[str] = []
+        super().__init__(self, user_id)
         self.screen: SentScreen = None
         self.screen_buffer: SentScreen = None
         self.__input_session: InputSession = None
@@ -20,17 +20,12 @@ class UserData:
     
     @input_session.setter
     def input_session(self, value: InputSession):
-        self.__input_session = value
-        if value and not value.manual_delete:
-            value.directory_level = len(self.directory_stack)
-    
-    def update_input_session(self):
-        new_dir_level = len(self.directory_stack)
-        ses = self.__input_session
-        if ses and not ses.manual_delete and ses.directory_level > new_dir_level:
-            self.__input_session = None
+        super().input_session = value
+        if value is None:
+            print("input session deleted")
+        
 
-class UserDataManager:
+class UserDataManager(BaseUserDataManager):
     def __init__(self):
         self.__users_data: dict[int, UserData] = {}
         self.users_data = self.__users_data
