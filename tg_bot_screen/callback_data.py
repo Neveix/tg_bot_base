@@ -47,11 +47,15 @@ class GoToScreen(CallbackData):
             self.screen_name == other.screen_name
 
 class StepBack(CallbackData):
-    def __init__(self, times: int = 1, clear_input_callback: bool = True,
-            pop_last_input: bool = True):
+    def __init__(self, times: int = 1, clear_input_callback: bool = True
+            , pop_last_input: bool = True
+            , pre_func: Callable[ [int], None ] = None
+            , post_func: Callable[ [int], None ] = None):
         self.times = times
         self.clear_input_callback = clear_input_callback
         self.pop_last_input = pop_last_input
+        self.pre_func = pre_func
+        self.post_func = post_func
 
     def clone(self):
         return StepBack()

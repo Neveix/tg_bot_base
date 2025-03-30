@@ -12,6 +12,9 @@ class CanBeEdited(ABC):
     async def edit(self) -> "CanBeEdited": ...
 
 class SentMessage(ABC):
+    def __init__(self):
+        self.category: str = None
+    
     @abstractmethod
     async def delete(self): ...
     
@@ -25,6 +28,9 @@ class SentMessage(ABC):
     def get_unsent(self): ...
 
 class Message(ABC):
+    def __init__(self):
+        self.category: str = None
+    
     @abstractmethod
     async def send(self, user_id: int) -> SentMessage: ...
     

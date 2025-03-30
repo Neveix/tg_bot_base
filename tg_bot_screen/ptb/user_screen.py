@@ -11,7 +11,7 @@ class UserScreen(BaseUserScreen):
         super().__init__(user_data)
         self.bot = bot
     
-    async def clear(self, user_id: int, delete_messages: bool):
+    async def clear(self, user_id: int, delete_messages: bool = True):
         user_data = self.user_data.get(user_id)
         screen = user_data.screen
         if screen and delete_messages:
@@ -44,6 +44,7 @@ class UserScreen(BaseUserScreen):
     
     async def buffer(self, user_id: int):
         user_data = self.user_data.get(user_id)
-        user_data.screen_buffer = user_data.screen.clone()
-        
+        user_data.screen_buffer = user_data.screen.get_unsent()
         await user_data.screen.delete(self.bot)
+        user_data.screen = None
+        

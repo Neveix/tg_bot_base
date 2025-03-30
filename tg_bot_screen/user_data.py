@@ -1,7 +1,7 @@
 from .input_session import InputSession
 from .input_callback import InputCallback
 from .callback_data import CallbackData, CallbackDataMapping
-from .screen import SentScreen
+from .screen import ReadyScreen, SentScreen
 
 class UserData:
     def __init__(self, user_id: int):
@@ -11,7 +11,7 @@ class UserData:
         self.input_callback: InputCallback = None
         self.directory_stack: list[str] = []
         self.screen: SentScreen = None
-        self.screen_buffer: SentScreen = None
+        self.screen_buffer: ReadyScreen = None
         self.__input_session: InputSession = None
     
     @property

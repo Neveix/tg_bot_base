@@ -97,7 +97,13 @@ class BotManager(ABC):
                         break
                     user_data.input_session.messages.pop()
             
+            if data.pre_func:
+                await data.pre_func(user_id)
+            
             await self.screen.step_back(user_id, data.times)
+            
+            if data.post_func:
+                await data.post_func(user_id)
             
             user_data.update_input_session()
             

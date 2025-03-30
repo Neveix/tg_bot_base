@@ -11,7 +11,6 @@ class UserData(BaseUserData):
     def __init__(self, user_id: int):
         super().__init__(self, user_id)
         self.screen: SentScreen = None
-        self.screen_buffer: SentScreen = None
         self.__input_session: InputSession = None
     
     @property

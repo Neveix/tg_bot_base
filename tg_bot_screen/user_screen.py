@@ -23,7 +23,7 @@ class UserScreen(ABC):
             self.append_screen(screen)
     
     @abstractmethod
-    async def clear(self, user_id: int, delete_messages: bool): ...
+    async def clear(self, user_id: int, delete_messages: bool = True): ...
     
     async def set_by_name(self, user_id: int, screen_name: str, 
             stack: bool = True, **kwargs):
@@ -77,8 +77,7 @@ class UserScreen(ABC):
     async def buffer(self, user_id: int): ...
     
     async def unbuffer(self, user_id: int): 
-        sent_screen = self.user_data.get(user_id).screen_buffer
-        screen = sent_screen.get_unsent()
+        screen = self.user_data.get(user_id).screen_buffer
         await self.set(user_id, screen)
     
     @abstractmethod
@@ -131,13 +130,12 @@ def calc_abstract_difference(start: list[int], end: list[int]):
         for i, snum in enumerate(start[startn:], start=startn):
             startn += 1
             if enum == snum:
-                # (from, to)
-                indices_edit.append((i, j))
+                indices_edit.append((i, j)) # (from, to)
                 break
             else:
                 indices_delete.append(i)
         else:
-            indices_send = end[j:]
+            indices_send = list(range(j, len(end)))
             break
     indices_delete += list(range(startn,len(start)))
     return indices_delete, indices_edit, indices_send
