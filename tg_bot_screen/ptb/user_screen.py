@@ -18,7 +18,9 @@ class UserScreen(BaseUserScreen):
             await screen.delete(self.bot)
         user_data.screen = None
     
-    async def set(self, user_id: int, new_screen: ReadyScreen):
+    async def set(self, user_id: int, new_screen: ReadyScreen = None):
+        if new_screen == None:
+            new_screen = ReadyScreen()
         mapping = self._map_callback_data(user_id, new_screen)
         
         old_screen = self.get(user_id)
@@ -44,7 +46,10 @@ class UserScreen(BaseUserScreen):
     
     async def buffer(self, user_id: int):
         user_data = self.user_data.get(user_id)
-        user_data.screen_buffer = user_data.screen.get_unsent()
-        await user_data.screen.delete(self.bot)
+        unsent = None
+        if user_data.screen:
+            unsent = user_data.screen.get_unsent()
+            await user_data.screen.delete(self.bot)
+        user_data.screen_buffer = unsent
         user_data.screen = None
         

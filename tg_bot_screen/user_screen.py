@@ -3,6 +3,8 @@ from email import message
 from typing import Type
 from uuid import uuid4
 
+from .error_info import check_bad_value
+
 from .callback_data import CallbackDataMapping
 from .screen import ProtoScreen, SentScreen
 from .message import Message, SentMessage
@@ -15,7 +17,9 @@ class UserScreen(ABC):
         self.screen_dict: dict[str, ProtoScreen] = {}
     
     def append_screen(self, screen: ProtoScreen):
-        assert self.screen_dict.get(screen.name) is None
+        check_bad_value(screen, ProtoScreen, self, "screen")
+        if self.screen_dict.get(screen.name) is not None:
+            raise KeyError(f"Попытка повторно создать экран с названием {screen.name!r}")
         self.screen_dict[screen.name] = screen
     
     def extend_screen(self, screens: list[ProtoScreen]):
@@ -39,6 +43,9 @@ class UserScreen(ABC):
                 directory_stack.append(screen_name)
         
         screen = self.screen_dict.get(screen_name)
+        if screen is None:
+            raise KeyError(f"Попытка получить экран с названием {screen_name!r}, \
+но его не существует")
         evaluated_screen = await screen.evaluate(user_id, sys_user_data=user_data, **kwargs)
         
         await self.set(user_id, evaluated_screen)
@@ -54,7 +61,7 @@ class UserScreen(ABC):
             if len(directory_stack) <= 1:
                 return
             directory_stack.pop()
-        self.user_data.get(user_id).update_input_session()
+        self.user_data.get(user_id).update_sessions()
         await self.set_by_name(user_id, directory_stack[-1])
     
     def get(self, user_id: int) -> SentScreen | None:

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Self
 
 from .callback_data import CallbackData
 from .button_rows import ButtonRows
@@ -13,13 +13,14 @@ class CanBeEdited(ABC):
 
 class SentMessage(ABC):
     def __init__(self):
+        self.text: str = None
         self.category: str = None
     
     @abstractmethod
     async def delete(self): ...
     
     @abstractmethod
-    def __eq__(self, other: "Message"): ...
+    def __eq__(self, other: Self): ...
     
     @abstractmethod
     def clone(self): ...
@@ -35,10 +36,10 @@ class Message(ABC):
     async def send(self, user_id: int) -> SentMessage: ...
     
     @abstractmethod
-    def __eq__(self, other: "Message"): ...
+    def __eq__(self, other: Self): ...
     
     @abstractmethod
-    def clone(self) -> "Message": ...
+    def clone(self) -> Self: ...
 
     def get_callback_data(self) -> list[CallbackData]:
         if self.button_rows is None:

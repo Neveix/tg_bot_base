@@ -9,6 +9,9 @@ class FuncCallback(InputCallback):
         self.function = function
         self.one_time = one_time
         self.kwargs = kwargs
+    
+    def __call__(self, **kwds):
+        return self.function(**self.kwargs, **kwds)
 
 class ScreenCallback(InputCallback):
     def __init__(self, screen_name: str, stack: bool = False):

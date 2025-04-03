@@ -14,6 +14,7 @@ class ButtonRows(BaseButtonRows):
         for row in self.rows:
             row_list = []
             for button in row.buttons:
+                button: Button
                 row_list.append(button.to_inline_button(mapping))
             result.append(row_list)
         return InlineKeyboardMarkup(result)

@@ -1,14 +1,21 @@
-from types import CoroutineType
-from typing import Any, Callable
+from typing import Any, Callable, Self
 from abc import ABC, abstractmethod
+from .input_callback import FuncCallback
+from .error_info import check_bad_text_and_len, check_bad_value, check_pre_post_func
 
 class CallbackData(ABC):
     @abstractmethod
     def clone(self): ...
+    
+    @abstractmethod
+    def __repr__(self): ...
 
 class Dummy(CallbackData):
     def clone(self):
         return Dummy()
+    
+    def __repr__(self):
+        return f"{type(self).__name__}()"
 
 class RunFunc(CallbackData):
     def __init__(self, function: Callable, **kwargs):
@@ -16,24 +23,26 @@ class RunFunc(CallbackData):
             function - Функция для выполнения при нажатии кнопки  
             **kwargs - keyword аргументы функции
         """
-        assert isinstance(function, Callable)
+        check_bad_value(function, Callable, self, "function")
         self.function = function
         self.kwargs = kwargs
     
     def clone(self):
         return RunFunc(self.function, **self.kwargs)
     
-    def __eq__(self, other: "RunFunc"):
+    def __repr__(self):
+        return f"{type(self).__name__}({self.function!r})"
+    
+    def __eq__(self, other: Self):
         return isinstance(other, RunFunc) and \
             self.function == other.function and self.kwargs == other.kwargs
 
 class GoToScreen(CallbackData):
     def __init__(self, screen_name: str, *
-            , pre_func: Callable[ [int], None ] = None
-            , post_func: Callable[ [int], None ] = None):
-        assert isinstance(screen_name, str)
-        assert pre_func is None or isinstance(pre_func, Callable)
-        assert post_func is None or isinstance(post_func, Callable)
+            , pre_func: FuncCallback = None
+            , post_func: FuncCallback = None):
+        check_bad_text_and_len(screen_name, self, "screen_name")
+        check_pre_post_func(pre_func, post_func, self)
         
         self.screen_name = screen_name
         self.pre_func = pre_func
@@ -42,25 +51,42 @@ class GoToScreen(CallbackData):
     def clone(self):
         return GoToScreen(self.screen_name)
     
-    def __eq__(self, other: "GoToScreen"):
+    def __repr__(self):
+        return f"{type(self).__name__}({self.screen_name!r}, \
+{self.pre_func}, {self.post_func})"
+    
+    def __eq__(self, other: Self):
         return isinstance(other, GoToScreen) and \
             self.screen_name == other.screen_name
 
 class StepBack(CallbackData):
     def __init__(self, times: int = 1, clear_input_callback: bool = True
             , pop_last_input: bool = True
-            , pre_func: Callable[ [int], None ] = None
-            , post_func: Callable[ [int], None ] = None):
+            , pre_func: FuncCallback = None
+            , post_func: FuncCallback = None):
+
+        check_bad_value(times, int, self, "times")
         self.times = times
+
+        check_bad_value(clear_input_callback, bool, self, "clear_input_callback")
         self.clear_input_callback = clear_input_callback
+
+        check_bad_value(pop_last_input, bool, self, "pop_last_input")
         self.pop_last_input = pop_last_input
+
+        check_pre_post_func(pre_func, post_func, self)
+        
         self.pre_func = pre_func
         self.post_func = post_func
 
     def clone(self):
         return StepBack()
     
-    def __eq__(self, other: "StepBack"):
+    def __repr__(self):
+        return f"{type(self).__name__}({self.times!r}, {self.clear_input_callback}, \
+{self.pop_last_input}, {self.pre_func}, {self.post_func})"
+    
+    def __eq__(self, other: Self):
         return isinstance(other, StepBack)
 
 class CallbackDataMapping:

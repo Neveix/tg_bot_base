@@ -16,10 +16,13 @@ class SimpleMessage(BaseSimpleMessage, HasButtonRows, Message):
         return SentSimpleMessage(
             self.text, self.button_rows, ptb_message, self.parse_mode)
     
-    def __eq__(self, other: "SimpleMessage"):
+    def __eq__(self, other: Self):
         return self.text == other.text and \
             self.button_rows == other.button_rows and \
             self.parse_mode == other.parse_mode
+    
+    def __repr__(self):
+        return f"{type(self).__name__}({self.text!r}, {self.button_rows!r}, {self.parse_mode!r})"
     
     def clone(self):
         button_rows = None
@@ -36,11 +39,12 @@ class SentSimpleMessage(BaseSentSimpleMessage, HasButtonRows, SentMessage):
     def change(self, message: SimpleMessage):
         self.text = message.text
         self.button_rows = message.button_rows
+        self.parse_mode = message.parse_mode
     
     async def edit(self, bot: Bot, mapping: CallbackDataMapping):
         orig = self.ptb_message
         reply_markup = self.get_reply_markup(mapping)
-        if orig.text == self.text and orig.reply_markup == reply_markup:
+        if orig.text_html == self.text and orig.reply_markup == reply_markup:
             return
         self.ptb_message = await bot.edit_message_text(
             text = self.text,
@@ -53,6 +57,9 @@ class SentSimpleMessage(BaseSentSimpleMessage, HasButtonRows, SentMessage):
         return self.text == other.text and \
             self.button_rows == other.button_rows and \
             self.parse_mode == other.parse_mode
+            
+    def __repr__(self):
+        return f"{type(self).__name__}({self.text!r}, {self.button_rows!r})"
     
     def clone(self):
         return SentSimpleMessage(self.text, self.button_rows, self.ptb_message, 

@@ -1,6 +1,8 @@
 from abc import abstractmethod, ABC
 from typing import Callable
 
+from .session import InputSession
+
 from .screen import DynamicScreen
 from .input_callback import FuncCallback, InputCallback, ScreenCallback
 from .callback_data import GoToScreen, RunFunc, StepBack, CallbackData
@@ -47,9 +49,11 @@ class BotManager(ABC):
         
         await self.screen.clear(user_id, delete_old)
         
-        if user_data.input_session:
+        for session in user_data.input_sessions:
+            if not session.add_new_messages:
+                continue
             message = kwargs["message"]
-            user_data.input_session.append(message)
+            session.append(message)
         
         if isinstance(input_callback, FuncCallback):
             if input_callback.one_time:
@@ -80,32 +84,35 @@ class BotManager(ABC):
         
         if isinstance(data, GoToScreen):
             if data.pre_func:
-                await data.pre_func(user_id)
+                await data.pre_func(user_id=user_id)
             
             await self.screen.set_by_name(user_id, data.screen_name)
             
             if data.post_func:
-                await data.post_func(user_id)
+                await data.post_func(user_id=user_id)
+                
+            user_data.update_sessions()
         
         elif isinstance(data, StepBack):
             if data.clear_input_callback:
                 user_data.input_callback = None
             
-            if data.pop_last_input and user_data.input_session:
-                for i in range(data.times):
-                    if user_data.input_session.messages == []:
-                        break
-                    user_data.input_session.messages.pop()
+            for session in user_data.input_sessions:
+                if data.pop_last_input and session.may_pop_last_input:
+                    for i in range(data.times):
+                        if session.messages == []:
+                            break
+                        session.messages.pop()
             
             if data.pre_func:
-                await data.pre_func(user_id)
+                await data.pre_func(user_id=user_id)
             
             await self.screen.step_back(user_id, data.times)
             
             if data.post_func:
-                await data.post_func(user_id)
+                await data.post_func(user_id=user_id)
             
-            user_data.update_input_session()
+            user_data.update_sessions()
             
         elif isinstance(data, RunFunc):
             await data.function(user_id=user_id, **data.kwargs)

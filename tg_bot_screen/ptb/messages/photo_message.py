@@ -2,7 +2,7 @@ import pathlib
 from typing import Self
 from telegram import Bot, InputFile, InputMediaPhoto, Message as PTBMessage
 import telegram
-from tg_bot_base import ButtonRows
+from ..button_rows import ButtonRows
 
 from ...callback_data import CallbackDataMapping
 from ...message import PhotoMessage     as BasePhotoMessage
@@ -28,6 +28,9 @@ class PhotoMessage(BasePhotoMessage, HasButtonRows, Message):
             self.photo == other.photo and \
             self.button_rows == other.button_rows and \
             self.parse_mode == other.parse_mode
+    
+    def __repr__(self):
+        return f"{type(self).__name__}({self.caption=!r}, {self.button_rows=!r}, {self.parse_mode=!r})"
     
     def clone(self) -> Self: 
         return PhotoMessage(self.photo, self.caption, self.button_rows, 
@@ -66,6 +69,9 @@ class SentPhotoMessage(BaseSentPhotoMessage, HasButtonRows, SentMessage):
             self.photo == other.photo and \
             self.button_rows == other.button_rows and \
             self.parse_mode == other.parse_mode
+    
+    def __repr__(self):
+        return f"{type(self).__name__}({self.caption=!r}, {self.button_rows=!r}, {self.parse_mode=!r})"
     
     def clone(self):
         return SentPhotoMessage(self.photo, self.caption, self.ptb_message, self.button_rows,

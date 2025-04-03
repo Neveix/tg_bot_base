@@ -29,7 +29,7 @@ class AudioMessage(BaseAudioMessage, HasButtonRows, Message):
         return SentAudioMessage( # TODO: fix
             self.text, self.button_rows, ptb_message)
     
-    def __eq__(self, other: "AudioMessage"):
+    def __eq__(self, other: Self):
         return self.caption == other.caption and \
             self.audio == other.audio and \
             self.button_rows == other.button_rows

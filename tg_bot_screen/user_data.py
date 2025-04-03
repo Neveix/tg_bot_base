@@ -1,7 +1,11 @@
-from .input_session import InputSession
+from typing import Type, TypeVar
+from .error_info import check_bad_value
+from .session import InputSession, Session
 from .input_callback import InputCallback
-from .callback_data import CallbackData, CallbackDataMapping
+from .callback_data import CallbackDataMapping
 from .screen import ReadyScreen, SentScreen
+
+SessionType = TypeVar("SessionType")
 
 class UserData:
     def __init__(self, user_id: int):
@@ -12,23 +16,64 @@ class UserData:
         self.directory_stack: list[str] = []
         self.screen: SentScreen = None
         self.screen_buffer: ReadyScreen = None
-        self.__input_session: InputSession = None
+        self.__sessions: dict[str, Session] = {}
     
     @property
-    def input_session(self):
-        return self.__input_session
+    def sessions(self):
+        return tuple([ item[1] for item in self.__sessions.items() ])
     
-    @input_session.setter
-    def input_session(self, value: InputSession):
-        self.__input_session = value
-        if value and not value.manual_delete:
-            value.directory_level = len(self.directory_stack)
+    @property
+    def input_sessions(self):
+        result: list[InputSession] = []
+        for session in self.sessions:
+            if isinstance(session, InputSession):
+                result.append(session)
+        return tuple(result)
     
-    def update_input_session(self):
+    def add_session(self, session: Session) -> bool:
+        check_bad_value(session, Session, self, "session")
+        if self.get_session(session.id):
+            return False
+        
+        session.directory_level = len(self.directory_stack)
+        try: session.last_directory = self.directory_stack[-1]
+        except: pass
+        
+        self.__sessions[session.id] = session
+        return True
+        
+    def get_session(self, id: str, expected_class: Type[SessionType] = Session
+            ) -> SessionType:
+        return self.__sessions.get(id)
+    
+    def update_sessions(self):
         new_dir_level = len(self.directory_stack)
-        ses = self.__input_session
-        if ses and not ses.manual_delete and ses.directory_level > new_dir_level:
-            self.__input_session = None
+        try: last_directory = self.directory_stack[-1]
+        except: last_directory = None
+        delete = []
+        for session in self.sessions:
+            if not session.delete_if_level_decreased:
+                continue
+            if not session.directory_level > new_dir_level:
+                continue
+            delete.append(session)
+            
+        for session in self.sessions:
+            if not session.delete_if_last_dir_changed:
+                continue
+            if session.last_directory == last_directory:
+                continue
+            delete.append(session)
+        
+        for session in delete:
+            self.delete_session(session)
+    
+    def delete_session(self, session: Session):
+        check_bad_value(session, Session, self, "session")
+        del self.__sessions[session.id]
+    
+    def __repr__(self):
+        return f"{type(self).__name__}({self.user_id!r})"
 
 class UserDataManager:
     def __init__(self):
