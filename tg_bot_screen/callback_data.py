@@ -98,7 +98,7 @@ class CallbackDataMapping:
     
     def get_by_callback(self, callback: CallbackData):
         for i_callback, uuid in self.items:
-            if callback == i_callback:
+            if callback is i_callback:
                 return uuid
         raise KeyError(callback)
     
