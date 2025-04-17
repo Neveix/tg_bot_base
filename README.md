@@ -39,7 +39,8 @@ TBB исключает такую возможность: Клавиатура, 
 
 bot пригодится для того, чтобы отправлять сообщения вручную и для того, чтобы TBB сам мог отправлять эти сообщения. Его методы, меняющие экран, используют атрибут bot у bot_manager.
 
-`from telegram.ext import Application, Bot
+```
+from telegram.ext import Application, Bot
 from src.managers.bot_manager import BotManager
 
 application = Application().token(your_token).build()
@@ -49,7 +50,8 @@ bot = application.bot
 bot_manager = BotManager()
 
 bot_manager.bot = bot
-bot_manager.application = application`
+bot_manager.application = application
+```
 
 ##### Обработчики событий
 Добавьте обработчики событий в бот
