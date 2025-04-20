@@ -1,11 +1,11 @@
 import os
 import argparse
 from pathlib import Path
-from project_generator.common import *
-from project_generator.create_init import create_init
-from project_generator.create_model import create_model
-from project_generator.create_screen import create_screen
-from project_generator.create_types import create_types
+from .project_generator.common import *
+from .project_generator.create_init import create_init
+from .project_generator.create_model import create_model
+from .project_generator.create_screen import create_screen
+from .project_generator.create_types import create_types
 
 
 def main():
