@@ -1,8 +1,6 @@
 from abc import abstractmethod, ABC
 from typing import Callable
-
 from .session import InputSession
-
 from .screen import DynamicScreen
 from .input_callback import FuncCallback, InputCallback, ScreenCallback
 from .callback_data import GoToScreen, RunFunc, StepBack, CallbackData

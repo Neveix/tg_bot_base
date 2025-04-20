@@ -56,7 +56,7 @@ class SentPhotoMessage(BaseSentPhotoMessage, HasButtonRows, SentMessage):
     async def edit(self, bot: Bot, mapping: CallbackDataMapping):
         orig = self.ptb_message
         reply_markup = self.get_reply_markup(mapping)
-        if orig.caption == self.caption and orig.reply_markup == reply_markup \
+        if orig.caption_html == self.caption and orig.reply_markup == reply_markup \
                 and self.__ptb_message_photo == self.photo:
             return
         self.ptb_message = await bot.edit_message_media(
