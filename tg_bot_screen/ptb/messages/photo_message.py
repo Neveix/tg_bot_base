@@ -33,8 +33,12 @@ class PhotoMessage(BasePhotoMessage, HasButtonRows, Message):
         return f"{type(self).__name__}({self.caption=!r}, {self.button_rows=!r}, {self.parse_mode=!r})"
     
     def clone(self) -> Self: 
-        return PhotoMessage(self.photo, self.caption, self.button_rows, 
+        return self.__class__(self.photo, self.caption, self.button_rows, 
             self.parse_mode)
+    
+    def transform(self, old: "SentMessage"):
+        return SentPhotoMessage(self.photo, self.caption,
+            old.ptb_message, self.button_rows, self.parse_mode)
 
 
 class SentPhotoMessage(BaseSentPhotoMessage, HasButtonRows, SentMessage):
@@ -46,12 +50,6 @@ class SentPhotoMessage(BaseSentPhotoMessage, HasButtonRows, SentMessage):
         self.photo = photo
         self.ptb_message = ptb_message
         self.__ptb_message_photo = photo
-    
-    def change(self, message: PhotoMessage):
-        self.caption = message.caption
-        self.photo = message.photo
-        self.parse_mode = message.parse_mode
-        self.button_rows = message.button_rows
     
     async def edit(self, bot: Bot, mapping: CallbackDataMapping):
         orig = self.ptb_message

@@ -5,6 +5,7 @@ from ..screen import ReadyScreen
 from .screen import SentScreen
 from ..user_data import UserData
 from ..user_screen import UserScreen as BaseUserScreen
+from .messages.message import SentMessage, Message
 
 class UserScreen(BaseUserScreen):
     def __init__(self, user_data: UserData, bot: Bot):
@@ -25,16 +26,19 @@ class UserScreen(BaseUserScreen):
         
         old_screen = self.get(user_id)
         user_data = self.user_data.get(user_id)
-        delete, edit, send = self.calc_screen_difference(old_screen, new_screen)
+        delete, edit, send = self.calc_screen_difference(
+            old_screen, new_screen, 
+            Message, SentMessage)
+        
         new_screen = SentScreen()
         tasks = []
         for message in delete:
             tasks.append( message.delete(self.bot) )
             
         for old_message, new_message in edit:
-            old_message.change(new_message)
-            tasks.append( old_message.edit(self.bot, mapping) )
-            new_screen.extend([old_message])
+            transformed_message = new_message.transform(old_message)
+            tasks.append( transformed_message.edit(self.bot, mapping) )
+            new_screen.extend([transformed_message])
         
         for message in send:
             new_message = await message.send(user_id, self.bot, mapping)

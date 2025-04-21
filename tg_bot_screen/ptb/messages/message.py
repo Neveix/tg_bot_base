@@ -15,7 +15,11 @@ class HasButtonRows(ABC):
         return None
 
 
-class Message(BaseMessage): ...
+class Message(BaseMessage, ABC):
+    @abstractmethod
+    def transform(self, old: "SentMessage") -> "SentMessage":
+        ...
+    
 
 class SentMessage(BaseSentMessage):
     def __init__(self):
@@ -25,3 +29,6 @@ class SentMessage(BaseSentMessage):
         await bot.delete_message(
             chat_id=self.ptb_message.chat_id,
             message_id=self.ptb_message.message_id)
+    
+    @abstractmethod
+    async def edit(self, bot: Bot, mapping: CallbackDataMapping): ...

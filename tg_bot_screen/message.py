@@ -6,9 +6,6 @@ from .button_rows import ButtonRows
 
 class CanBeEdited(ABC):
     @abstractmethod
-    async def change(self, message: "Message"): ...
-    
-    @abstractmethod
     async def edit(self) -> "CanBeEdited": ...
 
 class SentMessage(ABC):
@@ -46,21 +43,24 @@ class Message(ABC):
             return []
         return self.button_rows.get_callback_data()
 
-class AudioMessage(Message):
+class MediaMessage(ABC):
     def __init__(self, caption: str, button_rows: ButtonRows = None, 
             parse_mode: str = None):
         self.parse_mode = parse_mode
         self.caption = caption
         self.button_rows = button_rows
         self.category = "media"
+    
+    def __new__(cls, *args, **kwargs):
+        assert \
+            cls is not MediaMessage, \
+            "Нельзя создавать экземпляры MediaMessage напрямую"
+        return super().__new__(cls)
 
-class DocumentMessage(Message):
-    def __init__(self, caption: str, button_rows: ButtonRows = None, 
-            parse_mode: str = None):
-        self.parse_mode = parse_mode
-        self.caption = caption
-        self.button_rows = button_rows
-        self.category = "media"
+
+class AudioMessage(MediaMessage, Message): ...
+
+class DocumentMessage(MediaMessage, Message): ...
 
 class SimpleMessage(Message):
     def __init__(self, text: str, button_rows: ButtonRows = None, 
@@ -70,21 +70,9 @@ class SimpleMessage(Message):
         self.button_rows = button_rows
         self.category = "simple"
 
-class PhotoMessage(Message):
-    def __init__(self, caption: str, button_rows: ButtonRows = None, 
-            parse_mode: str = None):
-        self.parse_mode = parse_mode
-        self.caption = caption
-        self.button_rows = button_rows
-        self.category = "media"
+class PhotoMessage(MediaMessage, Message): ...
 
-class VideoMessage(Message):
-    def __init__(self, caption: str, button_rows: ButtonRows = None, 
-            parse_mode: str = None):
-        self.parse_mode = parse_mode
-        self.caption = caption
-        self.button_rows = button_rows
-        self.category = "media"
+class VideoMessage(MediaMessage, Message): ...
 
 class VideoNoteMessage(Message):
     def __init__(self, caption: str, button_rows: ButtonRows = None):
@@ -92,22 +80,9 @@ class VideoNoteMessage(Message):
         self.button_rows = button_rows
         self.category = "video_note"
 
-class SentAudioMessage(SentMessage, CanBeEdited):
-    def __init__(self, caption: str, button_rows: ButtonRows = None, 
-            parse_mode: str = None):
-        self.parse_mode = parse_mode
-        self.caption = caption
-        self.button_rows = button_rows
-        self.category = "media"
+class SentAudioMessage(MediaMessage, SentMessage, CanBeEdited): ...
 
-class SentDocumentMessage(SentMessage, CanBeEdited):
-    def __init__(self, caption: str, button_rows: ButtonRows = None, 
-            parse_mode: str = None):
-        self.parse_mode = parse_mode
-        self.caption = caption
-        self.button_rows = button_rows
-        self.category = "media"
-        
+class SentDocumentMessage(MediaMessage, SentMessage, CanBeEdited): ...
 
 class SentSimpleMessage(SentMessage, CanBeEdited):
     def __init__(self, text: str, button_rows: ButtonRows = None, 
@@ -117,21 +92,9 @@ class SentSimpleMessage(SentMessage, CanBeEdited):
         self.button_rows = button_rows
         self.category = "simple"
 
-class SentPhotoMessage(SentMessage, CanBeEdited):
-    def __init__(self, caption: str, button_rows: ButtonRows = None, 
-            parse_mode: str = None):
-        self.parse_mode = parse_mode
-        self.caption = caption
-        self.button_rows = button_rows
-        self.category = "media"
+class SentPhotoMessage(MediaMessage, SentMessage, CanBeEdited): ...
 
-class SentVideoMessage(SentMessage, CanBeEdited):
-    def __init__(self, caption: str, button_rows: ButtonRows = None, 
-            parse_mode: str = None):
-        self.parse_mode = parse_mode
-        self.caption = caption
-        self.button_rows = button_rows
-        self.category = "media"
+class SentVideoMessage(MediaMessage, SentMessage, CanBeEdited): ...
 
 class SentVideoNoteMessage(SentMessage):
     def __init__(self, caption: str, button_rows: ButtonRows = None):

@@ -49,10 +49,6 @@ class SentAudioMessage(BaseSentAudioMessage, HasButtonRows, SentMessage):
         super().__init__(button_rows)
         self.ptb_message = ptb_message 
     
-    def change(self, message: AudioMessage):
-        self.text = message.text
-        self.button_rows = message.button_rows
-    
     async def edit(self, bot: Bot, mapping: CallbackDataMapping):
         orig = self.ptb_message
         reply_markup = self.get_reply_markup(mapping)

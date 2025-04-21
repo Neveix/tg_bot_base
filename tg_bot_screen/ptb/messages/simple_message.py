@@ -29,17 +29,16 @@ class SimpleMessage(BaseSimpleMessage, HasButtonRows, Message):
         if self.button_rows:
             button_rows = self.button_rows.clone()
         return SimpleMessage(self.text, button_rows, self.parse_mode)
+
+    def transform(self, old: "SentMessage"):
+        return SentSimpleMessage(self.text, self.button_rows,
+            old.ptb_message, self.parse_mode)
     
 class SentSimpleMessage(BaseSentSimpleMessage, HasButtonRows, SentMessage):
     def __init__(self, text: str, button_rows: ButtonRows
         , ptb_message: PTBMessage, parse_mode: str = None):
         super().__init__(text, button_rows, parse_mode)
         self.ptb_message = ptb_message 
-    
-    def change(self, message: SimpleMessage):
-        self.text = message.text
-        self.button_rows = message.button_rows
-        self.parse_mode = message.parse_mode
     
     async def edit(self, bot: Bot, mapping: CallbackDataMapping):
         orig = self.ptb_message

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from email import message
-from typing import Type
+from typing import Type, TypeVar
 from uuid import uuid4
 
 from .error_info import check_bad_value
@@ -10,6 +10,9 @@ from .screen import ProtoScreen, SentScreen
 from .message import Message, SentMessage
 from .user_data import UserDataManager
 from .screen import ReadyScreen
+
+MsgType = TypeVar('MsgType')
+SentMsgType = TypeVar('SentMsgType')
 
 class UserScreen(ABC):
     def __init__(self, user_data: UserDataManager):
@@ -92,7 +95,8 @@ class UserScreen(ABC):
         ...
     
     @staticmethod
-    def calc_screen_difference(screen1: SentScreen, screen2: ReadyScreen):
+    def calc_screen_difference(screen1: SentScreen, screen2: ReadyScreen,
+            msg_type: type[MsgType], sent_msg_type: type[SentMsgType]):
         messages1 = []
         if screen1:
             messages1 = screen1.messages
@@ -106,12 +110,12 @@ class UserScreen(ABC):
         indices_delete, indices_edit, indices_send = calc_abstract_difference(
             screen1_codes, screen2_codes)
         
-        messages_delete: list[SentMessage] = [messages1[index]
+        messages_delete: list[SentMsgType] = [messages1[index]
             for index in indices_delete]
-        messages_edit: list[tuple[SentMessage, Message]] = [
+        messages_edit: list[tuple[SentMsgType, MsgType]] = [
             (messages1[from_i],messages2[to_i])
             for from_i, to_i in indices_edit]
-        messages_send: list[Message] = [messages2[index]
+        messages_send: list[MsgType] = [messages2[index]
             for index in indices_send]
         return messages_delete, messages_edit, messages_send
 
