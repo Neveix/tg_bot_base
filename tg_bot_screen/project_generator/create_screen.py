@@ -17,7 +17,8 @@ from typing import Callable
 from telegram import Message as TgMessage
 from tg_bot_screen.ptb import SimpleMessage, PhotoMessage, ButtonRows, \
     ButtonRow, Button, GoToScreen, RunFunc, StepBack, ScreenCallback, \
-    FuncCallback, InputSession, FuncCallback, Message
+    FuncCallback, InputSession, FuncCallback, Message, DocumentMessage, \
+    VideoMessage
 from tg_bot_screen.callback_data import Dummy
 from tg_bot_screen.ptb.user_data import UserData as SysUserData
 from src.init.app import botm

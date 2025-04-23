@@ -10,8 +10,10 @@ from ...message import SentPhotoMessage     as BaseSentPhotoMessage
 from .message import HasButtonRows, Message, SentMessage
 
 class PhotoMessage(BasePhotoMessage, HasButtonRows, Message):
-    def __init__(self, photo: bytes | InputFile | pathlib.Path | telegram.PhotoSize, 
-            caption: str, button_rows: ButtonRows = None, 
+    def __init__(self,
+            photo: bytes | InputFile | pathlib.Path | telegram.PhotoSize, 
+            caption: str = None, 
+            button_rows: ButtonRows = None, *,
             parse_mode: str = None):
         super().__init__(caption, button_rows, parse_mode)
         self.photo = photo
@@ -20,8 +22,11 @@ class PhotoMessage(BasePhotoMessage, HasButtonRows, Message):
         ptb_message = await bot.send_photo(user_id, self.photo
             , self.caption, reply_markup=self.get_reply_markup(mapping)
             , parse_mode=self.parse_mode)
-        return SentPhotoMessage(self.photo, self.caption,
-            ptb_message, self.button_rows, self.parse_mode)
+        return SentPhotoMessage(self.photo, 
+            ptb_message = ptb_message, 
+            caption = self.caption,
+            button_rows = self.button_rows, 
+            parse_mode = self.parse_mode)
     
     def __eq__(self, other: Self):
         return self.caption == other.caption and \
@@ -37,15 +42,22 @@ class PhotoMessage(BasePhotoMessage, HasButtonRows, Message):
             self.parse_mode)
     
     def transform(self, old: "SentMessage"):
-        return SentPhotoMessage(self.photo, self.caption,
-            old.ptb_message, self.button_rows, self.parse_mode)
+        return SentPhotoMessage(
+            self.photo, 
+            ptb_message = old.ptb_message, 
+            caption = self.caption,
+            button_rows = self.button_rows, 
+            parse_mode = self.parse_mode)
 
 
 class SentPhotoMessage(BaseSentPhotoMessage, HasButtonRows, SentMessage):
-    def __init__(self, photo: bytes | InputFile | pathlib.Path | telegram.PhotoSize, 
-            caption: str, ptb_message: PTBMessage, button_rows: ButtonRows = None, 
+    def __init__(self, 
+            photo: bytes | InputFile | pathlib.Path | telegram.PhotoSize, 
+            ptb_message: PTBMessage, 
+            caption: str = None, 
+            button_rows: ButtonRows = None, *, 
             parse_mode: str = None,
-            ):
+        ):
         super().__init__(caption, button_rows, parse_mode)
         self.photo = photo
         self.ptb_message = ptb_message
@@ -74,12 +86,14 @@ class SentPhotoMessage(BaseSentPhotoMessage, HasButtonRows, SentMessage):
         return f"{type(self).__name__}({self.caption=!r}, {self.button_rows=!r}, {self.parse_mode=!r})"
     
     def clone(self):
-        return SentPhotoMessage(self.photo, self.caption, self.ptb_message, self.button_rows,
-            self.parse_mode)
+        return self.__class__(self.photo, self.ptb_message, 
+            caption = self.caption, 
+            button_rows = self.button_rows,
+            parse_mode = self.parse_mode)
 
     def get_unsent(self):
         return PhotoMessage(
-              self.photo
-            , self.caption
-            , self.button_rows
-            , self.parse_mode)
+            self.photo, 
+            caption = self.caption, 
+            button_rows = self.button_rows, 
+            parse_mode = self.parse_mode)

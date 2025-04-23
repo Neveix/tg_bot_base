@@ -11,9 +11,12 @@ from ...message import DocumentMessage  as BaseDocumentMessage
 from ...message import SentDocumentMessage  as BaseSentDocumentMessage
 
 class DocumentMessage(BaseDocumentMessage, HasButtonRows, Message):
-    def __init__(self, document: bytes | InputFile | pathlib.Path | telegram.Document, 
-            caption: str, button_rows: ButtonRows = None, 
-            parse_mode: str = None, filename: str = None):
+    def __init__(self, 
+            document: bytes | InputFile | pathlib.Path | telegram.Document, 
+            caption: str = None, 
+            button_rows: ButtonRows = None, *,
+            parse_mode: str = None, 
+            filename: str = None):
         super().__init__(caption, button_rows, parse_mode)
         self.document = document
         self.filename = filename
@@ -24,8 +27,12 @@ class DocumentMessage(BaseDocumentMessage, HasButtonRows, Message):
             reply_markup=self.get_reply_markup(mapping),
             parse_mode=self.parse_mode,
             filename = self.filename)
-        return SentDocumentMessage(self.document, self.caption,
-            ptb_message, self.button_rows, self.parse_mode, 
+        return SentDocumentMessage(
+            self.document,
+            ptb_message, 
+            caption = self.caption,
+            button_rows = self.button_rows, 
+            parse_mode = self.parse_mode, 
             filename = self.filename)
     
     def __eq__(self, other: Self):
@@ -39,19 +46,29 @@ class DocumentMessage(BaseDocumentMessage, HasButtonRows, Message):
         return f"{type(self).__name__}{{{self.filename}}}({self.caption=!r}, {self.button_rows=!r}, {self.parse_mode=!r})"
     
     def clone(self) -> Self: 
-        return self.__class__(self.document, self.caption, self.button_rows, 
-            self.parse_mode, filename = self.filename)
+        return self.__class__(self.document, 
+            caption = self.caption, 
+            button_rows = self.button_rows, 
+            parse_mode = self.parse_mode, 
+            filename = self.filename)
     
     def transform(self, old: "SentMessage"):
-        return SentDocumentMessage(self.document, self.caption,
-            old.ptb_message, self.button_rows, self.parse_mode, 
+        return SentDocumentMessage(
+            self.document, old.ptb_message, 
+            caption = self.caption,
+            button_rows = self.button_rows, 
+            parse_mode = self.parse_mode, 
             filename = self.filename)
 
 class SentDocumentMessage(BaseSentDocumentMessage, HasButtonRows, SentMessage):
-    def __init__(self, document: bytes | InputFile | pathlib.Path | telegram.Document, 
-            caption: str, ptb_message: PTBMessage, button_rows: ButtonRows = None, 
-            parse_mode: str = None, filename: str = None
-            ):
+    def __init__(self, 
+            document: bytes | InputFile | pathlib.Path | telegram.Document, 
+            ptb_message: PTBMessage, 
+            caption: str = None, 
+            button_rows: ButtonRows = None, *,
+            parse_mode: str = None, 
+            filename: str = None
+        ):
         super().__init__(caption, button_rows, parse_mode)
         self.document = document
         self.ptb_message = ptb_message
@@ -85,13 +102,16 @@ class SentDocumentMessage(BaseSentDocumentMessage, HasButtonRows, SentMessage):
 {self.button_rows=!r}, {self.parse_mode=!r})"
     
     def clone(self):
-        return self.__class__(self.document, self.caption, self.ptb_message, self.button_rows,
-            self.parse_mode, filename=self.filename)
+        return self.__class__(self.document, self.ptb_message, 
+            caption = self.caption, 
+            button_rows = self.button_rows, 
+            parse_mode = self.parse_mode, 
+            filename = self.filename)
 
     def get_unsent(self):
         return DocumentMessage(
-              self.document
-            , self.caption
-            , self.button_rows
-            , self.parse_mode
-            , filename=self.filename)
+            self.document, 
+            caption = self.caption, 
+            button_rows = self.button_rows, 
+            parse_mode = self.parse_mode, 
+            filename=self.filename)

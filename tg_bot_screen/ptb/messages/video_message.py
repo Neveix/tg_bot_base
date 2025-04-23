@@ -12,8 +12,10 @@ from ...message import VideoMessage         as BaseVideoMessage
 from ...message import SentVideoMessage     as BaseSentVideoMessage
 
 class VideoMessage(BaseVideoMessage, HasButtonRows, Message):
-    def __init__(self, video: bytes | InputFile | pathlib.Path | telegram.Video, 
-            caption: str, button_rows: ButtonRows = None, 
+    def __init__(self, 
+            video: bytes | InputFile | pathlib.Path | telegram.Video, 
+            caption: str = None, 
+            button_rows: ButtonRows = None, *,
             parse_mode: str = None):
         super().__init__(caption, button_rows, parse_mode)
         self.video = video
@@ -23,8 +25,10 @@ class VideoMessage(BaseVideoMessage, HasButtonRows, Message):
             caption = self.caption, 
             reply_markup=self.get_reply_markup(mapping),
             parse_mode=self.parse_mode)
-        return SentVideoMessage(self.video, self.caption,
-            ptb_message, self.button_rows, self.parse_mode)
+        return SentVideoMessage(self.video, ptb_message, 
+            caption = self.caption, 
+            button_rows = self.button_rows, 
+            parse_mode = self.parse_mode)
     
     def __eq__(self, other: Self):
         return self.caption == other.caption and \
@@ -36,18 +40,24 @@ class VideoMessage(BaseVideoMessage, HasButtonRows, Message):
         return f"{type(self).__name__}({self.caption=!r}, {self.button_rows=!r}, {self.parse_mode=!r})"
     
     def clone(self) -> Self: 
-        return self.__class__(self.video, self.caption, self.button_rows, 
-            self.parse_mode)
+        return self.__class__(self.video, 
+            caption = self.caption, 
+            button_rows = self.button_rows, 
+            parse_mode = self.parse_mode)
     
     def transform(self, old: "SentMessage"):
-        return SentVideoMessage(self.video, self.caption,
-            old.ptb_message, self.button_rows, self.parse_mode)
+        return SentVideoMessage(self.video, old.ptb_message, 
+            caption = self.caption, 
+            button_rows = self.button_rows, 
+            parse_mode = self.parse_mode)
 
 class SentVideoMessage(BaseSentVideoMessage, HasButtonRows, SentMessage):
-    def __init__(self, video: bytes | InputFile | pathlib.Path | telegram.Video, 
-            caption: str, ptb_message: PTBMessage, button_rows: ButtonRows = None, 
+    def __init__(self, video: bytes | InputFile | pathlib.Path | telegram.Video,
+            ptb_message: PTBMessage,
+            caption: str = None, 
+            button_rows: ButtonRows = None, *,
             parse_mode: str = None,
-            ):
+        ):
         super().__init__(caption, button_rows, parse_mode)
         self.video = video
         self.ptb_message = ptb_message
@@ -77,12 +87,14 @@ class SentVideoMessage(BaseSentVideoMessage, HasButtonRows, SentMessage):
         return f"{type(self).__name__}({self.caption=!r}, {self.button_rows=!r}, {self.parse_mode=!r})"
     
     def clone(self):
-        return self.__class__(self.video, self.caption, self.ptb_message, self.button_rows,
-            self.parse_mode)
+        return self.__class__(self.video, self.ptb_message, 
+            caption = self.caption, 
+            button_rows = self.button_rows,
+            parse_mode = self.parse_mode)
 
     def get_unsent(self):
         return VideoMessage(
-              self.video
-            , self.caption
-            , self.button_rows
-            , self.parse_mode)
+            self.video, 
+            caption = self.caption, 
+            button_rows = self.button_rows, 
+            parse_mode = self.parse_mode)
