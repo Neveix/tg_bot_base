@@ -72,7 +72,7 @@ class BotManager(ABC):
     
     async def mapping_key_error(self, user_id: int): ...
     
-    async def _handle_callback_query(self, user_id: int, query_data: str):
+    async def _handle_callback_query(self, user_id: int, query_data: str, **kwargs):
         user_data = self.get_system_user_data(user_id)
         mapping = user_data.callback_mapping
         data: CallbackData = mapping.get_by_uuid(query_data)
@@ -82,12 +82,12 @@ class BotManager(ABC):
         
         if isinstance(data, GoToScreen):
             if data.pre_func:
-                await data.pre_func(user_id=user_id)
+                await data.pre_func(user_id=user_id, **kwargs)
             
-            await self.screen.set_by_name(user_id, data.screen_name)
+            await self.screen.set_by_name(user_id, data.screen_name, **kwargs)
             
             if data.post_func:
-                await data.post_func(user_id=user_id)
+                await data.post_func(user_id=user_id, **kwargs)
                 
             user_data.update_sessions()
         
@@ -103,12 +103,12 @@ class BotManager(ABC):
                         session.messages.pop()
             
             if data.pre_func:
-                await data.pre_func(user_id=user_id)
+                await data.pre_func(user_id=user_id, **kwargs)
             
             await self.screen.step_back(user_id, data.times)
             
             if data.post_func:
-                await data.post_func(user_id=user_id)
+                await data.post_func(user_id=user_id, **kwargs)
             
             user_data.update_sessions()
             

@@ -20,18 +20,19 @@ class BotManager(BaseBotManager):
         return self
     
     def get_callback_query_handler(self):
-        async def callback(update: Update, _):
+        async def callback(update: Update, context):
             user_id = update.callback_query.from_user.id
             query_data = update.callback_query.data
-            await self._handle_callback_query(user_id, query_data)
+            await self._handle_callback_query(user_id, query_data, 
+                update=update, context=context)
             await update.callback_query.answer()
         return CallbackQueryHandler(callback)
 
     def get_message_handler(self):
-        async def callback(update: Update, _):
+        async def callback(update: Update, context):
             user_id = update.message.from_user.id
             await self._handle_message(user_id, update=update
-                , message=update.message)
+                , message=update.message, context=context)
             
         return MessageHandler(None, callback)
     
