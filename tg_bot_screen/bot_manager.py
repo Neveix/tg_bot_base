@@ -113,7 +113,7 @@ class BotManager(ABC):
             user_data.update_sessions()
             
         elif isinstance(data, RunFunc):
-            await data.function(user_id=user_id, **data.kwargs)
+            await data.function(user_id=user_id, **data.kwargs, **kwargs)
     
     def dynamic_screen(self, name: str):
         def decorator(func: Callable[[int],list[Message]]):
