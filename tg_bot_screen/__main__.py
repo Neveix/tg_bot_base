@@ -17,7 +17,7 @@ def main():
     args = parser.parse_args()
     
     if args.ptb is False:
-        good_use = R"python .\tg_bot_screen\__main__.py --ptb"
+        good_use = R"python -m tg_bot_screen --ptb"
         print(f"""
 Ошибка: Не передан аргумент, который отражает библиотеку, которая будет использована
 Например --ptb

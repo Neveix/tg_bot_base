@@ -115,8 +115,11 @@ class BotManager(ABC):
         elif isinstance(data, RunFunc):
             await data.function(user_id=user_id, **data.kwargs, **kwargs)
     
-    def dynamic_screen(self, name: str):
-        def decorator(func: Callable[[int],list[Message]]):
+    def dynamic_screen(self, name: str | None = None):
+        def decorator(func: Callable):
+            nonlocal name
+            if name is None:
+                name = func.__name__
             self.screen.append_screen(DynamicScreen(name, func))
         return decorator
 

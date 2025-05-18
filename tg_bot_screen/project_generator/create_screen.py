@@ -5,8 +5,8 @@ def create_screen(cwd: Path):
     mkmodule(cwd / "welcome.py", """\
 from .common import *
 
-@botm.dynamic_screen("welcome")
-async def menus(user_id: int, **kwargs):
+@botm.dynamic_screen()
+async def screen_welcome(user_id: int, **kwargs):
     return [SimpleMessage("Меню", 
         ButtonRows(
              ButtonRow(Button("Пусто", Dummy()))
@@ -15,10 +15,10 @@ async def menus(user_id: int, **kwargs):
     mkmodule(cwd / "common.py", """\
 from typing import Callable
 from telegram import Message as TgMessage
-from tg_bot_screen.ptb import SimpleMessage, PhotoMessage, ButtonRows, \
-    ButtonRow, Button, GoToScreen, RunFunc, StepBack, ScreenCallback, \
-    FuncCallback, InputSession, FuncCallback, Message, DocumentMessage, \
-    VideoMessage
+from tg_bot_screen.ptb import SimpleMessage, PhotoMessage, ButtonRows,
+    ButtonRow, Button, GoToScreen, RunFunc, StepBack, ScreenCallback,
+    FuncCallback, InputSession, FuncCallback, Message, DocumentMessage,
+    VideoMessage, InputCallback 
 from tg_bot_screen.callback_data import Dummy
 from tg_bot_screen.ptb.user_data import UserData as SysUserData
 from src.init.app import botm
@@ -45,19 +45,19 @@ async def is_bad_text(user_id: int, message: TgMessage = None, stack = True):
         return True
     return False
 
-@botm.dynamic_screen("bad_text")
-async def menus(user_id: int, message: TgMessage = None, **kwargs):
+@botm.dynamic_screen()
+async def screen_bad_text(user_id: int, message: TgMessage = None, **kwargs):
     return [SimpleMessage("😔 Неподходящий текст или он отсутствует",
             ButtonRows(step_back_button_row()))]
 
 async def is_bad_image(user_id: int, message: TgMessage = None, stack = True):
-    if message.photo is None:
+    if message.photo is ():
         await botm.screen.set_by_name(user_id, "bad_image", stack=stack)
         return True
     return False
 
-@botm.dynamic_screen("bad_image")
-async def menus(user_id: int, message: TgMessage = None, **kwargs):
+@botm.dynamic_screen()
+async def screen_bad_image(user_id: int, message: TgMessage = None, **kwargs):
     return [SimpleMessage("😔 Неподходящая картинка или она отсутствует",
             ButtonRows(step_back_button_row()))]
 
@@ -89,8 +89,8 @@ def simple_multi_screen(text: str, has_step_back = True, parse_mode: str = None,
     msgs[-1].button_rows = button_rows
     return msgs
 
-@botm.dynamic_screen("error_screen")
-async def menus(user_id: int, **kwargs):
+@botm.dynamic_screen()
+async def screen_error_screen(user_id: int, **kwargs):
     user_data = botm.get_user_data(user_id)
     return [SimpleMessage(f"😔 Ошибка: {user_data.last_error}",
             ButtonRows(step_back_button_row()))]""")

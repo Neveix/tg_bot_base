@@ -5,10 +5,10 @@ from .error_info import check_bad_text_and_len, check_bad_value, check_pre_post_
 
 class CallbackData(ABC):
     @abstractmethod
-    def clone(self): ...
+    def clone(self) -> Self: ...
     
     @abstractmethod
-    def __repr__(self): ...
+    def __repr__(self) -> str: ...
 
 class Dummy(CallbackData):
     def clone(self):
@@ -33,14 +33,14 @@ class RunFunc(CallbackData):
     def __repr__(self):
         return f"{type(self).__name__}({self.function!r})"
     
-    def __eq__(self, other: Self):
+    def __eq__(self, other: object):
         return isinstance(other, RunFunc) and \
             self.function == other.function and self.kwargs == other.kwargs
 
 class GoToScreen(CallbackData):
     def __init__(self, screen_name: str, *
-            , pre_func: FuncCallback = None
-            , post_func: FuncCallback = None):
+            , pre_func:  FuncCallback | None = None
+            , post_func: FuncCallback | None = None):
         check_bad_text_and_len(screen_name, self, "screen_name")
         check_pre_post_func(pre_func, post_func, self)
         
@@ -55,7 +55,7 @@ class GoToScreen(CallbackData):
         return f"{type(self).__name__}({self.screen_name!r}, \
 {self.pre_func}, {self.post_func})"
     
-    def __eq__(self, other: Self):
+    def __eq__(self, other: object):
         return isinstance(other, GoToScreen) and \
             self.screen_name == other.screen_name
 
@@ -86,7 +86,7 @@ class StepBack(CallbackData):
         return f"{type(self).__name__}({self.times!r}, {self.clear_input_callback}, \
 {self.pop_last_input}, {self.pre_func}, {self.post_func})"
     
-    def __eq__(self, other: Self):
+    def __eq__(self, other: object):
         return isinstance(other, StepBack)
 
 class CallbackDataMapping:
