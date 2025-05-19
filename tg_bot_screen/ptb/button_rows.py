@@ -32,7 +32,11 @@ class Button(BaseButton):
         
     def to_inline_button(self, mapping: CallbackDataMapping
             ) -> InlineKeyboardButton:
-        uuid = mapping.get_by_callback(self.callback_data)
+        if self.web_app:
+            uuid = None
+        else:
+            uuid = mapping.get_by_callback(self.callback_data)
+        
         return InlineKeyboardButton(self.text
             , callback_data = uuid, url = self.url, web_app=self.web_app)
     

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "tg_bot_screen"
-version = "1.4.36"
+version = "1.4.37"
 authors = [
   { name="Neveix", email="i@neveix.ru" },
 ]
