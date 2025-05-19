@@ -1,29 +1,35 @@
 from abc import abstractmethod
 from typing import Self
-from uuid import uuid4
 from .callback_data import CallbackData
 from .error_info import check_bad_text_and_len, check_bad_value
 
 class Button:
-    def __init__(self, text: str, callback_data: CallbackData, url: str = None):
+    def __init__(self, text: str, callback_data: CallbackData, 
+                 url: str | None = None, web_app = None):
         check_bad_text_and_len(text, self, "text")
         check_bad_value(callback_data, CallbackData, self, "callback_data")
         if url:
             check_bad_text_and_len(url, self, "url")
-        
+
         self.text = text
         self.callback_data = callback_data
         self.url = url
+        self.web_app = web_app
     
     def clone(self) -> Self:
-        return Button(self.text, self.callback_data.clone())
+        return Button(self.text, self.callback_data.clone(), self.url, self.web_app)
 
     def __repr__(self):
         return f"{type(self).__name__}({self.text!r}, {self.callback_data!r}, url={self.url!r})"
 
-    def __eq__(self, other: Self):
+    def __eq__(self, other: object):
+        if not isinstance(other, Button):
+            return False
+        
         return (self.text == other.text and \
-            self.callback_data == other.callback_data)
+                self.callback_data == other.callback_data and \
+                self.url == other.url and \
+                self.web_app == other.web_app)
 
 class ButtonRow:
     def __init__(self, *buttons: Button):

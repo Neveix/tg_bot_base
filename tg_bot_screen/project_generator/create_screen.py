@@ -15,9 +15,9 @@ async def screen_welcome(user_id: int, **kwargs):
     mkmodule(cwd / "common.py", """\
 from typing import Callable
 from telegram import Message as TgMessage
-from tg_bot_screen.ptb import SimpleMessage, PhotoMessage, ButtonRows,
-    ButtonRow, Button, GoToScreen, RunFunc, StepBack, ScreenCallback,
-    FuncCallback, InputSession, FuncCallback, Message, DocumentMessage,
+from tg_bot_screen.ptb import SimpleMessage, PhotoMessage, ButtonRows, \\
+    ButtonRow, Button, GoToScreen, RunFunc, StepBack, ScreenCallback, \\
+    FuncCallback, InputSession, FuncCallback, Message, DocumentMessage, \\
     VideoMessage, InputCallback 
 from tg_bot_screen.callback_data import Dummy
 from tg_bot_screen.ptb.user_data import UserData as SysUserData
@@ -51,7 +51,7 @@ async def screen_bad_text(user_id: int, message: TgMessage = None, **kwargs):
             ButtonRows(step_back_button_row()))]
 
 async def is_bad_image(user_id: int, message: TgMessage = None, stack = True):
-    if message.photo is ():
+    if message.photo == ():
         await botm.screen.set_by_name(user_id, "bad_image", stack=stack)
         return True
     return False

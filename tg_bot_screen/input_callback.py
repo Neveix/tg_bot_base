@@ -4,7 +4,7 @@ from typing import Callable
 class InputCallback: ...
 
 class FuncCallback(InputCallback):
-    def __init__(self, function: Callable[[int],None]
+    def __init__(self, function: Callable
         , one_time: bool = True, **kwargs):
         self.function = function
         self.one_time = one_time
