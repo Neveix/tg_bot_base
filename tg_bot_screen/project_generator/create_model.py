@@ -28,7 +28,7 @@ class BotManager(BaseBotManager):
         await self.start_inner(user_id)""")
     
     mkmodule(cwd / "config_manager.py", """\
-from json import dumps
+from json import dumps, loads
 from pathlib import Path
 from typing import Any
 
