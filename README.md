@@ -1,6 +1,6 @@
 # Менеджер экранов для Телеграм-ботов
 
-tg_bot_screen это Python библиотека для упрощения создания телеграм ботов 
+tg_bot_screen - это Python библиотека для упрощения создания телеграм ботов 
 на базе Python-Telegram-Bot и других фреймворках.
 
 **Table of Contents**
@@ -12,7 +12,8 @@ tg_bot_screen это Python библиотека для упрощения со�
     - [Динамичность](#динамичность)
     - [Структура](#структура)
   - [Установка и использование](#установка-и-использование)
-    - [Быстрый старт](#быстрый-старт)
+    - [Инициализация проекта](#инициализация-проекта)
+    - [Минимально рабочий пример](#минимально-рабочий-пример)
 
 ## Основные возможности
 ### Экраны 
@@ -47,18 +48,65 @@ TBS исключает такую возможность: Клавиатура, 
 
 
 ## Установка и использование
-`pip install tg_bot_screen`
+**Есть 2 варианта как начать разработку с tg_bot_screen:**
+1) Инициализировать проект с помощью встроенного генератора
+2) Начать с минимально рабочего примера
 
-### Быстрый старт
+Скачайте зависимости: `pip install tg_bot_screen python-telegram-bot`
+
+### Инициализация проекта
 1. Создайте директорию с вашим проектом  
 2. Инициализируйте проект: `python -m tg_bot_screen --ptb`
 3. Добавьте переменную окружения `BOT_TOKEN` с вашим токеном бота из BotFather
 4. Запустите бота с помощью `python run.py`
 
 
+### Минимально рабочий пример
+
+```python
+from telegram import Update
+from telegram.ext import Application, CommandHandler
+
+from tg_bot_screen.callback_data import GoToScreen, StepBack
+from tg_bot_screen.ptb import BotManager
+from tg_bot_screen.ptb.button_rows import ButtonRows, ButtonRow, Button
+from tg_bot_screen.ptb.messages.simple_message import SimpleMessage
 
 
+token = "YOUR_TOKEN"
 
+app = Application.builder().token(token).build()
+
+botm = BotManager(app).build()
+
+async def start_callback(update: Update, _):
+    user_id = update.message.from_user.id 
+    print(f"{user_id} has typed /start")
+    await botm.screen.set_by_name(user_id, "welcome")
+
+app.add_handler(CommandHandler("start", start_callback))
+botm.add_handlers()
+
+@botm.dynamic_screen()
+async def welcome(user_id: int, **kwargs):
+    text = "Welcome screen"
+    button_rows = ButtonRows(
+        ButtonRow(Button("Second screen", GoToScreen("screen2")))
+    )
+    return [SimpleMessage(text, button_rows)]
+
+@botm.dynamic_screen()
+async def screen2(user_id: int, **kwargs):
+    text = "Second screen"
+    button_rows = ButtonRows(
+        ButtonRow(Button("Back", StepBack()))
+    )
+    return [SimpleMessage(text, button_rows)]
+
+
+print("Polling...")
+app.run_polling(0.1)
+```
 
 
 

@@ -40,6 +40,8 @@ class BotManager(BaseBotManager):
         await message.delete()
     
     def add_handlers(self):
+        """Эта функция должна вызываться ПОСЛЕ 
+        регистрации /start или подобных команд"""
         self.application.add_handlers([
             self.get_callback_query_handler(),
             self.get_message_handler()
