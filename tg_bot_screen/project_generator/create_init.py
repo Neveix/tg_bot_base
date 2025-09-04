@@ -15,42 +15,14 @@ bot = application.bot
 
 botm = BotManager(application).build()""")
     
-    mkmodule(cwd / "config.py", """\
-from pathlib import Path
-from json import loads, dumps
-from .app import botm
-
-file_path = Path("config/config.json")
-file_path.parent.mkdir(parents=True, exist_ok=True)
-defaults = botm.config.defaults
-    
-def load_config():
-    check_fields = False
-    if file_path.exists():
-        try:
-            json = loads(file_path.read_text("utf-8"))
-            check_fields = True
-        except:
-            json = defaults
-    else:
-        json = defaults
-    
-    if check_fields:
-        for name in defaults:
-            if name not in json:
-                json[name] = defaults[name]
-    
-    botm.config.set_config(file_path, json)""")
     
     mkmodule(cwd / "main.py", """\
 from telegram.ext import CommandHandler
 from .app import botm, application
 from .screens import load_screens
-from .config import load_config
 from .start import start, start_inner
 
 load_screens()
-load_config()
 
 botm.start_inner = start_inner
 

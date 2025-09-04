@@ -14,6 +14,7 @@ class BotManager(BaseBotManager):
         super().__init__(application)
         self.user_data_m = UserDataManager()
         self.config = ConfigManager()
+        self.config.load()
         
         self.start_inner: Callable = None
     
@@ -32,31 +33,51 @@ from pathlib import Path
 from typing import Any
 
 class ConfigManager:
-    def __init__(self):
-        self.__path: Path = None
-        self.__json: dict[str, Any] = None
+    def __init__(self, path: str = "config/config.json"):
+        self.__path = Path(path)
+        self.__json: dict[str, Any]
         self.defaults = {
-            "test" : 0
+            "development_mode" : False,
+            "admin_list": []
         }
     
-    def set_config(self, path: Path, json: dict):
-        self.__path = path
+    def load(self):
+        file_path = self.__path
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        defaults = self.defaults
+        check_fields = False # Для оптимизации
+        if file_path.exists():
+            try:
+                json = loads(file_path.read_text("utf-8"))
+                check_fields = True
+            except Exception as e:
+                print(f"ConfigManager Error {e!r}")
+                json = defaults
+        else:
+            json = defaults
+        
         self.__json = json
-        self.dump_to_file()
-    
+
+        if check_fields:
+            for name in defaults:
+                if name not in json:
+                    json[name] = defaults[name]
+            self.dump_to_file()
+
     def dump_to_file(self):
         self.__path.touch(exist_ok=True)
-        self.__path.write_text(dumps(self.__json, indent=4, ensure_ascii=False), 
+        self.__path.write_text(
+            dumps(self.__json, indent=4, ensure_ascii=False), 
             encoding="utf-8")
     
     @property
-    def test(self) -> int:
-        return self.__json["test"]
+    def development_mode(self) -> bool:
+        return self.__json["development_mode"]
     
-    @test.setter
-    def test(self, value: int):
-        self.__json["test"] = value
-        self.dump_to_file()
+    @property
+    def admin_list(self) -> list[int]:
+        return self.__json["admin_list"]
+        
     """)
     mkmodule(cwd / "user_data.py", """\
 class UserData:
