@@ -1,10 +1,22 @@
 # Менеджер экранов для Телеграм-ботов
 
 tg_bot_screen - это Python библиотека для упрощения создания телеграм ботов 
-на базе Python-Telegram-Bot и других фреймворках.
+на базе python-telegram-bot и других фреймворках.
 
-**Table of Contents**
+## Ссылки
+### GitHub
+https://github.com/Neveix/tg_bot_base  
+
+### PyPI (pip)
+https://pypi.org/project/tg-bot-screen/
+
+
+## Table of Contents
 - [Менеджер экранов для Телеграм-ботов](#менеджер-экранов-для-телеграм-ботов)
+  - [Ссылки](#ссылки)
+    - [GitHub](#github)
+    - [PyPI (pip)](#pypi-pip)
+  - [Table of Contents](#table-of-contents)
   - [Основные возможности](#основные-возможности)
     - [Экраны](#экраны)
     - [Пользовательский ввод](#пользовательский-ввод)
