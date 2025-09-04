@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from telegram import Bot, Message as PTBMessage
+import telegram
 
 from ..button_rows import ButtonRows
 from ...callback_data import CallbackDataMapping
@@ -26,9 +27,12 @@ class SentMessage(BaseSentMessage):
         self.ptb_message: PTBMessage = None
     
     async def delete(self, bot: Bot):
-        await bot.delete_message(
-            chat_id=self.ptb_message.chat_id,
-            message_id=self.ptb_message.message_id)
+        try:
+            await bot.delete_message(
+                chat_id=self.ptb_message.chat_id,
+                message_id=self.ptb_message.message_id)
+        except telegram.error.BadRequest as e:
+            print(f"{self} не получилось удалить: {e!r}")
     
     @abstractmethod
     async def edit(self, bot: Bot, mapping: CallbackDataMapping): ...

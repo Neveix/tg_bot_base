@@ -3,6 +3,8 @@ from email import message
 from typing import Type, TypeVar
 from uuid import uuid4
 
+import telegram
+
 from .error_info import check_bad_value
 
 from .callback_data import CallbackDataMapping
@@ -95,7 +97,10 @@ class UserScreen(ABC):
     
     async def unbuffer(self, user_id: int): 
         screen = self.user_data.get(user_id).screen_buffer
-        await self.set(user_id, screen)
+        try:
+            await self.set(user_id, screen)
+        except telegram.error.BadRequest as e:
+            print(f"у {user_id} ошибка в unbuffer: {e!r}")
     
     @abstractmethod
     async def set(self, user_id: int, new_screen: ReadyScreen):
