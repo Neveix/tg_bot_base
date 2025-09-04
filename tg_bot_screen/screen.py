@@ -74,7 +74,7 @@ class ProtoScreen(ABC):
             self.append(message)
     
     @abstractmethod
-    async def evaluate(self, user_id: int) -> ReadyScreen: ...
+    async def evaluate(self, user_id: int, **kwargs) -> ReadyScreen: ...
 
 class StaticScreen(ProtoScreen):
     def __init__(self, name: str, *messages: Message):

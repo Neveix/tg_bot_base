@@ -38,7 +38,14 @@ class UserScreen(ABC):
         directory_stack = user_data.directory_stack
         
         if not stack:
-            if len(directory_stack)==0 or directory_stack[-1] == screen_name: 
+            if len(directory_stack)==0:
+                print(f"{user_id} попытался перейти на экран {screen_name!r} "
+                      f"в режиме stack=False, но len(directory_stack) было 0")
+                return
+            
+            if directory_stack[-1] == screen_name: 
+                print(f"{user_id} попытался перейти на экран {screen_name!r} "
+                      f"но он уже находился на этом экране")
                 return 
             user_data.directory_stack[-1] = screen_name
         else:
@@ -47,8 +54,8 @@ class UserScreen(ABC):
         
         screen = self.screen_dict.get(screen_name)
         if screen is None:
-            raise KeyError(f"Попытка получить экран с названием {screen_name!r}, \
-но его не существует")
+            raise KeyError(f"Попытка получить экран с названием {screen_name!r}, "
+                            "но его не существует")
         evaluated_screen = await screen.evaluate(user_id, sys_user_data=user_data, **kwargs)
         
         await self.set(user_id, evaluated_screen)
