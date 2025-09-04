@@ -1,8 +1,8 @@
 from .common import *
 
-def create_model(cwd: Path): 
-    mkpackage(cwd)
-    mkmodule(cwd / "bot_manager.py", """\
+def create_model(proj_gen: ProjectGenerator, cwd: Path): 
+    proj_gen.mkpackage(cwd)
+    proj_gen.mkmodule(cwd / "bot_manager.py", """\
 from typing import Callable
 from telegram.ext import Application
 from tg_bot_screen.ptb import BotManager as BaseBotManager
@@ -27,7 +27,7 @@ class BotManager(BaseBotManager):
     async def mapping_key_error(self, user_id: int):
         await self.start_inner(user_id)""")
     
-    mkmodule(cwd / "config_manager.py", """\
+    proj_gen.mkmodule(cwd / "config_manager.py", """\
 from json import dumps, loads
 from pathlib import Path
 from typing import Any
@@ -79,7 +79,7 @@ class ConfigManager:
         return self.__json["admin_list"]
         
     """)
-    mkmodule(cwd / "user_data.py", """\
+    proj_gen.mkmodule(cwd / "user_data.py", """\
 class UserData:
     def __init__(self):
         self.last_error: str = None 

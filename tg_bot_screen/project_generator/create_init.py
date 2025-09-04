@@ -1,8 +1,9 @@
-from .common import *
+from pathlib import Path
+from .common import ProjectGenerator
 
-def create_init(cwd: Path): 
-    mkpackage(cwd)
-    mkmodule(cwd / "app.py", """\
+def create_init(proj_gen: ProjectGenerator, cwd: Path): 
+    proj_gen.mkpackage(cwd)
+    proj_gen.mkmodule(cwd / "app.py", """\
 from os import environ
 from telegram.ext import Application
 from src.model.bot_manager import BotManager
@@ -16,7 +17,7 @@ bot = application.bot
 botm = BotManager(application).build()""")
     
     
-    mkmodule(cwd / "main.py", """\
+    proj_gen.mkmodule(cwd / "main.py", """\
 from telegram.ext import CommandHandler
 from .app import botm, application
 from .screens import load_screens
@@ -34,7 +35,7 @@ botm.add_handlers()
 print("Запрашивание...")
 application.run_polling(0.1)""")
 
-    mkmodule(cwd / "screens.py", R"""\
+    proj_gen.mkmodule(cwd / "screens.py", R"""\
 import importlib
 from pathlib import Path
 
@@ -47,7 +48,7 @@ def load_screens():
         module_name = fullpath[:-3].replace("/", ".").replace("\\", ".")
         importlib.import_module(module_name)""")
     
-    mkmodule(cwd / "start.py", """\
+    proj_gen.mkmodule(cwd / "start.py", """\
 from telegram import Update, User
 from src.init.app import botm
 

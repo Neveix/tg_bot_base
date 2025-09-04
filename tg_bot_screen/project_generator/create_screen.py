@@ -1,8 +1,8 @@
 from .common import *
 
-def create_screen(cwd: Path): 
-    mkpackage(cwd)
-    mkmodule(cwd / "welcome.py", """\
+def create_screen(proj_gen: ProjectGenerator, cwd: Path): 
+    proj_gen.mkpackage(cwd)
+    proj_gen.mkmodule(cwd / "welcome.py", """\
 from .common import *
 
 @botm.dynamic_screen()
@@ -12,7 +12,7 @@ async def welcome(user_id: int, **kwargs):
              ButtonRow(Button("Пусто", Dummy()))
         ))]
 """)
-    mkmodule(cwd / "common.py", """\
+    proj_gen.mkmodule(cwd / "common.py", """\
 from typing import Callable
 from telegram import Message as TgMessage
 from tg_bot_screen.ptb import SimpleMessage, PhotoMessage, ButtonRows, \\
