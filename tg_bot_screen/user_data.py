@@ -43,7 +43,7 @@ class UserData:
         return True
         
     def get_session(self, id: str, expected_class: Type[SessionType] = Session
-            ) -> SessionType:
+            ) -> SessionType | None:
         return self.__sessions.get(id)
     
     def update_sessions(self):
