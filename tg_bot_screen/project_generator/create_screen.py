@@ -6,7 +6,7 @@ def create_screen(cwd: Path):
 from .common import *
 
 @botm.dynamic_screen()
-async def screen_welcome(user_id: int, **kwargs):
+async def welcome(user_id: int, **kwargs):
     return [SimpleMessage("Меню", 
         ButtonRows(
              ButtonRow(Button("Пусто", Dummy()))
