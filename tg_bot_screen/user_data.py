@@ -11,12 +11,15 @@ class UserData:
     def __init__(self, user_id: int):
         self.user_id = user_id
         self.callback_mapping = CallbackDataMapping()
-        self.media_group_id: str = None
-        self.input_callback: InputCallback = None
+        self.media_group_id: str | None = None
+        self.input_callback: InputCallback | None = None
         self.directory_stack: list[str] = []
-        self.screen: SentScreen = None
-        self.screen_buffer: ReadyScreen = None
+        self.screen: SentScreen | None = None
+        self.screen_buffer: ReadyScreen | None = None
         self.__sessions: dict[str, Session] = {}
+    
+    def reset_input_callback(self):
+        self.input_callback = None
     
     @property
     def sessions(self):
@@ -44,7 +47,7 @@ class UserData:
         
     def get_session(self, id: str, expected_class: Type[SessionType] = Session
             ) -> SessionType | None:
-        return self.__sessions.get(id)
+        return self.__sessions.get(id) # type: ignore
     
     def update_sessions(self):
         new_dir_level = len(self.directory_stack)
