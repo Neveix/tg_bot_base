@@ -6,10 +6,12 @@ from ..button_rows import ButtonRows
 from ...callback_data import CallbackDataMapping
 from ...message import Message as BaseMessage
 from ...message import SentMessage as BaseSentMessage
+from ...message import HasButtonRows as BaseHasButtonRows
 
-class HasButtonRows(ABC):
+class HasButtonRows(BaseHasButtonRows):
     def __init__(self):
-        self.button_rows: ButtonRows = None
+        self.button_rows: ButtonRows | None = None
+        
     def get_reply_markup(self, mapping: CallbackDataMapping):
         if self.button_rows:
             return self.button_rows.to_reply_markup(mapping)

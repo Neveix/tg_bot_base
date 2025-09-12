@@ -52,7 +52,8 @@ class VideoMessage(BaseVideoMessage, HasButtonRows, Message):
             parse_mode = self.parse_mode)
 
 class SentVideoMessage(BaseSentVideoMessage, HasButtonRows, SentMessage):
-    def __init__(self, video: bytes | InputFile | pathlib.Path | telegram.Video,
+    def __init__(self, 
+            video: bytes | InputFile | pathlib.Path | telegram.Video,
             ptb_message: PTBMessage,
             caption: str = None, 
             button_rows: ButtonRows = None, *,
@@ -66,7 +67,8 @@ class SentVideoMessage(BaseSentVideoMessage, HasButtonRows, SentMessage):
     async def edit(self, bot: Bot, mapping: CallbackDataMapping):
         orig = self.ptb_message
         reply_markup = self.get_reply_markup(mapping)
-        if orig.caption_html == self.caption and orig.reply_markup == reply_markup \
+        if      orig.caption_html == self.caption \
+                and orig.reply_markup == reply_markup \
                 and self.__ptb_message_video == self.video:
             return
         self.ptb_message = await bot.edit_message_media(

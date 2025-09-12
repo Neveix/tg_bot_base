@@ -8,6 +8,19 @@ class CanBeEdited(ABC):
     @abstractmethod
     async def edit(self) -> "CanBeEdited": ...
 
+class HasButtonRows(ABC):
+    def __init__(self):
+        self.button_rows: ButtonRows | None = None
+        
+    @abstractmethod
+    def get_reply_markup(self, *args, **kwargs):
+        ...
+    
+    def get_callback_data(self) -> list[CallbackData]:
+        if self.button_rows is None:
+            return []
+        return self.button_rows.get_callback_data()
+
 class SentMessage(ABC):
     def __init__(self):
         self.text: str = None
@@ -17,10 +30,11 @@ class SentMessage(ABC):
     async def delete(self): ...
     
     @abstractmethod
-    def __eq__(self, other: Self): ...
+    def __eq__(self, other: object) -> bool: 
+        ...
     
     @abstractmethod
-    def clone(self): ...
+    def clone(self) -> Self: ...
     
     @abstractmethod
     def get_unsent(self): ...
@@ -33,15 +47,11 @@ class Message(ABC):
     async def send(self, user_id: int) -> SentMessage: ...
     
     @abstractmethod
-    def __eq__(self, other: Self): ...
+    def __eq__(self, other: object) -> bool: 
+        ...
     
     @abstractmethod
     def clone(self) -> Self: ...
-
-    def get_callback_data(self) -> list[CallbackData]:
-        if self.button_rows is None:
-            return []
-        return self.button_rows.get_callback_data()
 
 class MediaMessage(ABC):
     def __init__(self, caption: str, button_rows: ButtonRows = None, 
