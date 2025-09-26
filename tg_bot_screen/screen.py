@@ -55,7 +55,7 @@ class SentScreen(HasCallbackData):
         return f"{type(self).__name__}({self.messages!r})"
     
     @abstractmethod
-    async def delete(self): ...
+    async def delete(self, *args, **kwargs): ...
     
     @abstractmethod
     def get_unsent(self) -> ReadyScreen: ...
@@ -74,14 +74,15 @@ class ProtoScreen(ABC):
             self.append(message)
     
     @abstractmethod
-    async def evaluate(self, user_id: int, **kwargs) -> ReadyScreen: ...
+    async def evaluate(self, user_id: int, *args, 
+                       **kwargs) -> ReadyScreen: ...
 
 class StaticScreen(ProtoScreen):
     def __init__(self, name: str, *messages: Message):
         super().__init__(name = name)
-        self.extend(messages)
+        self.extend(list(messages))
     
-    async def evaluate(self, _):
+    async def evaluate(self, user_id: int, *args, **kwargs):
         messages = []
         for message in self.messages:
             new_message = message.clone()
