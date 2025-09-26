@@ -6,8 +6,8 @@ class Session:
 
         self.id = id
         
-        self.directory_level: int = None
-        self.last_directory: str = None
+        self.directory_level: int = -1
+        self.last_directory: str = ""
         
         self.delete_if_level_decreased = delete_if_level_decreased
         self.delete_if_last_dir_changed = delete_if_last_dir_changed
