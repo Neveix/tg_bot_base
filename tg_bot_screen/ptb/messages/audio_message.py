@@ -19,7 +19,7 @@ class AudioMessage(BaseAudioMessage, HasButtonRows, Message):
             audio: InputFile | bytes | pathlib.Path | telegram.Audio, 
             caption: str, 
             button_rows: ButtonRows = None, *, 
-            parse_mode: str = None,
+            parse_mode: str | None = None,
             filename: str = None
         ):
         super().__init__(caption, button_rows, parse_mode)

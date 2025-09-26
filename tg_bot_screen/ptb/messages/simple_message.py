@@ -36,7 +36,7 @@ class SimpleMessage(BaseSimpleMessage, HasButtonRows, Message):
     
 class SentSimpleMessage(BaseSentSimpleMessage, HasButtonRows, SentMessage):
     def __init__(self, text: str, button_rows: ButtonRows
-        , ptb_message: PTBMessage, parse_mode: str = None):
+        , ptb_message: PTBMessage, parse_mode: str | None = None):
         super().__init__(text, button_rows, parse_mode)
         self.ptb_message = ptb_message 
     

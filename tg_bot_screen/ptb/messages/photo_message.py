@@ -14,7 +14,7 @@ class PhotoMessage(BasePhotoMessage, HasButtonRows, Message):
             photo: bytes | InputFile | pathlib.Path | telegram.PhotoSize, 
             caption: str = None, 
             button_rows: ButtonRows = None, *,
-            parse_mode: str = None):
+            parse_mode: str | None = None):
         super().__init__(caption, button_rows, parse_mode)
         self.photo = photo
         
@@ -56,7 +56,7 @@ class SentPhotoMessage(BaseSentPhotoMessage, HasButtonRows, SentMessage):
             ptb_message: PTBMessage, 
             caption: str = None, 
             button_rows: ButtonRows = None, *, 
-            parse_mode: str = None,
+            parse_mode: str | None = None,
         ):
         super().__init__(caption, button_rows, parse_mode)
         self.photo = photo

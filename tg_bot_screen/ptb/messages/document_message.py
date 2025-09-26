@@ -15,7 +15,7 @@ class DocumentMessage(BaseDocumentMessage, HasButtonRows, Message):
             document: bytes | InputFile | pathlib.Path | telegram.Document, 
             caption: str = None, 
             button_rows: ButtonRows = None, *,
-            parse_mode: str = None, 
+            parse_mode: str | None = None, 
             filename: str = None):
         super().__init__(caption, button_rows, parse_mode)
         self.document = document
@@ -66,7 +66,7 @@ class SentDocumentMessage(BaseSentDocumentMessage, HasButtonRows, SentMessage):
             ptb_message: PTBMessage, 
             caption: str = None, 
             button_rows: ButtonRows = None, *,
-            parse_mode: str = None, 
+            parse_mode: str | None = None, 
             filename: str = None
         ):
         super().__init__(caption, button_rows, parse_mode)

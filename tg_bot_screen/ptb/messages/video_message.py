@@ -16,7 +16,7 @@ class VideoMessage(BaseVideoMessage, HasButtonRows, Message):
             video: bytes | InputFile | pathlib.Path | telegram.Video, 
             caption: str = None, 
             button_rows: ButtonRows = None, *,
-            parse_mode: str = None):
+            parse_mode: str | None = None):
         super().__init__(caption, button_rows, parse_mode)
         self.video = video
         
@@ -57,7 +57,7 @@ class SentVideoMessage(BaseSentVideoMessage, HasButtonRows, SentMessage):
             ptb_message: PTBMessage,
             caption: str = None, 
             button_rows: ButtonRows = None, *,
-            parse_mode: str = None,
+            parse_mode: str | None = None,
         ):
         super().__init__(caption, button_rows, parse_mode)
         self.video = video
