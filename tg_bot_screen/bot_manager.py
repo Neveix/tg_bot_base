@@ -1,5 +1,5 @@
 from abc import abstractmethod, ABC
-from typing import Callable
+from typing import Callable, Self
 from .screen import DynamicScreen
 from .input_callback import FuncCallback, InputCallback, ScreenCallback
 from .callback_data import CallbackData
@@ -8,8 +8,8 @@ from .user_screen import UserScreen
 
 class BotManager(ABC):
     def __init__(self):
-        self.system_user_data: UserDataManager = None
-        self.screen: UserScreen = None
+        self.system_user_data: UserDataManager
+        self.screen: UserScreen
         
     def config_delete_old_messages(self, user_id: int):
         input_callback = self.get_system_user_data(user_id).input_callback
@@ -17,12 +17,13 @@ class BotManager(ABC):
             return False
         return True
     
-    def build(self):
-        user_datam = UserDataManager()
-        screen = UserScreen(user_datam)
-        self.system_user_data = user_datam
-        self.screen = screen
-        return self
+    @abstractmethod
+    def build(self) -> Self: ...
+        # user_datam = UserDataManager()
+        # screen = UserScreen(user_datam)
+        # self.system_user_data = user_datam
+        # self.screen = screen
+        # return self
     
     @abstractmethod
     def add_handlers(self): ...
@@ -39,7 +40,7 @@ class BotManager(ABC):
         if delete_old:
             await self.delete_message(**kwargs)
         
-        input_callback: InputCallback = user_data.input_callback
+        input_callback = user_data.input_callback
         if input_callback is None:
             return
         

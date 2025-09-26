@@ -17,7 +17,8 @@ class Button:
         self.web_app = web_app
     
     def clone(self) -> Self:
-        return Button(self.text, self.callback_data.clone(), self.url, self.web_app)
+        return self.__class__(self.text, self.callback_data.clone(), 
+                      self.url, self.web_app)
 
     def __repr__(self):
         return f"{type(self).__name__}({self.text!r}, {self.callback_data!r}, url={self.url!r})"
@@ -34,7 +35,7 @@ class Button:
 class ButtonRow:
     def __init__(self, *buttons: Button):
         self.buttons: list[Button] = []
-        self.extend(buttons)
+        self.extend(list(buttons))
     
     def extend(self, buttons: list[Button]):
         for button in buttons:
@@ -47,22 +48,27 @@ class ButtonRow:
         return self
     
     def clone(self) -> Self:
-        return ButtonRow().\
-            extend([button.clone() for button in self.buttons])
+        return self.__class__().extend([
+            button.clone() 
+            for button in self.buttons
+        ])
     
     def __repr__(self):
         return f"{type(self).__name__}(*{self.buttons!r})"
     
-    def __eq__(self, other: Self):
-        return all([
-            button1 == button2 
-            for button1, button2
-            in zip(self.buttons, other.buttons)])
+    def __eq__(self, other: object) -> bool:
+        return \
+            isinstance(other, self.__class__) and \
+            all([
+                button1 == button2 
+                for button1, button2
+                in zip(self.buttons, other.buttons)
+            ])
 
 class ButtonRows:
     def __init__(self, *rows: ButtonRow):
         self.rows: list[ButtonRow] = []
-        self.extend(rows)
+        self.extend(list(rows))
     
     def extend(self, rows: list[ButtonRow]):
         for row in rows:
@@ -73,11 +79,13 @@ class ButtonRows:
         self.rows.append(row)
     
     def clone(self) -> Self:
-        return ButtonRows(*[row.clone() for row in self.rows])
+        return self.__class__(*[row.clone() for row in self.rows])
     
-    def __eq__(self, other: Self):
-        return all([row1 == row2
-            for row1, row2 in zip(self.rows,other.rows)])
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, self.__class__) and \
+            all([row1 == row2
+                for row1, row2 in 
+                zip(self.rows,other.rows)])
         
     def __repr__(self):
         return f"{type(self).__name__}(*{self.rows!r})"

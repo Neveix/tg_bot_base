@@ -1,4 +1,4 @@
-from typing import Callable, Self, Sequence
+from typing import Callable, Self, Sequence, Type
 from abc import ABC, abstractmethod
 
 from .session import InputSession
@@ -45,7 +45,7 @@ class RunFunc(CallbackData):
             function - Функция для выполнения при нажатии кнопки  
             **kwargs - keyword аргументы функции
         """
-        check_bad_value(function, Callable, self, "function")
+        check_bad_value(function, Type[Callable], self, "function")
         self.function = function
         self.kwargs = kwargs
     

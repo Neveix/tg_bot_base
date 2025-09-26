@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from email import message
-from typing import Type, TypeVar
+from typing import Type, TypeVar, cast
 from uuid import uuid4
 
 import telegram
@@ -13,8 +13,8 @@ from .message import Message, SentMessage
 from .user_data import UserDataManager
 from .screen import ReadyScreen
 
-MsgType = TypeVar('MsgType')
-SentMsgType = TypeVar('SentMsgType')
+MsgType = TypeVar('MsgType', bound=Message)
+SentMsgType = TypeVar('SentMsgType', bound=SentMessage)
 
 class UserScreen(ABC):
     def __init__(self, user_data: UserDataManager):
@@ -97,6 +97,9 @@ class UserScreen(ABC):
     
     async def unbuffer(self, user_id: int): 
         screen = self.user_data.get(user_id).screen_buffer
+        if not screen:
+            print(f"у {user_id} нет screen в unbuffer")
+            return
         try:
             await self.set(user_id, screen)
         except telegram.error.BadRequest as e:
@@ -107,20 +110,20 @@ class UserScreen(ABC):
         ...
     
     @staticmethod
-    def calc_screen_difference(screen1: SentScreen, screen2: ReadyScreen,
-            msg_type: type[MsgType], sent_msg_type: type[SentMsgType]):
-        messages1 = []
-        if screen1:
-            messages1 = screen1.messages
-        messages2 = screen2.messages
+    def calc_screen_difference(screen1: SentScreen | None, screen2: ReadyScreen,
+            msg_type: type[MsgType], sent_msg_type: type[SentMsgType]
+        ) -> tuple[list[SentMsgType], list[tuple[SentMsgType, MsgType]], list[MsgType]]:
+        
+        messages1 = cast(list[SentMsgType], screen1.messages if screen1 else [])
+        messages2 = cast(list[MsgType], screen2.messages)
         type_codes = get_type_codes(messages1 + messages2)
-        screen1_codes = [type_codes[message.category] 
+        screen1_codes: list[int] = [type_codes[message.category] 
             for message in messages1]
-        screen2_codes = [type_codes[message.category] 
+        screen2_codes: list[int] = [type_codes[message.category] 
             for message in messages2]
         
-        indices_delete, indices_edit, indices_send = calc_abstract_difference(
-            screen1_codes, screen2_codes)
+        indices_delete, indices_edit, indices_send = \
+            calc_abstract_difference(screen1_codes, screen2_codes)
         
         messages_delete: list[SentMsgType] = [messages1[index]
             for index in indices_delete]
@@ -133,7 +136,7 @@ class UserScreen(ABC):
 
 SomeMessage = Message | SentMessage
 
-def get_type_codes(messages: list[SomeMessage]):
+def get_type_codes(messages: list[MsgType | SentMsgType]):
     type_codes = set()
     for message in messages:
         type_codes.add(message.category)
@@ -141,7 +144,8 @@ def get_type_codes(messages: list[SomeMessage]):
     type_codes = [(code, i) for i, code in enumerate(type_codes)]
     return dict(type_codes)
 
-def calc_abstract_difference(start: list[int], end: list[int]):
+def calc_abstract_difference(start: list[int], end: list[int]
+        ) -> tuple[list[int], list[tuple[int, int]], list[int]]:
     indices_delete = []
     indices_edit = []
     indices_send = []

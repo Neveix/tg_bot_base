@@ -23,8 +23,8 @@ class HasButtonRows(ABC):
 
 class SentMessage(ABC):
     def __init__(self):
-        self.text: str = None
-        self.category: str = None
+        self.text: str
+        self.category: str
     
     @abstractmethod
     async def delete(self): ...
@@ -41,7 +41,7 @@ class SentMessage(ABC):
 
 class Message(ABC):
     def __init__(self):
-        self.category: str = None
+        self.category: str | None = None
     
     @abstractmethod
     async def send(self, user_id: int) -> SentMessage: ...
@@ -54,8 +54,8 @@ class Message(ABC):
     def clone(self) -> Self: ...
 
 class MediaMessage(ABC):
-    def __init__(self, caption: str, button_rows: ButtonRows = None, 
-            parse_mode: str = None):
+    def __init__(self, caption: str, button_rows: ButtonRows | None = None, 
+                parse_mode: str | None = None):
         self.parse_mode = parse_mode
         self.caption = caption
         self.button_rows = button_rows
@@ -73,8 +73,8 @@ class AudioMessage(MediaMessage, Message): ...
 class DocumentMessage(MediaMessage, Message): ...
 
 class SimpleMessage(Message):
-    def __init__(self, text: str, button_rows: ButtonRows = None, 
-            parse_mode: str = None):
+    def __init__(self, text: str, button_rows: ButtonRows | None = None, 
+                    parse_mode: str | None = None):
         self.parse_mode = parse_mode
         self.text = text
         self.button_rows = button_rows
@@ -85,7 +85,7 @@ class PhotoMessage(MediaMessage, Message): ...
 class VideoMessage(MediaMessage, Message): ...
 
 class VideoNoteMessage(Message):
-    def __init__(self, caption: str, button_rows: ButtonRows = None):
+    def __init__(self, caption: str, button_rows: ButtonRows | None = None):
         self.caption = caption
         self.button_rows = button_rows
         self.category = "video_note"
@@ -95,8 +95,8 @@ class SentAudioMessage(MediaMessage, SentMessage, CanBeEdited): ...
 class SentDocumentMessage(MediaMessage, SentMessage, CanBeEdited): ...
 
 class SentSimpleMessage(SentMessage, CanBeEdited):
-    def __init__(self, text: str, button_rows: ButtonRows = None, 
-            parse_mode: str = None):
+    def __init__(self, text: str, button_rows: ButtonRows | None = None, 
+            parse_mode: str | None = None):
         self.parse_mode = parse_mode
         self.text = text
         self.button_rows = button_rows
@@ -107,7 +107,7 @@ class SentPhotoMessage(MediaMessage, SentMessage, CanBeEdited): ...
 class SentVideoMessage(MediaMessage, SentMessage, CanBeEdited): ...
 
 class SentVideoNoteMessage(SentMessage):
-    def __init__(self, caption: str, button_rows: ButtonRows = None):
+    def __init__(self, caption: str, button_rows: ButtonRows | None = None):
         self.caption = caption
         self.button_rows = button_rows
         self.category = "video_note"

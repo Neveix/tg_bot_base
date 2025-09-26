@@ -4,11 +4,12 @@ from typing import Callable, Iterable, Self
 
 from .error_info import check_bad_value
 from .callback_data import CallbackData
-from .message import Message, SentMessage
+from .message import HasButtonRows, Message, SentMessage
 
 class HasCallbackData(ABC):
     @abstractmethod
-    def __init__(self): ...
+    def __init__(self):
+        self.messages: list[HasButtonRows]
     
     def get_callback_data(self):
         result: list[CallbackData] = []
@@ -38,7 +39,7 @@ class ReadyScreen(HasCallbackData):
 class SentScreen(HasCallbackData):
     def __init__(self, *messages: SentMessage):
         self.messages: list[SentMessage] = []
-        self.extend(messages)
+        self.extend(list(messages))
     
     def extend(self, messages: list[SentMessage]):
         for message in messages:
@@ -49,7 +50,8 @@ class SentScreen(HasCallbackData):
         self.messages.append(message)
         
     def clone(self) -> Self:
-        return SentScreen(*[message.clone() for message in self.messages])
+        return self.__class__(*[message.clone() 
+                                for message in self.messages])
     
     def __repr__(self):
         return f"{type(self).__name__}({self.messages!r})"
