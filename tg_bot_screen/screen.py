@@ -20,7 +20,7 @@ class HasCallbackData(ABC):
 class ReadyScreen(HasCallbackData):
     def __init__(self, *messages: Message):
         self.messages: list[Message] = []
-        self.extend(messages)
+        self.extend(list(messages))
     
     def extend(self, messages: list[Message]):
         for message in messages:
