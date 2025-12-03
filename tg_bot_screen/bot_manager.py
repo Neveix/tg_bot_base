@@ -52,15 +52,11 @@ class BotManager(ABC):
             message = kwargs["message"]
             session.append(message)
         
-        if isinstance(input_callback, FuncCallback):
-            if input_callback.one_time:
-                user_data.input_callback = None
-            await input_callback.function(user_id=user_id
-                , **input_callback.kwargs, **kwargs)
-        elif isinstance(input_callback, ScreenCallback):
-            user_data.input_callback = None
-            await self.screen.set_by_name(user_id, input_callback.screen_name,
-                input_callback.stack, **kwargs)
+        await input_callback.use(
+            user_id=user_id, user_data=user_data,
+            screen_set_by_name=self.screen.set_by_name,
+            **kwargs
+        )
             
 
     @abstractmethod
@@ -80,12 +76,12 @@ class BotManager(ABC):
             return
         
         await data.use(user_id=user_id,
-                  input_sessions=sud.input_sessions,
-                  screen_set_by_name=self.screen.set_by_name,
-                  screen_step_back=self.screen.step_back,
-                  reset_input_callback=sud.reset_input_callback,
-                  update_sessions=sud.update_sessions,
-                  **kwargs)
+            input_sessions=sud.input_sessions,
+            screen_set_by_name=self.screen.set_by_name,
+            screen_step_back=self.screen.step_back,
+            reset_input_callback=sud.reset_input_callback,
+            update_sessions=sud.update_sessions,
+            **kwargs)
     
     def dynamic_screen(self, name: str | None = None):
         def decorator(func: Callable):
