@@ -5,3 +5,4 @@ dist/*
 README.html
 icons.json
 .venv
+.env

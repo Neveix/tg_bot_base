@@ -3,8 +3,8 @@ from abc import ABC, abstractmethod
 
 from .session import InputSession
 
-from .input_callback import FuncCallback
-from .error_info import check_bad_text_and_len, check_bad_value, check_pre_post_func
+from .input_callback import FuncCallback, check_pre_post_func
+from .error_info import check_bad_text_and_len, check_bad_value
 
 class CallbackData(ABC):
     @abstractmethod

@@ -1,12 +1,13 @@
 from abc import ABC, abstractmethod
-from typing import Callable
-
-from .user_data import UserData
+from typing import Any, Callable, TYPE_CHECKING
+from .error_info import check_bad_value
+if TYPE_CHECKING:
+    from .user_data import UserData
 
 class InputCallback(ABC): 
     @abstractmethod
     async def use(self, *, user_id: int, 
-        user_data: UserData, 
+        user_data: "UserData", 
         screen_set_by_name: Callable, **kw) -> None: ...
 
 
@@ -21,7 +22,7 @@ class FuncCallback(InputCallback):
         return self.function(**self.kwargs, **kwds)
     
     async def use(self, *, user_id: int, 
-            user_data: UserData, 
+            user_data: "UserData", 
             screen_set_by_name: Callable, **kw) -> None:
         if self.one_time:
             user_data.input_callback = None
@@ -36,8 +37,18 @@ class ScreenCallback(InputCallback):
         self.stack = stack
         
     async def use(self, *, user_id: int, 
-            user_data: UserData, 
+            user_data: "UserData", 
             screen_set_by_name: Callable, **kw) -> None:
         user_data.input_callback = None
         await screen_set_by_name(user_id, self.screen_name,
             self.stack, **kw)
+        
+
+def check_pre_post_func(pre: FuncCallback | None, 
+                        post: FuncCallback | None, 
+                        obj: Any):
+    if pre:
+        check_bad_value(pre, FuncCallback, obj, "pre_func")
+    
+    if post:
+        check_bad_value(post, FuncCallback, obj, "post_func")
