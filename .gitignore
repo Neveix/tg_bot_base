@@ -3,3 +3,5 @@ test*.py
 dist/*
 .mypy_cache
 README.html
+icons.json
+.venv
