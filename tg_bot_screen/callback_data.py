@@ -1,9 +1,9 @@
-from types import FunctionType
+from types import FunctionType, MethodType
 from typing import Callable, Self, Sequence, Type
 from abc import ABC, abstractmethod
 from .session import InputSession
 from .input_callback import FuncCallback, check_pre_post_func
-from .error_info import check_bad_text_and_len, check_bad_value
+from .error_info import check_bad_text_and_len, check_bad_value, check_callable
 
 class CallbackData(ABC):
     @abstractmethod
@@ -44,7 +44,7 @@ class RunFunc(CallbackData):
             function - Функция для выполнения при нажатии кнопки  
             **kwargs - keyword аргументы функции
         """
-        check_bad_value(function, FunctionType, self, "function")
+        check_callable(function, self, "function")
         self.function = function
         self.kwargs = kwargs
     
