@@ -11,7 +11,7 @@ class BotManager(ABC):
         self.system_user_data: UserDataManager
         self.screen: UserScreen
         
-    def config_delete_old_messages(self, user_id: int):
+    def config_delete_old_messages(self, user_id: int, **kwargs):
         input_callback = self.get_system_user_data(user_id).input_callback
         if input_callback is not None:
             return False
@@ -36,7 +36,7 @@ class BotManager(ABC):
 
     async def _handle_message(self, user_id: int, **kwargs):
         user_data = self.get_system_user_data(user_id)
-        delete_old: bool = self.config_delete_old_messages(user_id)
+        delete_old: bool = self.config_delete_old_messages(user_id, **kwargs)
         if delete_old:
             await self.delete_message(**kwargs)
         
