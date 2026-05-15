@@ -43,7 +43,14 @@ class SentSimpleMessage(BaseSentSimpleMessage, HasButtonRows, SentMessage):
     async def edit(self, bot: Bot, mapping: CallbackDataMapping):
         orig = self.ptb_message
         reply_markup = self.get_reply_markup(mapping)
-        if orig.text_html == self.text and orig.reply_markup == reply_markup:
+        orig_text = orig.text.strip() if orig.text else orig.text
+        orig_text_html = orig.text_html.strip() if orig.text_html else orig.text_html
+        new_text = self.text.strip()
+        
+        text_ident = orig_text == new_text
+        text_html_ident = orig_text_html == new_text
+        rm_ident = orig.reply_markup == reply_markup
+        if (text_ident or text_html_ident) and rm_ident:
             return
         self.ptb_message = await bot.edit_message_text(
             text = self.text,
