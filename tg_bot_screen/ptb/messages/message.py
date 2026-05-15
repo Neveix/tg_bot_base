@@ -14,7 +14,10 @@ class HasButtonRows(BaseHasButtonRows):
         
     def get_reply_markup(self, mapping: CallbackDataMapping):
         if self.button_rows:
-            return self.button_rows.to_reply_markup(mapping)
+            rm = self.button_rows.to_reply_markup(mapping)
+            if len(rm.inline_keyboard) == 0:
+                return None
+            return rm
         return None
 
 
