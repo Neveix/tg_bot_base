@@ -5,8 +5,8 @@ import telegram
 from ..button_rows import ButtonRows
 
 from ...callback_data import CallbackDataMapping
-from ...message import PhotoMessage     as BasePhotoMessage
-from ...message import SentPhotoMessage     as BaseSentPhotoMessage
+from ...core.models.message import PhotoMessage     as BasePhotoMessage
+from ...core.models.message import SentPhotoMessage     as BaseSentPhotoMessage
 from .message import HasButtonRows, Message, SentMessage
 
 class PhotoMessage(BasePhotoMessage, HasButtonRows, Message):

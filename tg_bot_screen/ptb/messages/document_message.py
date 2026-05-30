@@ -7,8 +7,8 @@ from ...callback_data import CallbackDataMapping
 from telegram import Message as PTBMessage
 
 from .message import HasButtonRows, Message, SentMessage
-from ...message import DocumentMessage  as BaseDocumentMessage
-from ...message import SentDocumentMessage  as BaseSentDocumentMessage
+from ...core.models.message import DocumentMessage  as BaseDocumentMessage
+from ...core.models.message import SentDocumentMessage  as BaseSentDocumentMessage
 
 class DocumentMessage(BaseDocumentMessage, HasButtonRows, Message):
     def __init__(self, 

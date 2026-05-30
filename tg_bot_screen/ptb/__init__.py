@@ -2,7 +2,7 @@ from ..callback_data import CallbackData, RunFunc, GoToScreen, StepBack
 from ..input_callback import InputCallback, FuncCallback, ScreenCallback
 from ..screen import ReadyScreen, StaticScreen, DynamicScreen, SentScreen, \
     ProtoScreen, StaticScreen, DynamicScreen
-from ..message import Message, SentMessage
+from ..core.models.message import UnSentMessage, SentMessage
 from ..session import Session
 
 from .bot_manager import BotManager

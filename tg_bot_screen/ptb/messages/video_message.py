@@ -8,8 +8,8 @@ from ...callback_data import CallbackDataMapping
 from telegram import Message as PTBMessage
 
 from .message import HasButtonRows, Message, SentMessage
-from ...message import VideoMessage         as BaseVideoMessage
-from ...message import SentVideoMessage     as BaseSentVideoMessage
+from ...core.models.message import VideoMessage         as BaseVideoMessage
+from ...core.models.message import SentVideoMessage     as BaseSentVideoMessage
 
 class VideoMessage(BaseVideoMessage, HasButtonRows, Message):
     def __init__(self, 

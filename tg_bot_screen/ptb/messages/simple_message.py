@@ -3,8 +3,8 @@ from telegram import Bot
 from telegram import Message as PTBMessage
 
 from ..button_rows import ButtonRows
-from ...message import SimpleMessage    as BaseSimpleMessage
-from ...message import SentSimpleMessage    as BaseSentSimpleMessage
+from ...core.models.message import SimpleMessage    as BaseSimpleMessage
+from ...core.models.message import SentSimpleMessage    as BaseSentSimpleMessage
 from ...callback_data import CallbackDataMapping
 from .message import HasButtonRows, Message, SentMessage
 

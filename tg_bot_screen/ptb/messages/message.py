@@ -4,9 +4,9 @@ import telegram
 
 from ..button_rows import ButtonRows
 from ...callback_data import CallbackDataMapping
-from ...message import Message as BaseMessage
-from ...message import SentMessage as BaseSentMessage
-from ...message import HasButtonRows as BaseHasButtonRows
+from ...core.models.message import UnSentMessage as BaseMessage
+from ...core.models.message import SentMessage as BaseSentMessage
+from ...core.models.message import HasButtonRows as BaseHasButtonRows
 
 class HasButtonRows(BaseHasButtonRows):
     def __init__(self):

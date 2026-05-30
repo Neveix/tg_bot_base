@@ -1,7 +1,6 @@
 from abc import abstractmethod, ABC
 from typing import Callable, Self
 from .screen import DynamicScreen
-from .input_callback import FuncCallback, InputCallback, ScreenCallback
 from .callback_data import CallbackData
 from .user_data import UserDataManager
 from .user_screen import UserScreen

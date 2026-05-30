@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
-from email import message
-from typing import Type, TypeVar, cast
+from typing import TypeVar, cast
 from uuid import uuid4
 
 import telegram
@@ -9,11 +8,11 @@ from .error_info import check_bad_value
 
 from .callback_data import CallbackDataMapping
 from .screen import ProtoScreen, SentScreen
-from .message import Message, SentMessage
+from .core.models.message import UnSentMessage, SentMessage
 from .user_data import UserDataManager
 from .screen import ReadyScreen
 
-MsgType = TypeVar('MsgType', bound=Message)
+MsgType = TypeVar('MsgType', bound=UnSentMessage)
 SentMsgType = TypeVar('SentMsgType', bound=SentMessage)
 
 class UserScreen(ABC):
@@ -134,7 +133,7 @@ class UserScreen(ABC):
             for index in indices_send]
         return messages_delete, messages_edit, messages_send
 
-SomeMessage = Message | SentMessage
+SomeMessage = UnSentMessage | SentMessage
 
 def get_type_codes(messages: list[MsgType | SentMsgType]):
     type_codes = set()

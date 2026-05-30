@@ -4,7 +4,7 @@ from typing import Callable, Iterable, Self
 
 from .error_info import check_bad_value
 from .callback_data import CallbackData
-from .message import HasButtonRows, Message, SentMessage
+from .core.models.message import HasButtonRows, UnSentMessage, SentMessage
 
 class HasCallbackData(ABC):
     @abstractmethod
@@ -18,16 +18,16 @@ class HasCallbackData(ABC):
         return result
 
 class ReadyScreen(HasCallbackData):
-    def __init__(self, *messages: Message):
-        self.messages: list[Message] = []
+    def __init__(self, *messages: UnSentMessage):
+        self.messages: list[UnSentMessage] = []
         self.extend(list(messages))
     
-    def extend(self, messages: list[Message]):
+    def extend(self, messages: list[UnSentMessage]):
         for message in messages:
             self.append(message)
         
-    def append(self, message: Message):
-        check_bad_value(message, Message, self, "message")
+    def append(self, message: UnSentMessage):
+        check_bad_value(message, UnSentMessage, self, "message")
         self.messages.append(message)
     
     def __repr__(self):
@@ -65,13 +65,13 @@ class SentScreen(HasCallbackData):
 class ProtoScreen(ABC):
     def __init__(self, name: str = None):
         self.name = name
-        self.messages: list[Message] = []
+        self.messages: list[UnSentMessage] = []
     
-    def append(self, message: Message):
-        check_bad_value(message, Message, self, "message")
+    def append(self, message: UnSentMessage):
+        check_bad_value(message, UnSentMessage, self, "message")
         self.messages.append(message)
     
-    def extend(self, messages: list[Message]):
+    def extend(self, messages: list[UnSentMessage]):
         for message in messages:
             self.append(message)
     
@@ -80,7 +80,7 @@ class ProtoScreen(ABC):
                        **kwargs) -> ReadyScreen: ...
 
 class StaticScreen(ProtoScreen):
-    def __init__(self, name: str, *messages: Message):
+    def __init__(self, name: str, *messages: UnSentMessage):
         super().__init__(name = name)
         self.extend(list(messages))
     
@@ -96,7 +96,7 @@ class StaticScreen(ProtoScreen):
 
 class DynamicScreen(ProtoScreen):
     def __init__(self, name: str, 
-            function: Callable[[int], Iterable[Message]]):
+            function: Callable[[int], Iterable[UnSentMessage]]):
         super().__init__(name)
         if not iscoroutinefunction(function):
             print(f"Экран {name} был создан с не async функцией")

@@ -7,8 +7,8 @@ from telegram import Message as PTBMessage
 from ..button_rows import ButtonRows
 
 from ...callback_data import CallbackDataMapping
-from ...message import AudioMessage     as BaseAudioMessage
-from ...message import SentAudioMessage     as BaseSentAudioMessage
+from ...core.models.message import AudioMessage     as BaseAudioMessage
+from ...core.models.message import SentAudioMessage     as BaseSentAudioMessage
 from .message import HasButtonRows, Message, SentMessage
 
 
