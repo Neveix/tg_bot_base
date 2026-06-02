@@ -1,5 +1,4 @@
-from types import FunctionType, MethodType
-from typing import Callable, Self, Sequence, Type
+from typing import Callable, Self, Sequence
 from abc import ABC, abstractmethod
 from .session import InputSession
 from .input_callback import FuncCallback, check_pre_post_func
@@ -13,13 +12,15 @@ class CallbackData(ABC):
     def __repr__(self) -> str: ...
     
     @abstractmethod
-    async def use(self, *, user_id: int,
-                  input_sessions: Sequence[InputSession],
-                  screen_set_by_name: Callable, 
-                  screen_step_back: Callable, 
-                  reset_input_callback: Callable,
-                  update_sessions: Callable,
-                  **kwargs):
+    async def use(self, *, 
+        user_id: int,
+        input_sessions: Sequence[InputSession],
+        screen_set_by_name: Callable, 
+        screen_step_back: Callable, 
+        reset_input_callback: Callable,
+        update_sessions: Callable,
+        **kwargs
+    ):
         ...
 
 class Dummy(CallbackData):
@@ -29,13 +30,15 @@ class Dummy(CallbackData):
     def __repr__(self):
         return f"{type(self).__name__}()"
     
-    async def use(self, *, user_id: int,
-                  input_sessions: Sequence[InputSession],
-                  screen_set_by_name: Callable, 
-                  screen_step_back: Callable, 
-                  reset_input_callback: Callable,
-                  update_sessions: Callable,
-                  **kwargs):
+    async def use(self, *, 
+            user_id: int,
+            input_sessions: Sequence[InputSession],
+            screen_set_by_name: Callable, 
+            screen_step_back: Callable, 
+            reset_input_callback: Callable,
+            update_sessions: Callable,
+            **kwargs
+        ):
         pass
 
 class RunFunc(CallbackData):
@@ -58,13 +61,15 @@ class RunFunc(CallbackData):
         return isinstance(other, RunFunc) and \
             self.function == other.function and self.kwargs == other.kwargs
             
-    async def use(self, *, user_id: int,
-                  input_sessions: Sequence[InputSession],
-                  screen_set_by_name: Callable, 
-                  screen_step_back: Callable, 
-                  reset_input_callback: Callable,
-                  update_sessions: Callable,
-                  **kwargs):
+    async def use(self, *, 
+            user_id: int,
+            input_sessions: Sequence[InputSession],
+            screen_set_by_name: Callable, 
+            screen_step_back: Callable, 
+            reset_input_callback: Callable,
+            update_sessions: Callable,
+            **kwargs
+        ):
         await self.function(user_id=user_id, **self.kwargs, **kwargs)
 
 class GoToScreen(CallbackData):
@@ -149,7 +154,7 @@ class StepBack(CallbackData):
         
         for session in input_sessions:
             if self.pop_last_input and session.may_pop_last_input:
-                for i in range(self.times):
+                for _ in range(self.times):
                     if session.messages == []:
                         break
                     session.messages.pop()
@@ -164,21 +169,3 @@ class StepBack(CallbackData):
         
         update_sessions()
 
-class CallbackDataMapping:
-    def __init__(self):
-        self.items: list[tuple[CallbackData, str]] = []
-    
-    def add(self, callback: CallbackData, uuid: str):
-        self.items.append((callback, uuid))
-    
-    def get_by_callback(self, callback: CallbackData):
-        for i_callback, uuid in self.items:
-            if callback is i_callback:
-                return uuid
-        raise KeyError(callback)
-    
-    def get_by_uuid(self, uuid: str):
-        for callback, i_uuid in self.items:
-            if uuid == i_uuid:
-                return callback
-        return None

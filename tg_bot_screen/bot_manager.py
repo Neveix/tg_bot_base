@@ -1,9 +1,9 @@
 from abc import abstractmethod, ABC
 from typing import Callable, Self
-from .screen import DynamicScreen
-from .callback_data import CallbackData
-from .user_data import UserDataManager
-from .user_screen import UserScreen
+from .core.models.screen import DynamicScreen
+from .core.models.callback_data import CallbackData
+from .core.models.user_state import UserDataManager
+from .core.models.user_screen import UserScreen
 
 class BotManager(ABC):
     def __init__(self):
@@ -17,12 +17,13 @@ class BotManager(ABC):
         return True
     
     @abstractmethod
-    def build(self) -> Self: ...
+    def build(self) -> Self: 
         # user_datam = UserDataManager()
         # screen = UserScreen(user_datam)
         # self.system_user_data = user_datam
         # self.screen = screen
         # return self
+        ...
     
     @abstractmethod
     def add_handlers(self): ...
@@ -45,7 +46,7 @@ class BotManager(ABC):
         
         await self.screen.clear(user_id, delete_old)
         
-        for session in user_data.input_sessions:
+        for session in user_data.sessions.get_input_sessions():
             if not session.add_new_messages:
                 continue
             message = kwargs["message"]
@@ -75,11 +76,11 @@ class BotManager(ABC):
             return
         
         await data.use(user_id=user_id,
-            input_sessions=sud.input_sessions,
+            input_sessions=sud.sessions.get_input_sessions(),
             screen_set_by_name=self.screen.set_by_name,
             screen_step_back=self.screen.step_back,
             reset_input_callback=sud.reset_input_callback,
-            update_sessions=sud.update_sessions,
+            update_sessions=sud.sessions.update_all,
             **kwargs)
     
     def dynamic_screen(self, name: str | None = None):

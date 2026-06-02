@@ -1,14 +1,14 @@
 from asyncio import gather
 from telegram import Bot
 
-from ..screen import ReadyScreen
+from ..core.models.screen import UnSentScreen
 from .screen import SentScreen
-from ..user_data import UserData
-from ..user_screen import UserScreen as BaseUserScreen
+from ..core.models.user_state import UserState
+from ..core.models.user_screen import UserScreen as BaseUserScreen
 from .messages.message import SentMessage, Message
 
 class UserScreen(BaseUserScreen):
-    def __init__(self, user_data: UserData, bot: Bot):
+    def __init__(self, user_data: UserState, bot: Bot):
         super().__init__(user_data)
         self.bot = bot
     
@@ -19,9 +19,9 @@ class UserScreen(BaseUserScreen):
             await screen.delete(self.bot)
         user_data.screen = None
     
-    async def set(self, user_id: int, new_screen: ReadyScreen = None):
+    async def set(self, user_id: int, new_screen: UnSentScreen = None):
         if new_screen == None:
-            new_screen = ReadyScreen()
+            new_screen = UnSentScreen()
         mapping = self._map_callback_data(user_id, new_screen)
         
         old_screen = self.get(user_id)

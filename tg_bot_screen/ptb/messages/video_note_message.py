@@ -1,6 +1,6 @@
 from telegram import Message as PTBMessage
 
-from ...button_rows import Self
+from ...core.models.button_rows import Self
 from ...core.models.message import VideoNoteMessage as BaseVideoNoteMessage
 from ...core.models.message import SentVideoNoteMessage as BaseSentVideoNoteMessage
 from .message import Message, SentMessage

@@ -1,12 +1,12 @@
 from uuid import uuid4
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 
-from tg_bot_screen.callback_data import CallbackData
+from tg_bot_screen.core.models.callback_data import CallbackData
 
-from ..callback_data import CallbackDataMapping
-from ..button_rows import ButtonRows as BaseButtonRows
-from ..button_rows import Button as BaseButton
-from ..button_rows import ButtonRow as BaseButtonRow
+from ..core.models.callback_data import CallbackDataMapping
+from ..core.models.button_rows import ButtonRows as BaseButtonRows
+from ..core.models.button_rows import Button as BaseButton
+from ..core.models.button_rows import ButtonRow as BaseButtonRow
 
 class ButtonRows(BaseButtonRows):
     def to_reply_markup(self, mapping: CallbackDataMapping

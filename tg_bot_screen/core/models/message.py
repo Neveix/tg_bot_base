@@ -1,19 +1,33 @@
 from abc import ABC, abstractmethod
+from enum import StrEnum
 from typing import Self
 
-from ...callback_data import CallbackData
-from ...button_rows import ButtonRows
+from .callback_data import CallbackData
+from .button_rows import ButtonRows
 
 
 
-class MessageCategory:
+class MessageCategory(StrEnum):
     SIMPLE = "simple"
     MEDIA = "media"
     VIDEO_NOTE = "video_note"
     
+class ParseMode(StrEnum):
+    MARKDOWN = "markdown"
+    HTML = "html"
+
+    
+class HasText(ABC):
+    def __init__(self, *,
+        text: str,
+        parse_mode: ParseMode | None = None,
+    ):
+        self.text = text
+        self.parse_mode = parse_mode
+
 
 class HasButtonRows(ABC):
-    def __init__(self, button_rows: ButtonRows | None = None):
+    def __init__(self, *, button_rows: ButtonRows | None = None):
         self.button_rows = button_rows
         
     @abstractmethod
@@ -27,9 +41,12 @@ class HasButtonRows(ABC):
 
 
 
-class UnSentMessage(ABC):
-    def __init__(self, text: str, category: str):
-        self.text = text
+class UnSentMessage(HasButtonRows):
+    def __init__(self, *,
+        category: MessageCategory,
+        button_rows: ButtonRows | None = None,
+    ):
+        super().__init__(button_rows=button_rows)
         self.category = category
     
     @abstractmethod
@@ -43,9 +60,12 @@ class UnSentMessage(ABC):
     def clone(self) -> Self: ...
 
 
-class SentMessage(ABC):
-    def __init__(self, text: str, category: str):
-        self.text = text
+class SentMessage(HasButtonRows):
+    def __init__(self, 
+        category: MessageCategory,
+        button_rows: ButtonRows | None = None
+    ):
+        super().__init__(button_rows=button_rows)
         self.category = category
     
     @abstractmethod
@@ -66,33 +86,33 @@ class SentMessage(ABC):
 
 
 
-class MediaMessage(HasButtonRows, ABC):
-    def __init__(self, 
+class MediaMessage(HasText, HasButtonRows):
+    def __init__(self, *,
         text: str, 
         button_rows: ButtonRows | None = None,
-        parse_mode: str | None = None,
+        parse_mode: ParseMode | None = None,
     ):
-        super().__init__(button_rows)
-        self.text = text
-        self.parse_mode = parse_mode
-        self.caption = MessageCategory.MEDIA
+        HasText.__init__(self, text=text, parse_mode=parse_mode)
+        HasButtonRows.__init__(self, button_rows=button_rows)
+        self.category: MessageCategory = MessageCategory.MEDIA
     
     def __new__(cls, *args, **kwargs):
         assert \
             cls is not MediaMessage, \
-            "MediaMessage cannot be created directly, only its subclasses"
+            f"{cls.__name__} cannot be created directly, only its subclasses"
         return super().__new__(cls)
 
 
-class SimpleMessage(UnSentMessage):
+class SimpleMessage(UnSentMessage, HasText):
     def __init__(self, 
         text: str, 
         button_rows: ButtonRows | None = None, 
-        parse_mode: str | None = None,
+        parse_mode: ParseMode | None = None,
     ):
-        super().__init__(text, MessageCategory.SIMPLE)
-        self.parse_mode = parse_mode
-        self.button_rows = button_rows
+        UnSentMessage.__init__(self, button_rows=button_rows, category=MessageCategory.SIMPLE)
+        HasText.__init__(self, text=text, parse_mode=parse_mode)
+        
+
 
 
 
@@ -110,11 +130,12 @@ class VideoMessage(MediaMessage, UnSentMessage): ...
 
 class VideoNoteMessage(UnSentMessage):
     def __init__(self, 
-        text: str, 
         button_rows: ButtonRows | None = None,
     ):
-        super().__init__(text, MessageCategory.VIDEO_NOTE)
-        self.button_rows = button_rows
+        super().__init__(
+            category=MessageCategory.VIDEO_NOTE, 
+            button_rows=button_rows,
+        )
 
 
 class SentAudioMessage(MediaMessage, SentMessage): ...
@@ -123,15 +144,14 @@ class SentAudioMessage(MediaMessage, SentMessage): ...
 class SentDocumentMessage(MediaMessage, SentMessage): ...
 
 
-class SentSimpleMessage(SentMessage):
+class SentSimpleMessage(SentMessage, HasText):
     def __init__(self, 
         text: str, 
         button_rows: ButtonRows | None = None, 
-        parse_mode: str | None = None,
+        parse_mode: ParseMode | None = None,
     ):
-        super().__init__(text, MessageCategory.SIMPLE)
-        self.parse_mode = parse_mode
-        self.button_rows = button_rows
+        super().__init__(category=MessageCategory.SIMPLE, button_rows=button_rows)
+        HasText.__init__(self, text=text, parse_mode=parse_mode)
 
 
 class SentPhotoMessage(MediaMessage, SentMessage): ...
@@ -142,8 +162,6 @@ class SentVideoMessage(MediaMessage, SentMessage): ...
 
 class SentVideoNoteMessage(SentMessage):
     def __init__(self, 
-        text: str, 
         button_rows: ButtonRows | None = None,
     ):
-        super().__init__(text, MessageCategory.VIDEO_NOTE)
-        self.button_rows = button_rows
+        super().__init__(MessageCategory.VIDEO_NOTE, button_rows)

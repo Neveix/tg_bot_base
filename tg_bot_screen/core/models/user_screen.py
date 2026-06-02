@@ -2,21 +2,19 @@ from abc import ABC, abstractmethod
 from typing import TypeVar, cast
 from uuid import uuid4
 
-import telegram
-
 from .error_info import check_bad_value
-
-from .callback_data import CallbackDataMapping
+from ..interfaces import CallbackDataMapping
+from ...infrastructure.callback_data_mapping import CallbackDataMappingImpl
 from .screen import ProtoScreen, SentScreen
-from .core.models.message import UnSentMessage, SentMessage
-from .user_data import UserDataManager
-from .screen import ReadyScreen
+from .message import UnSentMessage, SentMessage
+from ..interfaces import UserStateStore
+from .screen import UnSentScreen
 
 MsgType = TypeVar('MsgType', bound=UnSentMessage)
 SentMsgType = TypeVar('SentMsgType', bound=SentMessage)
 
 class UserScreen(ABC):
-    def __init__(self, user_data: UserDataManager):
+    def __init__(self, user_data: UserStateStore):
         self.user_data = user_data
         self.screen_dict: dict[str, ProtoScreen] = {}
     
@@ -25,10 +23,6 @@ class UserScreen(ABC):
         if self.screen_dict.get(screen.name) is not None:
             raise KeyError(f"Попытка повторно создать экран с названием {screen.name!r}")
         self.screen_dict[screen.name] = screen
-    
-    def extend_screen(self, screens: list[ProtoScreen]):
-        for screen in screens:
-            self.append_screen(screen)
     
     @abstractmethod
     async def clear(self, user_id: int, delete_messages: bool = True): ...
@@ -44,13 +38,14 @@ class UserScreen(ABC):
                       f"в режиме stack=False, но len(directory_stack) было 0")
                 return
             
-            if directory_stack[-1] == screen_name: 
+            if directory_stack.last() == screen_name: 
                 print(f"{user_id} попытался перейти на экран {screen_name!r} "
                       f"но он уже находился на этом экране")
                 return 
-            user_data.directory_stack[-1] = screen_name
+            user_data.directory_stack.pop()
+            user_data.directory_stack.append(screen_name)
         else:
-            if len(directory_stack)==0 or directory_stack[-1] != screen_name:
+            if len(directory_stack)==0 or directory_stack.last() != screen_name:
                 directory_stack.append(screen_name)
         
         screen = self.screen_dict.get(screen_name)
@@ -63,8 +58,9 @@ class UserScreen(ABC):
     
     async def update(self, user_id: int):
         directory_stack = self.user_data.get(user_id).directory_stack
-        if len(directory_stack) != 0:
-            await self.set_by_name(user_id, directory_stack[-1])
+        last_screen_name = directory_stack.last()
+        if last_screen_name:
+            await self.set_by_name(user_id, last_screen_name)
     
     async def step_back(self, user_id: int, times: int = 1) -> None:
         directory_stack = self.user_data.get(user_id).directory_stack
@@ -72,8 +68,10 @@ class UserScreen(ABC):
             if len(directory_stack) <= 1:
                 return
             directory_stack.pop()
-        self.user_data.get(user_id).update_sessions()
-        await self.set_by_name(user_id, directory_stack[-1])
+        self.user_data.get(user_id).sessions.update_all()
+        last_screen_name = directory_stack.last()
+        if last_screen_name:
+            await self.set_by_name(user_id, last_screen_name)
     
     def get(self, user_id: int) -> SentScreen | None:
         screen = self.user_data.get(user_id).screen
@@ -81,9 +79,9 @@ class UserScreen(ABC):
             return None
         return screen.clone()
     
-    def _map_callback_data(self, user_id: int, screen: ReadyScreen
+    def _map_callback_data(self, user_id: int, screen: UnSentScreen
             ) -> CallbackDataMapping:
-        mapping = CallbackDataMapping()
+        mapping = CallbackDataMappingImpl()
         callback_data_list = screen.get_callback_data()
         for callback_data in callback_data_list:
             uuid = str(uuid4())
@@ -101,15 +99,15 @@ class UserScreen(ABC):
             return
         try:
             await self.set(user_id, screen)
-        except telegram.error.BadRequest as e:
+        except Exception as e:
             print(f"у {user_id} ошибка в unbuffer: {e!r}")
     
     @abstractmethod
-    async def set(self, user_id: int, new_screen: ReadyScreen):
+    async def set(self, user_id: int, new_screen: UnSentScreen):
         ...
     
     @staticmethod
-    def calc_screen_difference(screen1: SentScreen | None, screen2: ReadyScreen,
+    def calc_screen_difference(screen1: SentScreen | None, screen2: UnSentScreen,
             msg_type: type[MsgType], sent_msg_type: type[SentMsgType]
         ) -> tuple[list[SentMsgType], list[tuple[SentMsgType, MsgType]], list[MsgType]]:
         

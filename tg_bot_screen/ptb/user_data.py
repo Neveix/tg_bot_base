@@ -1,6 +1,6 @@
 
 
-from ..user_data import UserData as BaseUserData, \
+from ..core.models.user_state import UserState as BaseUserData, \
     UserDataManager as BaseUserDataManager
 from .screen import SentScreen
 from .session import InputSession

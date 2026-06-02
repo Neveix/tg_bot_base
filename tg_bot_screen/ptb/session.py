@@ -1,5 +1,5 @@
 from typing import Any
-from ..session import InputSession as BaseInputSession
+from ..core.models.session import InputSession as BaseInputSession
 from telegram import Message as TgMessage
 
 

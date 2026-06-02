@@ -1,26 +1,37 @@
 from inspect import iscoroutinefunction
 from abc import ABC, abstractmethod
-from typing import Callable, Iterable, Self
+from typing import Iterable, Protocol, Self, Sequence
 
 from .error_info import check_bad_value
 from .callback_data import CallbackData
-from .core.models.message import HasButtonRows, UnSentMessage, SentMessage
+from .message import HasButtonRows, UnSentMessage, SentMessage
 
 class HasCallbackData(ABC):
+   
     @abstractmethod
-    def __init__(self):
-        self.messages: list[HasButtonRows]
+    def get_callback_data(self) -> list[CallbackData]:
+        ...
     
-    def get_callback_data(self):
+    
+class HasCallbackDataMixin(HasCallbackData):
+    @abstractmethod
+    def get_messages_for_callback_data(self) -> Sequence[HasButtonRows]:
+        ...
+    
+    def get_callback_data(self) -> list[CallbackData]:
         result: list[CallbackData] = []
-        for message in self.messages:
+        for message in self.get_messages_for_callback_data():
             result.extend(message.get_callback_data())
         return result
 
-class ReadyScreen(HasCallbackData):
+
+class UnSentScreen(HasCallbackDataMixin):
     def __init__(self, *messages: UnSentMessage):
         self.messages: list[UnSentMessage] = []
         self.extend(list(messages))
+    
+    def get_messages_for_callback_data(self):
+        return self.messages
     
     def extend(self, messages: list[UnSentMessage]):
         for message in messages:
@@ -33,8 +44,9 @@ class ReadyScreen(HasCallbackData):
     def __repr__(self):
         return f"{type(self).__name__}({self.messages!r})"
     
-    def clone(self) -> "ReadyScreen":
-        return ReadyScreen(*[message.clone() for message in self.messages])
+    def clone(self) -> "UnSentScreen":
+        return UnSentScreen(*[message.clone() for message in self.messages])
+
 
 class SentScreen(HasCallbackData):
     def __init__(self, *messages: SentMessage):
@@ -60,10 +72,11 @@ class SentScreen(HasCallbackData):
     async def delete(self, *args, **kwargs): ...
     
     @abstractmethod
-    def get_unsent(self) -> ReadyScreen: ...
+    def get_unsent(self) -> UnSentScreen: ...
+
 
 class ProtoScreen(ABC):
-    def __init__(self, name: str = None):
+    def __init__(self, name: str):
         self.name = name
         self.messages: list[UnSentMessage] = []
     
@@ -77,7 +90,8 @@ class ProtoScreen(ABC):
     
     @abstractmethod
     async def evaluate(self, user_id: int, *args, 
-                       **kwargs) -> ReadyScreen: ...
+                       **kwargs) -> UnSentScreen: ...
+
 
 class StaticScreen(ProtoScreen):
     def __init__(self, name: str, *messages: UnSentMessage):
@@ -89,14 +103,23 @@ class StaticScreen(ProtoScreen):
         for message in self.messages:
             new_message = message.clone()
             messages.append(new_message)
-        return ReadyScreen(*messages)
+        return UnSentScreen(*messages)
     
     def __repr__(self):
         return f"{type(self).__name__}({self.name!r}, {self.messages!r})"
 
+
+
+class DynamicScreenEvaluateFunction(Protocol):
+    async def __call__(self, *, 
+        user_id: int, **kwargs
+    ) -> Iterable[UnSentMessage]: 
+        ...
+
+
 class DynamicScreen(ProtoScreen):
     def __init__(self, name: str, 
-            function: Callable[[int], Iterable[UnSentMessage]]):
+            function: DynamicScreenEvaluateFunction):
         super().__init__(name)
         if not iscoroutinefunction(function):
             print(f"Экран {name} был создан с не async функцией")
@@ -104,7 +127,7 @@ class DynamicScreen(ProtoScreen):
     
     async def evaluate(self, user_id: int, **kwargs):
         messages = await self.function(user_id=user_id, **kwargs)
-        return ReadyScreen(*messages)
+        return UnSentScreen(*messages)
 
     def __repr__(self):
         return f"{type(self).__name__}({self.name!r}, {self.function!r})"

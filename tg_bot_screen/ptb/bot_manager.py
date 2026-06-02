@@ -4,7 +4,7 @@ from telegram.ext import Application, CallbackQueryHandler, MessageHandler
 
 from ..bot_manager import BotManager as BaseBotManager
 from .user_screen import UserScreen
-from ..user_data import UserDataManager
+from ..core.models.user_state import UserDataManager
 
 class BotManager(BaseBotManager):
     def __init__(self, application: Application):
