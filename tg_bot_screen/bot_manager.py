@@ -9,12 +9,6 @@ class BotManager(ABC):
     def __init__(self):
         self.system_user_data: UserDataManager
         self.screen: UserScreen
-        
-    def config_delete_old_messages(self, user_id: int, **kwargs):
-        input_callback = self.get_system_user_data(user_id).input_callback
-        if input_callback is not None:
-            return False
-        return True
     
     @abstractmethod
     def build(self) -> Self: 
@@ -28,61 +22,7 @@ class BotManager(ABC):
     @abstractmethod
     def add_handlers(self): ...
     
-    def get_system_user_data(self, user_id: int):
-        return self.system_user_data.get(user_id)
 
-    @abstractmethod
-    def get_message_handler(self): ...
-
-    async def _handle_message(self, user_id: int, **kwargs):
-        user_data = self.get_system_user_data(user_id)
-        delete_old: bool = self.config_delete_old_messages(user_id, **kwargs)
-        if delete_old:
-            await self.delete_message(**kwargs)
-        
-        input_callback = user_data.input_callback
-        if input_callback is None:
-            return
-        
-        await self.screen.clear(user_id, delete_old)
-        
-        for session in user_data.sessions.get_input_sessions():
-            if not session.add_new_messages:
-                continue
-            message = kwargs["message"]
-            session.append(message)
-        
-        await input_callback.use(
-            user_id=user_id, user_data=user_data,
-            screen_set_by_name=self.screen.set_by_name,
-            **kwargs
-        )
-            
-
-    @abstractmethod
-    def get_callback_query_handler(self): ...
-    
-    @abstractmethod
-    async def delete_message(self, message): ...
-    
-    async def mapping_key_error(self, user_id: int): ...
-    
-    async def _handle_callback_query(self, user_id: int, query_data: str, **kwargs):
-        sud = self.get_system_user_data(user_id)
-        mapping = sud.callback_mapping
-        data: CallbackData | None = mapping.get_by_uuid(query_data)
-        if data is None:
-            await self.mapping_key_error(user_id)
-            return
-        
-        await data.use(user_id=user_id,
-            input_sessions=sud.sessions.get_input_sessions(),
-            screen_set_by_name=self.screen.set_by_name,
-            screen_step_back=self.screen.step_back,
-            reset_input_callback=sud.reset_input_callback,
-            update_sessions=sud.sessions.update_all,
-            **kwargs)
-    
     def dynamic_screen(self, name: str | None = None):
         def decorator(func: Callable):
             nonlocal name
