@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from enum import StrEnum
 from typing import Self
 
-from .callback_data import CallbackData
+from .callback_data_impl import CallbackData
 from .button_rows import ButtonRows
 
 

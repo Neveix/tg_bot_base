@@ -5,7 +5,7 @@ from telegram import Message as PTBMessage
 from ..button_rows import ButtonRows
 from ...core.models.message import SimpleMessage    as BaseSimpleMessage
 from ...core.models.message import SentSimpleMessage    as BaseSentSimpleMessage
-from ...core.models.callback_data import CallbackDataMapping
+from ...core.models.callback_data_impl import CallbackDataMapping
 from .message import HasButtonRows, Message, SentMessage
 
 class SimpleMessage(BaseSimpleMessage, HasButtonRows, Message):

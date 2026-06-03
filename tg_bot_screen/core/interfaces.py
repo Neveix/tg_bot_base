@@ -1,6 +1,15 @@
 from abc import ABC, abstractmethod
-from .models.callback_data import CallbackData
+from typing import Self
 from .models.user_state import UserState
+from .models.callback_data_use_params import CallbackDataUseParams
+
+
+class CallbackData(ABC):
+    @abstractmethod
+    def clone(self) -> Self: ...
+    
+    @abstractmethod
+    async def use(self, *, params: CallbackDataUseParams, **kwargs): ...
 
 
 class CallbackDataMapping(ABC):

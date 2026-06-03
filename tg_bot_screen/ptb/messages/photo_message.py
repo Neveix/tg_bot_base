@@ -4,7 +4,7 @@ from telegram import Bot, InputFile, InputMediaPhoto, Message as PTBMessage
 import telegram
 from ..button_rows import ButtonRows
 
-from ...core.models.callback_data import CallbackDataMapping
+from ...core.models.callback_data_impl import CallbackDataMapping
 from ...core.models.message import PhotoMessage     as BasePhotoMessage
 from ...core.models.message import SentPhotoMessage     as BaseSentPhotoMessage
 from .message import HasButtonRows, Message, SentMessage

@@ -1,7 +1,7 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
-from tg_bot_screen.core.models.callback_data import CallbackData
+from tg_bot_screen.core.models.callback_data_impl import CallbackData
 
-from ..core.models.callback_data import CallbackDataMapping
+from ..core.models.callback_data_impl import CallbackDataMapping
 from ..core.models.button_rows import ButtonRows as BaseButtonRows
 from ..core.models.button_rows import Button as BaseButton
 from ..core.models.button_rows import ButtonRow as BaseButtonRow

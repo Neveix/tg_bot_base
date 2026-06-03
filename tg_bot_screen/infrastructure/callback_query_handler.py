@@ -1,7 +1,7 @@
 from typing import Protocol
 
 from ..core.interfaces import UserStateStore
-from ..core.models.callback_data import CallbackData, CallbackDataUseParams
+from ..core.models.callback_data_impl import CallbackData, CallbackDataUseParams
 from ..core.models.user_screen import UserScreen
 
 

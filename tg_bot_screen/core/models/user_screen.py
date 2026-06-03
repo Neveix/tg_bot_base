@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import TypeVar, cast
 from uuid import uuid4
 
-from .error_info import check_bad_value
+from ..guards import check_bad_value
 from ..interfaces import CallbackDataMapping
 from ...infrastructure.callback_data_mapping import CallbackDataMappingImpl
 from .screen import ProtoScreen, SentScreen

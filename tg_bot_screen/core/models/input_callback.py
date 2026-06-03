@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Any, Callable, TYPE_CHECKING
-from .error_info import check_bad_value
+from ..guards import check_bad_value
 if TYPE_CHECKING:
     from .user_state import UserState
 

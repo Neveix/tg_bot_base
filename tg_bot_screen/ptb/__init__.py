@@ -1,4 +1,4 @@
-from ..core.models.callback_data import CallbackData, RunFunc, GoToScreen, StepBack
+from ..core.models.callback_data_impl import CallbackData, RunFunc, GoToScreen, StepBack
 from ..core.models.input_callback import InputCallback, FuncCallback, ScreenCallback
 from ..core.models.screen import UnSentScreen, StaticScreen, DynamicScreen, SentScreen, \
     ProtoScreen, StaticScreen, DynamicScreen
