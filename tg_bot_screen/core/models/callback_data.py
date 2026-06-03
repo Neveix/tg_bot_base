@@ -1,8 +1,18 @@
+from dataclasses import dataclass
 from typing import Callable, Self, Sequence
 from abc import ABC, abstractmethod
 from .session import InputSession
 from .input_callback import FuncCallback, check_pre_post_func
 from .error_info import check_bad_text_and_len, check_bad_value, check_callable
+
+@dataclass
+class CallbackDataUseParams:
+    user_id: int
+    input_sessions: Sequence[InputSession]
+    screen_set_by_name: Callable
+    screen_step_back: Callable
+    reset_input_callback: Callable
+    update_sessions: Callable
 
 class CallbackData(ABC):
     @abstractmethod
@@ -13,12 +23,7 @@ class CallbackData(ABC):
     
     @abstractmethod
     async def use(self, *, 
-        user_id: int,
-        input_sessions: Sequence[InputSession],
-        screen_set_by_name: Callable, 
-        screen_step_back: Callable, 
-        reset_input_callback: Callable,
-        update_sessions: Callable,
+        params: CallbackDataUseParams,
         **kwargs
     ):
         ...
@@ -31,12 +36,7 @@ class Dummy(CallbackData):
         return f"{type(self).__name__}()"
     
     async def use(self, *, 
-            user_id: int,
-            input_sessions: Sequence[InputSession],
-            screen_set_by_name: Callable, 
-            screen_step_back: Callable, 
-            reset_input_callback: Callable,
-            update_sessions: Callable,
+            params: CallbackDataUseParams,
             **kwargs
         ):
         pass
@@ -62,15 +62,10 @@ class RunFunc(CallbackData):
             self.function == other.function and self.kwargs == other.kwargs
             
     async def use(self, *, 
-            user_id: int,
-            input_sessions: Sequence[InputSession],
-            screen_set_by_name: Callable, 
-            screen_step_back: Callable, 
-            reset_input_callback: Callable,
-            update_sessions: Callable,
+            params: CallbackDataUseParams,
             **kwargs
         ):
-        await self.function(user_id=user_id, **self.kwargs, **kwargs)
+        await self.function(user_id=params.user_id, **self.kwargs, **kwargs)
 
 class GoToScreen(CallbackData):
     def __init__(self, screen_name: str, *
@@ -94,23 +89,20 @@ class GoToScreen(CallbackData):
         return isinstance(other, GoToScreen) and \
             self.screen_name == other.screen_name
 
-    async def use(self, *, user_id: int,
-                  input_sessions: Sequence[InputSession],
-                  screen_set_by_name: Callable, 
-                  screen_step_back: Callable, 
-                  reset_input_callback: Callable,
-                  update_sessions: Callable,
-                  **kwargs):
+    async def use(self, *, 
+        params: CallbackDataUseParams,
+        **kwargs
+    ):
         if self.pre_func:
-            await self.pre_func(user_id=user_id, **kwargs)
+            await self.pre_func(user_id=params.user_id, **kwargs)
         
-        await screen_set_by_name(user_id, self.screen_name, 
+        await params.screen_set_by_name(params.user_id, self.screen_name, 
                                  **kwargs)
         
         if self.post_func:
-            await self.post_func(user_id=user_id, **kwargs)
+            await self.post_func(user_id=params.user_id, **kwargs)
             
-        update_sessions()
+        params.update_sessions()
 
 class StepBack(CallbackData):
     def __init__(self, times: int = 1, clear_input_callback: bool = True
@@ -142,17 +134,14 @@ class StepBack(CallbackData):
     def __eq__(self, other: object):
         return isinstance(other, StepBack)
     
-    async def use(self, *, user_id: int,
-                  input_sessions: Sequence[InputSession],
-                  screen_set_by_name: Callable, 
-                  screen_step_back: Callable, 
-                  reset_input_callback: Callable,
-                  update_sessions: Callable,
-                  **kwargs):
+    async def use(self, *, 
+        params: CallbackDataUseParams,
+        **kwargs
+        ):
         if self.clear_input_callback:
-            reset_input_callback()
+            params.reset_input_callback()
         
-        for session in input_sessions:
+        for session in params.input_sessions:
             if self.pop_last_input and session.may_pop_last_input:
                 for _ in range(self.times):
                     if session.messages == []:
@@ -160,12 +149,12 @@ class StepBack(CallbackData):
                     session.messages.pop()
         
         if self.pre_func:
-            await self.pre_func(user_id=user_id, **kwargs)
+            await self.pre_func(user_id=params.user_id, **kwargs)
         
-        await screen_step_back(user_id, self.times)
+        await params.screen_step_back(params.user_id, self.times)
         
         if self.post_func:
-            await self.post_func(user_id=user_id, **kwargs)
+            await self.post_func(user_id=params.user_id, **kwargs)
         
-        update_sessions()
+        params.update_sessions()
 
