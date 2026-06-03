@@ -2,7 +2,7 @@ from typing import Type, TypeVar
 
 from .session import Session, InputSession
 from .error_info import check_bad_value
-from .directory_stack import DirectoryStack
+from ...infrastructure.directory_stack import DirectoryStack
 
 SessionType = TypeVar("SessionType")
 

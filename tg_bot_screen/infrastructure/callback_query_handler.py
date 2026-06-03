@@ -1,7 +1,7 @@
 from typing import Protocol
 
 from ..core.interfaces import UserStateStore
-from ..core.models.callback_data import CallbackData
+from ..core.models.callback_data import CallbackData, CallbackDataUseParams
 from ..core.models.user_screen import UserScreen
 
 
@@ -27,10 +27,14 @@ class CallbackQueryHandler:
             await self.settings.mapping_key_error_callback(user_id)
             return
         
-        await data.use(user_id=user_id,
-            input_sessions=sud.sessions.get_input_sessions(),
-            screen_set_by_name=self.user_screen.set_by_name,
-            screen_step_back=self.user_screen.step_back,
-            reset_input_callback=sud.reset_input_callback,
-            update_sessions=sud.sessions.update_all,
-            **kwargs)
+        await data.use(
+            params=CallbackDataUseParams(
+                user_id=user_id,
+                input_sessions=sud.sessions.get_input_sessions(),
+                screen_set_by_name=self.user_screen.set_by_name,
+                screen_step_back=self.user_screen.step_back,
+                reset_input_callback=sud.reset_input_callback,
+                update_sessions=sud.sessions.update_all,
+            ),
+            **kwargs
+        )

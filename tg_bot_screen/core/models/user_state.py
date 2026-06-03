@@ -1,4 +1,4 @@
-from .directory_stack import DirectoryStack
+from ...infrastructure.directory_stack import DirectoryStack
 from .input_callback import InputCallback
 from ..interfaces import CallbackDataMapping
 from .screen import UnSentScreen, SentScreen

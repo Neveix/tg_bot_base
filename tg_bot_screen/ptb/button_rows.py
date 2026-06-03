@@ -1,6 +1,4 @@
-from uuid import uuid4
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
-
 from tg_bot_screen.core.models.callback_data import CallbackData
 
 from ..core.models.callback_data import CallbackDataMapping
