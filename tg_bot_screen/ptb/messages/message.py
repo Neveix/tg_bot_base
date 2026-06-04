@@ -3,7 +3,7 @@ from telegram import Bot, Message as PTBMessage
 import telegram
 
 from ..button_rows import ButtonRows
-from ...core.models.callback_data_impl import CallbackDataMapping
+from ...infrastructure.models.callback_data_impl import CallbackDataMapping
 from ...core.models.message import UnSentMessage as BaseMessage
 from ...core.models.message import SentMessage as BaseSentMessage
 from ...core.models.message import HasButtonRows as BaseHasButtonRows

@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from enum import StrEnum
 from typing import Self
 
-from .callback_data_impl import CallbackData
+from ..interfaces import CallbackData
 from .button_rows import ButtonRows
 
 
@@ -17,18 +18,15 @@ class ParseMode(StrEnum):
     HTML = "html"
 
     
-class HasText(ABC):
-    def __init__(self, *,
-        text: str,
-        parse_mode: ParseMode | None = None,
-    ):
-        self.text = text
-        self.parse_mode = parse_mode
+@dataclass(kw_only=True)
+class HasText:
+    text: str
+    parse_mode: ParseMode | None = None
 
 
-class HasButtonRows(ABC):
-    def __init__(self, *, button_rows: ButtonRows | None = None):
-        self.button_rows = button_rows
+@dataclass(kw_only=True)
+class HasButtonRows:
+    button_rows: ButtonRows | None = None
         
     @abstractmethod
     def get_reply_markup(self, *args, **kwargs):

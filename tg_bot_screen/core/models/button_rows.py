@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from typing import Any
-from .callback_data_impl import CallbackData
+from ...infrastructure.models.callback_data_impl import CallbackData
 
 @dataclass(frozen=True)
 class Button:

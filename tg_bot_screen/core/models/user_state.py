@@ -1,21 +1,19 @@
-from ...infrastructure.directory_stack import DirectoryStack
-from .input_callback import InputCallback
-from ..interfaces import CallbackDataMapping
+from ..interfaces import CallbackDataMapping, InputCallback, DirectoryStack
 from .screen import UnSentScreen, SentScreen
 from .user_sessions import UserSessions
-
-from ...infrastructure.callback_data_mapping import CallbackDataMappingImpl
 
 
 class UserState:
     def __init__(self, 
         user_id: int,
+        callback_mapping: CallbackDataMapping,
+        directory_stack: DirectoryStack,
     ):
         self.user_id = user_id
-        self.callback_mapping: CallbackDataMapping = CallbackDataMappingImpl()
+        self.callback_mapping = callback_mapping
+        self.directory_stack = directory_stack
         self.media_group_id: str | None = None
         self.input_callback: InputCallback | None = None
-        self.directory_stack = DirectoryStack()
         self.screen: SentScreen | None = None
         self.screen_buffer: UnSentScreen | None = None
         self.sessions = UserSessions(self.directory_stack)

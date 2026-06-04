@@ -1,8 +1,8 @@
 from dataclasses import dataclass, field
 from typing import Callable, Self
-from ..interfaces import CallbackData
-from .callback_data_use_params import CallbackDataUseParams
-from .input_callback import FuncCallback
+from ...core.interfaces import CallbackData
+from ...core.models.callback_data_use_params import CallbackDataUseParams
+from .input_callback_impl import FuncCallback
 
 
 

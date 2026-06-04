@@ -1,4 +1,4 @@
-from ..core.models.callback_data_impl import CallbackData
+from .models.callback_data_impl import CallbackData
 from ..core.interfaces import CallbackDataMapping
 
 class CallbackDataMappingImpl(CallbackDataMapping):

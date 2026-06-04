@@ -1,14 +1,9 @@
-from abc import ABC, abstractmethod
-from typing import Any, Callable, TYPE_CHECKING
-from ..guards import check_bad_value
-if TYPE_CHECKING:
-    from .user_state import UserState
+from typing import Any, Callable
+from ...core.guards import check_bad_value
+from ...core.interfaces import InputCallback
+from ...core.models.user_state import UserState
 
-class InputCallback(ABC): 
-    @abstractmethod
-    async def use(self, *, user_id: int, 
-        user_data: "UserState", 
-        screen_set_by_name: Callable, **kw) -> None: ...
+
 
 
 class FuncCallback(InputCallback):
@@ -21,9 +16,11 @@ class FuncCallback(InputCallback):
     def __call__(self, **kwds):
         return self.function(**self.kwargs, **kwds)
     
-    async def use(self, *, user_id: int, 
-            user_data: "UserState", 
-            screen_set_by_name: Callable, **kw) -> None:
+    async def use(self, *, 
+        user_id: int, 
+        user_data: UserState, 
+        screen_set_by_name: Callable, **kw
+    ) -> None:
         if self.one_time:
             user_data.input_callback = None
             
@@ -36,9 +33,12 @@ class ScreenCallback(InputCallback):
         self.screen_name = screen_name
         self.stack = stack
         
-    async def use(self, *, user_id: int, 
-            user_data: "UserState", 
-            screen_set_by_name: Callable, **kw) -> None:
+    async def use(self, *, 
+        user_id: int, 
+        user_data: UserState, 
+        screen_set_by_name: Callable, 
+        **kw
+    ) -> None:
         user_data.input_callback = None
         await screen_set_by_name(user_id, self.screen_name,
             self.stack, **kw)

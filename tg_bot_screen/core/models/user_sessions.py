@@ -1,6 +1,6 @@
-from typing import Type, TypeVar
+from typing import TypeVar
 
-from .session import Session, InputSession
+from .session import Session, InputSession, SessionDeleteContext
 from ..guards import check_bad_value
 from ...infrastructure.directory_stack import DirectoryStack
 
@@ -9,6 +9,7 @@ SessionType = TypeVar("SessionType")
 class UserSessions:
     def __init__(self, directory_stack: DirectoryStack):
         self.__sessions: dict[str, Session] = {}
+        self.__ses_del_ctx: dict[str, SessionDeleteContext] = {}
         self.directory_stack = directory_stack
     
     def get_all(self):
@@ -26,39 +27,56 @@ class UserSessions:
         if self.get(session.id):
             return False
         
-        session.directory_level = len(self.directory_stack)
-        
-        if last:=self.directory_stack.last():
-            session.last_directory = last
-        
+        self.__ses_del_ctx[session.id] = SessionDeleteContext(
+            directory_level=len(self.directory_stack),
+            last_directory=self.directory_stack.last() or ""
+        )
         self.__sessions[session.id] = session
         return True
         
-    def get(self, id: str, expected_class: Type[SessionType] = Session
-            ) -> SessionType | None:
-        return self.__sessions.get(id) # type: ignore
+    def get(self, id: str) -> Session | None:
+        return self.__sessions.get(id)
     
     def update_all(self):
         new_dir_level = len(self.directory_stack)
         last_directory = self.directory_stack.last()
-        delete = []
+        
+        delete = set()
         for session in self.get_all():
             if not session.delete_if_level_decreased:
                 continue
-            if not session.directory_level > new_dir_level:
+            
+            del_ctx = self.__ses_del_ctx.get(session.id)
+            
+            if del_ctx is None:
+                print("update_all: del_ctx is None!")
                 continue
-            delete.append(session)
+            
+            if not del_ctx.directory_level > new_dir_level:
+                continue
+            
+            delete.add(session)
             
         for session in self.get_all():
             if not session.delete_if_last_dir_changed:
                 continue
-            if session.last_directory == last_directory:
+            
+            del_ctx = self.__ses_del_ctx.get(session.id)
+            
+            if del_ctx is None:
+                print("update_all: del_ctx is None!")
                 continue
-            delete.append(session)
+            
+            if del_ctx.last_directory == last_directory:
+                continue
+            
+            delete.add(session)
         
         for session in delete:
-            self.delete(session)
+            self.delete_by_object(session)
     
-    def delete(self, session: Session):
-        check_bad_value(session, Session, self, "session")
-        del self.__sessions[session.id]
+    def delete_by_object(self, session: Session):
+        self.delete(session.id)
+        
+    def delete(self, session_id: str) -> None:
+        del self.__sessions[session_id]

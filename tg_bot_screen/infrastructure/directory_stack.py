@@ -1,7 +1,7 @@
+from ..core.interfaces import DirectoryStack
 
 
-
-class DirectoryStack:
+class DirectoryStackImpl(DirectoryStack):
     def __init__(self) -> None:
         self.__stack: list[str] = []
     
@@ -9,7 +9,6 @@ class DirectoryStack:
         return tuple(self.__stack)
     
     def last(self) -> str | None:
-        ":raises IndexError: if stack is empty"
         try: return self.__stack[-1]
         except: return None
     

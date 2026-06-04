@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from typing import Iterable, Protocol, Self, Sequence
 
 from ..guards import check_bad_value
-from .callback_data_impl import CallbackData
+from ...infrastructure.models.callback_data_impl import CallbackData
 from .message import HasButtonRows, UnSentMessage, SentMessage
 
 class HasCallbackData(ABC):
