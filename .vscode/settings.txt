@@ -1,0 +1,32 @@
+{
+    "python-envs.workspaceSearchPaths": [
+        ".venv",
+        "*/.venv"
+    ],
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}",
+        "${workspaceFolder/tg_bot_screen",
+        "${workspaceFolder/src",
+        "src"
+    ],
+    "python.analysis.autoSearchPaths": true,
+    "python.autoComplete.extraPaths": [
+        "${workspaceFolder}"
+    ],
+    "python.analysis.useLibraryCodeForTypes": true,
+    // "python.analysis.diagnosticMode": "workspace",
+    "python.analysis.diagnosticMode": "openFilesOnly",
+    "python.analysis.typeCheckingMode": "off",
+    "python.analysis.displayEnglishDiagnostics": true,
+    "python.analysis.generateWithTypeAnnotation": true,
+    "python.analysis.include": [
+        "src",
+        "tg_bot_screen"
+    ],
+    "python.analysis.includeExtraPathSymbolsInSymbolSearch": true,
+    "python.analysis.includeAliasesFromUserFiles": true,
+    "python.analysis.indexing.followSymlinkedFolders": true,
+    "python.analysis.inlayHints.functionReturnTypes": false,
+    "python.analysis.inlayHints.pytestParameters": false,
+    "python.analysis.languageServerMode": "full",
+}

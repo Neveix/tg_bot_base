@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "tg_bot_screen"
-version = "1.4.50"
+version = "2.0.0"
 authors = [
   { name="Neveix", email="i@neveix.ru" },
 ]
@@ -25,4 +25,7 @@ Issues = "https://github.com/Neveix/tg_bot_base/issues"
 
 [project.optional-dependencies]
 ptb = ["python-telegram-bot[job-queue]>=21.9"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["tg_bot_screen"]
 

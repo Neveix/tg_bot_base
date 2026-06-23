@@ -1,54 +1,48 @@
-from typing import Any, Callable
-from ...core.guards import check_bad_value
+from typing import Callable
+
+from ...core.models.input_callback_use_params import InputCallbackUseParams
 from ...core.interfaces import InputCallback
-from ...core.models.user_state import UserState
-
-
 
 
 class FuncCallback(InputCallback):
-    def __init__(self, function: Callable
-        , one_time: bool = True, **kwargs):
+    def __init__(
+        self,
+        function: Callable,
+        one_time: bool = True,
+        **kwargs,
+    ):
         self.function = function
         self.one_time = one_time
         self.kwargs = kwargs
-    
-    def __call__(self, **kwds):
-        return self.function(**self.kwargs, **kwds)
-    
-    async def use(self, *, 
-        user_id: int, 
-        user_data: UserState, 
-        screen_set_by_name: Callable, **kw
+
+    async def use(
+        self,
+        *,
+        params: InputCallbackUseParams,
     ) -> None:
         if self.one_time:
-            user_data.input_callback = None
-            
-        await self.function(user_id=user_id
-                , **self.kwargs, **kw)
-        
+            params.user_state.input_callback = None
+
+        await self.function(user_id=params.user_state.user_id, **self.kwargs)
+
 
 class ScreenCallback(InputCallback):
-    def __init__(self, screen_name: str, stack: bool = False):
+    def __init__(
+        self,
+        screen_name: str,
+        stack: bool = False,
+    ):
         self.screen_name = screen_name
         self.stack = stack
-        
-    async def use(self, *, 
-        user_id: int, 
-        user_data: UserState, 
-        screen_set_by_name: Callable, 
-        **kw
-    ) -> None:
-        user_data.input_callback = None
-        await screen_set_by_name(user_id, self.screen_name,
-            self.stack, **kw)
-        
 
-def check_pre_post_func(pre: FuncCallback | None, 
-                        post: FuncCallback | None, 
-                        obj: Any):
-    if pre:
-        check_bad_value(pre, FuncCallback, obj, "pre_func")
-    
-    if post:
-        check_bad_value(post, FuncCallback, obj, "post_func")
+    async def use(
+        self,
+        *,
+        params: InputCallbackUseParams,
+    ) -> None:
+        params.user_state.input_callback = None
+        await params.screen_service.set_by_name(
+            params.user_state.user_id,
+            self.screen_name,
+            self.stack,
+        )
