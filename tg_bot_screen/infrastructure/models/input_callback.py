@@ -23,7 +23,11 @@ class FuncCallback(InputCallback):
         if self.one_time:
             params.user_state.input_callback = None
 
-        await self.function(user_id=params.user_state.user_id, **self.kwargs)
+        await self.function(
+            user_id=params.user_state.user_id,
+            params=params,
+            **self.kwargs,
+        )
 
 
 class ScreenCallback(InputCallback):

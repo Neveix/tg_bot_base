@@ -24,7 +24,7 @@ Homepage = "https://github.com/Neveix/tg_bot_base"
 Issues = "https://github.com/Neveix/tg_bot_base/issues"
 
 [project.optional-dependencies]
-ptb = ["python-telegram-bot[job-queue]>=21.9"]
+ptb = ["python-telegram-bot[job-queue]>=22.8"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["tg_bot_screen"]

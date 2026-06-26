@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, Self
 
+from tg_bot_screen.core.models.button_rows import ButtonRows
 from tg_bot_screen.core.models.input_callback_use_params import InputCallbackUseParams
 from .models.user_state import UserState
 from .models.callback_data_use_params import CallbackDataUseParams
@@ -12,12 +13,12 @@ class CallbackData(ABC):
     def clone(self) -> Self: ...
 
     @abstractmethod
-    async def use(self, *, params: CallbackDataUseParams, **kwargs): ...
+    async def use(self, *, params: CallbackDataUseParams): ...
 
 
 class CallbackDataMapping(ABC):
     @abstractmethod
-    def add(self, callback: CallbackData, uuid: str) -> None: ...
+    def add(self, callback: CallbackData) -> None: ...
 
     @abstractmethod
     def get_by_callback(self, callback: CallbackData) -> str: ...
@@ -104,20 +105,42 @@ class ScreenRegistry(ABC):
 
 class BotAdapter(ABC):
     @abstractmethod
-    async def delete_message(self, chat_id: int, message_id: int): ...
+    async def delete_message(
+        self,
+        chat_id: int,
+        message_id: int,
+    ) -> bool: ...
 
     @abstractmethod
     async def edit_text(
-        self, chat_id: int, message_id: int, text: str, reply_markup
-    ): ...
+        self,
+        chat_id: int,
+        message_id: int,
+        text: str,
+        mapping: CallbackDataMapping,
+        button_rows: ButtonRows | None = None,
+    ) -> int: ...
 
     @abstractmethod
     async def send_message(
         self,
         chat_id: int,
         text: str,
-        reply_markup,
-    ) -> Any: ...
+        mapping: CallbackDataMapping,
+        parse_mode: str | None = None,
+        button_rows: ButtonRows | None = None,
+    ) -> int: ...
+
+    @abstractmethod
+    async def send_audio(
+        self,
+        chat_id: int,
+        text: str,
+        audio,
+        mapping: CallbackDataMapping,
+        parse_mode: str | None = None,
+        button_rows: ButtonRows | None = None,
+    ) -> int: ...
 
     @abstractmethod
     async def send_photo(
@@ -125,5 +148,47 @@ class BotAdapter(ABC):
         chat_id: int,
         photo,
         caption: str,
-        reply_markup,
+        mapping: CallbackDataMapping,
+        parse_mode: str | None = None,
+        button_rows: ButtonRows | None = None,
+    ) -> int: ...
+
+    @abstractmethod
+    async def send_video(
+        self,
+        chat_id: int,
+        video,
+        caption: str,
+        mapping: CallbackDataMapping,
+        parse_mode: str | None = None,
+        button_rows: ButtonRows | None = None,
+    ) -> int: ...
+
+    @abstractmethod
+    async def send_document(
+        self,
+        chat_id: int,
+        document,
+        caption: str,
+        mapping: CallbackDataMapping,
+        parse_mode: str | None = None,
+        button_rows: ButtonRows | None = None,
+    ) -> int: ...
+
+    @abstractmethod
+    async def send_video_note(
+        self,
+        chat_id: int,
+        video_note,
+        mapping: CallbackDataMapping,
+        button_rows: ButtonRows | None = None,
+    ) -> int: ...
+
+
+class ButtonRowsToReplyMarkupConverter(ABC):
+    @abstractmethod
+    def convert(
+        self,
+        mapping: CallbackDataMapping,
+        button_rows: ButtonRows | None = None,
     ) -> Any: ...

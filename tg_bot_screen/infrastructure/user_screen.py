@@ -1,6 +1,5 @@
 import asyncio
 from typing import Protocol
-from uuid import uuid4
 
 from tg_bot_screen.infrastructure.screen_diff_service import calc_screen_difference
 
@@ -28,8 +27,7 @@ def _map_callback_data(
     mapping = callback_data_mapping_factory()
     callback_data_list = screen.get_callback_data()
     for callback_data in callback_data_list:
-        uuid = str(uuid4())
-        mapping.add(callback_data, uuid)
+        mapping.add(callback_data)
     user_state_store.get(user_id).callback_mapping = mapping
     return mapping
 
@@ -74,7 +72,7 @@ class ScreenServiceImpl(ScreenService):
         new_screen = SentScreen()
         tasks = []
         for message in delete:
-            tasks.append(message.delete(self.bot_adapter))
+            tasks.append(message.delete(user_id, self.bot_adapter))
 
         for old_message, new_message in edit:
             tasks.append(old_message.edit(new_message, self.bot_adapter, mapping))
@@ -149,6 +147,7 @@ class ScreenServiceImpl(ScreenService):
         if user_data.screen:
             unsent = user_data.screen.get_unsent()
             await user_data.screen.delete(self.bot_adapter)
+
         user_data.screen_buffer = unsent
         user_data.screen = None
 
@@ -162,4 +161,6 @@ class ScreenServiceImpl(ScreenService):
         except Exception as e:
             print(f"у {user_id} ошибка в unbuffer: {e!r}")
 
-    def get(self, user_id: int) -> SentScreen | None: ...
+    def get(self, user_id: int) -> SentScreen | None:
+        user_state = self.user_state_store.get(user_id)
+        return user_state.screen
