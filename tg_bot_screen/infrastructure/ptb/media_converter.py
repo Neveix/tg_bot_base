@@ -1,6 +1,12 @@
 from io import BytesIO
 
-from telegram import InputFile
+from telegram import (
+    InputFile,
+    InputMediaAudio,
+    InputMediaDocument,
+    InputMediaPhoto,
+    InputMediaVideo,
+)
 
 from tg_bot_screen.core.models.media_data import (
     Audio,
@@ -36,7 +42,7 @@ from tg_bot_screen.core.models.media_data import (
 
 
 class PhotoConverterPtb:
-    def convert(self, photo: Photo):
+    def to_send_parameter(self, photo: Photo):
         if isinstance(photo, PhotoFileId):
             return photo.file_id
 
@@ -55,9 +61,13 @@ class PhotoConverterPtb:
 
         raise TypeError(f"Unsupported photo type: {type(photo)}")
 
+    def to_input_media(self, photo: Photo):
+        send_param = self.to_send_parameter(photo)
+        return InputMediaPhoto(media=send_param)
+
 
 class AudioConverterPtb:
-    def convert(self, audio: Audio):
+    def to_send_parameter(self, audio: Audio):
         if isinstance(audio, AudioFileId):
             return audio.file_id
 
@@ -76,9 +86,13 @@ class AudioConverterPtb:
 
         raise TypeError(f"Unsupported audio type: {type(audio)}")
 
+    def to_input_media(self, audio: Audio):
+        send_param = self.to_send_parameter(audio)
+        return InputMediaAudio(media=send_param)
+
 
 class VideoConverterPtb:
-    def convert(self, video: Video):
+    def to_send_parameter(self, video: Video):
         if isinstance(video, VideoFileId):
             return video.file_id
 
@@ -97,9 +111,13 @@ class VideoConverterPtb:
 
         raise TypeError(f"Unsupported video type: {type(video)}")
 
+    def to_input_media(self, video: Video):
+        send_param = self.to_send_parameter(video)
+        return InputMediaVideo(media=send_param)
+
 
 class DocumentConverterPtb:
-    def convert(self, document: Document):
+    def to_send_parameter(self, document: Document):
         if isinstance(document, DocumentFileId):
             return document.file_id
 
@@ -118,9 +136,13 @@ class DocumentConverterPtb:
 
         raise TypeError(f"Unsupported document type: {type(document)}")
 
+    def to_input_media(self, document: Document):
+        send_param = self.to_send_parameter(document)
+        return InputMediaDocument(media=send_param)
+
 
 class VoiceConverterPtb:
-    def convert(self, voice: Voice):
+    def to_send_parameter(self, voice: Voice):
         if isinstance(voice, VoiceFileId):
             return voice.file_id
 
@@ -139,9 +161,13 @@ class VoiceConverterPtb:
 
         raise TypeError(f"Unsupported voice type: {type(voice)}")
 
+    def to_input_media(self, voice: Voice):
+        send_param = self.to_send_parameter(voice)
+        return InputMediaAudio(media=send_param)
+
 
 class VideoNoteConverterPtb:
-    def convert(self, video_note: VideoNote):
+    def to_send_parameter(self, video_note: VideoNote):
         if isinstance(video_note, VideoNoteFileId):
             return video_note.file_id
 
@@ -156,3 +182,50 @@ class VideoNoteConverterPtb:
             return InputFile(data, filename=video_note.filename)
 
         raise TypeError(f"Unsupported video note type: {type(video_note)}")
+
+
+class GeneralConverterPtb:
+    def __init__(self):
+        self._photo_converter = PhotoConverterPtb()
+        self._audio_converter = AudioConverterPtb()
+        self._video_converter = VideoConverterPtb()
+        self._document_converter = DocumentConverterPtb()
+        self._voice_converter = VoiceConverterPtb()
+        self._video_note_converter = VideoNoteConverterPtb()
+
+    def to_send_parameter(
+        self, media: Photo | Audio | Video | Document | Voice | VideoNote
+    ):
+        if isinstance(media, Photo):
+            return self._photo_converter.to_send_parameter(media)
+
+        if isinstance(media, Audio):
+            return self._audio_converter.to_send_parameter(media)
+
+        if isinstance(media, Video):
+            return self._video_converter.to_send_parameter(media)
+
+        if isinstance(media, Document):
+            return self._document_converter.to_send_parameter(media)
+
+        if isinstance(media, Voice):
+            return self._voice_converter.to_send_parameter(media)
+
+        if isinstance(media, VideoNote):
+            return self._video_note_converter.to_send_parameter(media)
+
+    def to_input_media(self, media: Photo | Audio | Video | Document | Voice):
+        if isinstance(media, Photo):
+            return self._photo_converter.to_input_media(media)
+
+        if isinstance(media, Audio):
+            return self._audio_converter.to_input_media(media)
+
+        if isinstance(media, Video):
+            return self._video_converter.to_input_media(media)
+
+        if isinstance(media, Document):
+            return self._document_converter.to_input_media(media)
+
+        if isinstance(media, Voice):
+            return self._voice_converter.to_input_media(media)

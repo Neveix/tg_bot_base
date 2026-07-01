@@ -1,8 +1,16 @@
 from abc import ABC, abstractmethod
-from typing import Any, Self
+from typing import Any, Self, Sequence
 
 from tg_bot_screen.core.models.button_rows import ButtonRows
 from tg_bot_screen.core.models.input_callback_use_params import InputCallbackUseParams
+from tg_bot_screen.core.models.media_data import (
+    Audio,
+    Document,
+    Photo,
+    Video,
+    VideoNote,
+    Voice,
+)
 from .models.user_state import UserState
 from .models.callback_data_use_params import CallbackDataUseParams
 from .models.screen import ProtoScreen, UnSentScreen, SentScreen
@@ -105,23 +113,6 @@ class ScreenRegistry(ABC):
 
 class BotAdapter(ABC):
     @abstractmethod
-    async def delete_message(
-        self,
-        chat_id: int,
-        message_id: int,
-    ) -> bool: ...
-
-    @abstractmethod
-    async def edit_text(
-        self,
-        chat_id: int,
-        message_id: int,
-        text: str,
-        mapping: CallbackDataMapping,
-        button_rows: ButtonRows | None = None,
-    ) -> int: ...
-
-    @abstractmethod
     async def send_message(
         self,
         chat_id: int,
@@ -129,60 +120,187 @@ class BotAdapter(ABC):
         mapping: CallbackDataMapping,
         parse_mode: str | None = None,
         button_rows: ButtonRows | None = None,
-    ) -> int: ...
+    ) -> int:
+        """
+        :raises MessageNotModified:
+        :raises BadRequest: when telegram api error
+        :raises TgBotScreenException: In any other case
+        """
+        pass
 
     @abstractmethod
     async def send_audio(
         self,
         chat_id: int,
         text: str,
-        audio,
+        audio: Audio,
         mapping: CallbackDataMapping,
         parse_mode: str | None = None,
         button_rows: ButtonRows | None = None,
-    ) -> int: ...
+    ) -> int:
+        """
+        :raises MessageNotModified:
+        :raises BadRequest: when telegram api error
+        :raises TgBotScreenException: In any other case
+        """
+        pass
 
     @abstractmethod
     async def send_photo(
         self,
         chat_id: int,
-        photo,
+        photo: Photo,
         caption: str,
         mapping: CallbackDataMapping,
         parse_mode: str | None = None,
         button_rows: ButtonRows | None = None,
-    ) -> int: ...
+    ) -> int:
+        """
+        :raises MessageNotModified:
+        :raises BadRequest: when telegram api error
+        :raises TgBotScreenException: In any other case
+        """
+        pass
 
     @abstractmethod
     async def send_video(
         self,
         chat_id: int,
-        video,
-        caption: str,
+        video: Video,
         mapping: CallbackDataMapping,
+        caption: str | None = None,
         parse_mode: str | None = None,
         button_rows: ButtonRows | None = None,
-    ) -> int: ...
+    ) -> int:
+        """
+        :raises MessageNotModified:
+        :raises BadRequest: when telegram api error
+        :raises TgBotScreenException: In any other case
+        """
+        pass
 
     @abstractmethod
     async def send_document(
         self,
         chat_id: int,
-        document,
-        caption: str,
+        document: Document,
+        caption: str | None,
         mapping: CallbackDataMapping,
         parse_mode: str | None = None,
         button_rows: ButtonRows | None = None,
-    ) -> int: ...
+    ) -> int:
+        """
+        :raises MessageNotModified:
+        :raises BadRequest: when telegram api error
+        :raises TgBotScreenException: In any other case
+        """
+        pass
+
+    @abstractmethod
+    async def send_voice(
+        self,
+        chat_id: int,
+        voice: Voice,
+        mapping: CallbackDataMapping,
+        caption: str | None = None,
+        parse_mode: str | None = None,
+        button_rows: ButtonRows | None = None,
+    ) -> int:
+        """
+        :raises MessageNotModified:
+        :raises BadRequest: when telegram api error
+        :raises TgBotScreenException: In any other case
+        """
+        pass
 
     @abstractmethod
     async def send_video_note(
         self,
         chat_id: int,
-        video_note,
+        video_note: VideoNote,
         mapping: CallbackDataMapping,
         button_rows: ButtonRows | None = None,
-    ) -> int: ...
+    ) -> int:
+        """
+        :raises MessageNotModified:
+        :raises BadRequest: when telegram api error
+        :raises TgBotScreenException: In any other case
+        """
+        pass
+
+    @abstractmethod
+    async def delete_message(self, chat_id: int, message_id: int) -> bool:
+        """
+        :raises MessageNotModified:
+        :raises BadRequest: when telegram api error
+        :raises TgBotScreenException: In any other case
+        """
+        pass
+
+    @abstractmethod
+    async def edit_message_text(
+        self,
+        chat_id: int,
+        message_id: int,
+        text: str,
+        mapping: CallbackDataMapping,
+        button_rows: ButtonRows | None = None,
+    ) -> int:
+        """
+        :raises MessageNotModified:
+        :raises BadRequest: when telegram api error
+        :raises TgBotScreenException: In any other case
+        """
+        pass
+
+    @abstractmethod
+    async def edit_message_media(
+        self,
+        chat_id: int,
+        message_id: int,
+        media: Photo | Video | Audio | Document,
+        mapping: CallbackDataMapping,
+        button_rows: ButtonRows | None = None,
+    ) -> int:
+        """
+        :raises MessageNotModified:
+        :raises BadRequest: when telegram api error
+        :raises TgBotScreenException: In any other case
+        """
+        pass
+
+    @abstractmethod
+    async def edit_message_caption(
+        self,
+        chat_id: int,
+        message_id: int,
+        caption: str | None,
+        mapping: CallbackDataMapping,
+        parse_mode: str | None = None,
+        button_rows: ButtonRows | None = None,
+    ) -> int:
+        """
+        :raises MessageNotModified:
+        :raises BadRequest: when telegram api error
+        :raises TgBotScreenException: In any other case
+        """
+        pass
+
+    @abstractmethod
+    async def send_media_group(
+        self,
+        chat_id: int,
+        media: Sequence[Photo | Video | Audio | Document],
+        mapping: CallbackDataMapping,
+        caption: str | None = None,
+        parse_mode: str | None = None,
+    ) -> list[int]:
+        """
+        :raises MessageNotModified:
+        :raises BadRequest: when telegram api error
+        :raises TgBotScreenException: In any other case
+        """
+        pass
 
 
 class ButtonRowsToReplyMarkupConverter(ABC):

@@ -12,3 +12,7 @@ class BadRequest(TgBotScreenException):
 
 class CannotTransformMessage(TgBotScreenException):
     pass
+
+
+class ImplementationError(TgBotScreenException):
+    pass

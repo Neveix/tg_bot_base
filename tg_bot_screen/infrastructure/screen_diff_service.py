@@ -2,6 +2,7 @@ from typing import TypeVar, cast
 
 from tg_bot_screen.core.models.message import Message, SentMessage
 from tg_bot_screen.core.models.screen import SentScreen, UnSentScreen
+from .screen_abstract_diff import calc_abstract_difference
 
 MsgType = TypeVar("MsgType", bound=Message)
 SentMsgType = TypeVar("SentMsgType", bound=SentMessage)
@@ -33,35 +34,7 @@ def calc_screen_difference(
 
 
 def get_type_codes(messages: list[MsgType | SentMsgType]):
-    type_codes = set()
+    type_codes = []
     for message in messages:
-        type_codes.add(message.category)
-    type_codes = list(type_codes)
-    type_codes = [(code, i) for i, code in enumerate(type_codes)]
-    return dict(type_codes)
-
-
-def calc_abstract_difference(
-    start: list[int], end: list[int]
-) -> tuple[list[int], list[tuple[int, int]], list[int]]:
-    indices_delete = []
-    indices_edit = []
-    indices_send = []
-    startn = 0
-    for j, enum in enumerate(end):
-        if startn >= len(start):
-            indices_send.append(j)
-            continue
-        for i, snum in enumerate(start[startn:], start=startn):
-            startn += 1
-            if enum == snum:
-                indices_edit.append((i, j))  # (from, to)
-                break
-            else:
-                indices_delete.append(i)
-        else:
-            indices_send = list(range(j, len(end)))
-            break
-    indices_delete += list(range(startn, len(start)))
-    return indices_delete, indices_edit, indices_send
-
+        type_codes.append(message.category)
+    return {code: i for i, code in enumerate(type_codes)}
