@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 import asyncio
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Any, Coroutine, Protocol, Self, Sequence
+from typing import Any, Coroutine, Generic, Protocol, Self, Sequence, TypeVar
 
 from tg_bot_screen.core.exceptions import (
     CannotTransformMessage,
@@ -70,20 +70,6 @@ class UnSentMessage:
     ):
         self.category = category
 
-    @abstractmethod
-    async def send(
-        self,
-        user_id: int,
-        bot_adapter: BotAdapter,
-        mapping: CallbackDataMapping,
-    ) -> "SentMessage": ...
-
-    @abstractmethod
-    def __eq__(self, other: object) -> bool: ...
-
-    @abstractmethod
-    def clone(self) -> Self: ...
-
 
 class SentMessage(ABC):
     def __init__(
@@ -96,31 +82,8 @@ class SentMessage(ABC):
         self.message_ids = message_ids
         self.user_id = user_id
 
-    async def delete(
-        self,
-        user_id: int,
-        bot_adapter: BotAdapter,
-    ):
-        final_result = False
-        for message_id in self.message_ids:
-            result = await bot_adapter.delete_message(
-                chat_id=user_id,
-                message_id=message_id,
-            )
-            final_result |= result
-
-        return final_result
-
     @abstractmethod
     def get_unsent(self) -> UnSentMessage: ...
-
-    @abstractmethod
-    async def edit(
-        self,
-        new_message: UnSentMessage,
-        bot_adapter: BotAdapter,
-        mapping: CallbackDataMapping,
-    ) -> Self: ...
 
 
 Message = UnSentMessage | SentMessage
@@ -146,40 +109,15 @@ class SimpleMessage(UnSentMessage, HasButtonRowsMixin, HasTextMixin):
         )
         HasTextMixin.__init__(self, text=text, parse_mode=parse_mode)
 
-    async def send(
-        self,
-        user_id: int,
-        bot_adapter: BotAdapter,
-        mapping: CallbackDataMapping,
-    ):
-        message_id = await bot_adapter.send_message(
-            chat_id=user_id,
-            text=self.text,
-            mapping=mapping,
-            parse_mode=self.parse_mode,
-            button_rows=self.button_rows,
-        )
 
-        return SentSimpleMessage(
-            text=self.text,
-            message_ids=[message_id],
-            user_id=user_id,
-            button_rows=self.button_rows,
-            parse_mode=self.parse_mode,
-        )
-
-
-class MediaMessage(HasTextMixin, HasButtonRowsMixin):
+class MediaMessage(HasButtonRowsMixin):
     def __init__(
         self,
         *,
-        text: str,
         category: MessageCategory,
         button_rows: ButtonRows | None = None,
-        parse_mode: ParseMode | None = None,
     ):
         self.category = category
-        HasTextMixin.__init__(self, text=text, parse_mode=parse_mode)
         HasButtonRowsMixin.__init__(self, button_rows=button_rows)
 
     def __new__(cls, *args, **kwargs):
@@ -193,41 +131,14 @@ class AudioMessage(MediaMessage, UnSentMessage):
     def __init__(
         self,
         *,
-        text: str,
         audio: Audio,
         button_rows: ButtonRows | None = None,
-        parse_mode: ParseMode | None = None,
     ):
         self.media = audio
         MediaMessage.__init__(
             self,
-            text=text,
             category=MessageCategory.AUDIO,
             button_rows=button_rows,
-            parse_mode=parse_mode,
-        )
-
-    async def send(
-        self,
-        user_id: int,
-        bot_adapter: BotAdapter,
-        mapping: CallbackDataMapping,
-    ):
-        message_id = await bot_adapter.send_audio(
-            chat_id=user_id,
-            audio=self.media,
-            text=self.text,
-            mapping=mapping,
-            button_rows=self.button_rows,
-        )
-
-        return SentAudioMessage(
-            text=self.text,
-            media=self.media,
-            message_ids=[message_id],
-            user_id=user_id,
-            button_rows=self.button_rows,
-            parse_mode=self.parse_mode,
         )
 
 
@@ -235,41 +146,14 @@ class DocumentMessage(MediaMessage, UnSentMessage):
     def __init__(
         self,
         *,
-        text: str,
         document: Document,
         button_rows: ButtonRows | None = None,
-        parse_mode: ParseMode | None = None,
     ):
         self.media = document
         MediaMessage.__init__(
             self,
-            text=text,
             category=MessageCategory.DOCUMENT,
             button_rows=button_rows,
-            parse_mode=parse_mode,
-        )
-
-    async def send(
-        self,
-        user_id: int,
-        bot_adapter: BotAdapter,
-        mapping: CallbackDataMapping,
-    ):
-        message_id = await bot_adapter.send_document(
-            chat_id=user_id,
-            document=self.media,
-            caption=self.text,
-            mapping=mapping,
-            button_rows=self.button_rows,
-        )
-
-        return SentDocumentMessage(
-            text=self.text,
-            media=self.media,
-            message_ids=[message_id],
-            user_id=user_id,
-            button_rows=self.button_rows,
-            parse_mode=self.parse_mode,
         )
 
 
@@ -277,41 +161,14 @@ class PhotoMessage(MediaMessage, UnSentMessage):
     def __init__(
         self,
         *,
-        text: str,
         photo: Photo,
         button_rows: ButtonRows | None = None,
-        parse_mode: ParseMode | None = None,
     ):
         self.media = photo
         MediaMessage.__init__(
             self,
-            text=text,
             category=MessageCategory.PHOTO,
             button_rows=button_rows,
-            parse_mode=parse_mode,
-        )
-
-    async def send(
-        self,
-        user_id: int,
-        bot_adapter: BotAdapter,
-        mapping: CallbackDataMapping,
-    ):
-        message_id = await bot_adapter.send_photo(
-            chat_id=user_id,
-            photo=self.media,
-            caption=self.text,
-            mapping=mapping,
-            button_rows=self.button_rows,
-        )
-
-        return SentPhotoMessage(
-            text=self.text,
-            media=self.media,
-            message_ids=[message_id],
-            user_id=user_id,
-            button_rows=self.button_rows,
-            parse_mode=self.parse_mode,
         )
 
 
@@ -319,41 +176,14 @@ class VideoMessage(MediaMessage, UnSentMessage):
     def __init__(
         self,
         *,
-        text: str,
         video: Video,
         button_rows: ButtonRows | None = None,
-        parse_mode: ParseMode | None = None,
     ):
         self.media = video
         MediaMessage.__init__(
             self,
-            text=text,
             category=MessageCategory.VIDEO,
             button_rows=button_rows,
-            parse_mode=parse_mode,
-        )
-
-    async def send(
-        self,
-        user_id: int,
-        bot_adapter: BotAdapter,
-        mapping: CallbackDataMapping,
-    ):
-        message_id = await bot_adapter.send_video(
-            chat_id=user_id,
-            video=self.media,
-            caption=self.text,
-            mapping=mapping,
-            button_rows=self.button_rows,
-        )
-
-        return SentVideoMessage(
-            text=self.text,
-            media=self.media,
-            message_ids=[message_id],
-            user_id=user_id,
-            button_rows=self.button_rows,
-            parse_mode=self.parse_mode,
         )
 
 
@@ -367,26 +197,6 @@ class VoiceMessage(HasButtonRowsMixin, UnSentMessage):
         HasButtonRowsMixin.__init__(self, button_rows=button_rows)
         UnSentMessage.__init__(self, category=MessageCategory.VOICE)
 
-    async def send(
-        self,
-        user_id: int,
-        bot_adapter: BotAdapter,
-        mapping: CallbackDataMapping,
-    ):
-        message_id = await bot_adapter.send_voice(
-            chat_id=user_id,
-            voice=self.voice,
-            mapping=mapping,
-            button_rows=self.button_rows,
-        )
-
-        return SentVoiceMessage(
-            voice=self.voice,
-            message_ids=[message_id],
-            user_id=user_id,
-            button_rows=self.button_rows,
-        )
-
 
 class VideoNoteMessage(HasButtonRowsMixin, UnSentMessage):
     def __init__(
@@ -398,164 +208,53 @@ class VideoNoteMessage(HasButtonRowsMixin, UnSentMessage):
         HasButtonRowsMixin.__init__(self, button_rows=button_rows)
         UnSentMessage.__init__(self, category=MessageCategory.VIDEO_NOTE)
 
-    async def send(
-        self,
-        user_id: int,
-        bot_adapter: BotAdapter,
-        mapping: CallbackDataMapping,
-    ):
-        message_id = await bot_adapter.send_video_note(
-            chat_id=user_id,
-            video_note=self.video_note,
-            mapping=mapping,
-            button_rows=self.button_rows,
-        )
 
-        return SentVideoNoteMessage(
-            video_note=self.video_note,
-            message_ids=[message_id],
-            user_id=user_id,
-            button_rows=self.button_rows,
-        )
-
-
-class PhotoVideoAlbumMessage(HasTextMixin, UnSentMessage):
+class PhotoVideoAlbumMessage(UnSentMessage):
     def __init__(
         self,
         *,
-        text: str,
         media: Sequence[Photo | Video],
-        parse_mode: ParseMode | None = None,
+        button_rows: ButtonRows | None = None,
     ):
         self.media = media
-        HasTextMixin.__init__(
-            self,
-            text=text,
-            parse_mode=parse_mode,
-        )
+        self.button_rows = button_rows
         UnSentMessage.__init__(
             self,
             category=MessageCategory.PHOTO_VIDEO_ALBUM,
         )
 
-    async def send(
-        self,
-        user_id: int,
-        bot_adapter: BotAdapter,
-        mapping: CallbackDataMapping,
-    ):
-        message_ids = await bot_adapter.send_media_group(
-            chat_id=user_id,
-            media=self.media,
-            caption=self.text,
-            mapping=mapping,
-        )
 
-        return SentPhotoVideoAlbumMessage(
-            text=self.text,
-            media=self.media,
-            message_ids=message_ids,
-            user_id=user_id,
-            parse_mode=self.parse_mode,
-        )
-
-
-class AudioAlbumMessage(HasTextMixin, UnSentMessage):
+class AudioAlbumMessage(UnSentMessage):
     def __init__(
         self,
         *,
-        text: str,
         media: Sequence[Audio],
-        parse_mode: ParseMode | None = None,
+        button_rows: ButtonRows | None = None,
     ):
         self.media = media
-        HasTextMixin.__init__(
-            self,
-            text=text,
-            parse_mode=parse_mode,
-        )
+        self.button_rows = button_rows
         UnSentMessage.__init__(
             self,
             category=MessageCategory.AUDIO_ALBUM,
         )
 
-    async def send(
-        self,
-        user_id: int,
-        bot_adapter: BotAdapter,
-        mapping: CallbackDataMapping,
-    ):
-        message_ids = await bot_adapter.send_media_group(
-            chat_id=user_id,
-            media=self.media,
-            caption=self.text,
-            mapping=mapping,
-        )
 
-        return SentAudioAlbumMessage(
-            text=self.text,
-            media=self.media,
-            message_ids=message_ids,
-            user_id=user_id,
-            parse_mode=self.parse_mode,
-        )
-
-
-class DocumentAlbumMessage(HasTextMixin, UnSentMessage):
+class DocumentAlbumMessage(UnSentMessage):
     def __init__(
         self,
         *,
-        text: str,
         media: Sequence[Document],
-        parse_mode: ParseMode | None = None,
+        button_rows: ButtonRows | None = None,
     ):
         self.media = media
-        HasTextMixin.__init__(
-            self,
-            text=text,
-            parse_mode=parse_mode,
-        )
+        self.button_rows = button_rows
         UnSentMessage.__init__(
             self,
             category=MessageCategory.DOCUMENT_ALBUM,
         )
 
-    async def send(
-        self,
-        user_id: int,
-        bot_adapter: BotAdapter,
-        mapping: CallbackDataMapping,
-    ):
-        message_ids = await bot_adapter.send_media_group(
-            chat_id=user_id,
-            media=self.media,
-            caption=self.text,
-            mapping=mapping,
-        )
-
-        return SentDocumentAlbumMessage(
-            text=self.text,
-            media=self.media,
-            message_ids=message_ids,
-            user_id=user_id,
-            parse_mode=self.parse_mode,
-        )
-
 
 # ----- #
-
-
-async def run_parallel_requests(coroutines: list[Coroutine]) -> None:
-    results = await asyncio.gather(*coroutines, return_exceptions=True)
-
-    if all(isinstance(r, MessageNotModified) for r in results):
-        raise MessageNotModified("All edits returned MessageNotModified")
-
-    for result in results:
-        if isinstance(result, Exception) and not isinstance(result, MessageNotModified):
-            raise result
-
-    return None
 
 
 class SentSimpleMessage(SentMessage, HasButtonRowsMixin, HasTextMixin):
@@ -590,26 +289,15 @@ class SentSimpleMessage(SentMessage, HasButtonRowsMixin, HasTextMixin):
             parse_mode=self.parse_mode,
         )
 
-    async def edit(
-        self,
-        new_message: UnSentMessage,
-        bot_adapter: BotAdapter,
-        mapping: CallbackDataMapping,
-    ) -> Self:
-        # TODO:
-        ...
-
 
 class SentMediaMessage(SentMessage, HasButtonRowsMixin, HasTextMixin):
     def __init__(
         self,
         *,
-        text: str,
         message_ids: Sequence[int],
         user_id: int,
         category: MessageCategory,
         button_rows: ButtonRows | None = None,
-        parse_mode: ParseMode | None = None,
     ):
         SentMessage.__init__(
             self,
@@ -621,7 +309,6 @@ class SentMediaMessage(SentMessage, HasButtonRowsMixin, HasTextMixin):
             self,
             button_rows=button_rows,
         )
-        HasTextMixin.__init__(self, text=text, parse_mode=parse_mode)
 
     def __new__(cls, *args, **kwargs):
         assert cls is not MediaMessage, (
@@ -634,156 +321,96 @@ class SentAudioMessage(SentMediaMessage):
     def __init__(
         self,
         *,
-        text: str,
         media: Audio,
         message_ids: Sequence[int],
         user_id: int,
         button_rows: ButtonRows | None = None,
-        parse_mode: ParseMode | None = None,
     ):
         self.audio = media
         super().__init__(
-            text=text,
             message_ids=message_ids,
             category=MessageCategory.AUDIO,
             user_id=user_id,
             button_rows=button_rows,
-            parse_mode=parse_mode,
         )
 
     def get_unsent(self) -> UnSentMessage:
         return AudioMessage(
-            text=self.text,
             audio=self.audio,
             button_rows=self.button_rows,
-            parse_mode=self.parse_mode,
         )
-
-    async def edit(
-        self,
-        new_message: UnSentMessage,
-        bot_adapter: BotAdapter,
-        mapping: CallbackDataMapping,
-    ) -> Self:
-        # TODO:
-        ...
 
 
 class SentDocumentMessage(SentMediaMessage):
     def __init__(
         self,
         *,
-        text: str,
         media: Document,
         message_ids: Sequence[int],
         user_id: int,
         button_rows: ButtonRows | None = None,
-        parse_mode: ParseMode | None = None,
     ):
         self.document = media
         super().__init__(
-            text=text,
             message_ids=message_ids,
             user_id=user_id,
             category=MessageCategory.DOCUMENT,
             button_rows=button_rows,
-            parse_mode=parse_mode,
         )
 
     def get_unsent(self) -> UnSentMessage:
         return DocumentMessage(
-            text=self.text,
             document=self.document,
             button_rows=self.button_rows,
-            parse_mode=self.parse_mode,
         )
-
-    async def edit(
-        self,
-        new_message: UnSentMessage,
-        bot_adapter: BotAdapter,
-        mapping: CallbackDataMapping,
-    ) -> Self:
-        # TODO:
-        ...
 
 
 class SentPhotoMessage(SentMediaMessage):
     def __init__(
         self,
         *,
-        text: str,
         media: Photo,
         message_ids: Sequence[int],
         user_id: int,
         button_rows: ButtonRows | None = None,
-        parse_mode: ParseMode | None = None,
     ):
         self.photo = media
         super().__init__(
-            text=text,
             message_ids=message_ids,
             category=MessageCategory.PHOTO,
             user_id=user_id,
             button_rows=button_rows,
-            parse_mode=parse_mode,
         )
 
     def get_unsent(self) -> UnSentMessage:
         return PhotoMessage(
-            text=self.text,
             photo=self.photo,
             button_rows=self.button_rows,
-            parse_mode=self.parse_mode,
         )
-
-    async def edit(
-        self,
-        new_message: UnSentMessage,
-        bot_adapter: BotAdapter,
-        mapping: CallbackDataMapping,
-    ) -> Self:
-        # TODO:
-        ...
 
 
 class SentVideoMessage(SentMediaMessage):
     def __init__(
         self,
         *,
-        text: str,
         media: Video,
         message_ids: Sequence[int],
         user_id: int,
         button_rows: ButtonRows | None = None,
-        parse_mode: ParseMode | None = None,
     ):
         self.video = media
         super().__init__(
-            text=text,
             message_ids=message_ids,
             category=MessageCategory.VIDEO,
             user_id=user_id,
             button_rows=button_rows,
-            parse_mode=parse_mode,
         )
 
     def get_unsent(self) -> UnSentMessage:
         return VideoMessage(
-            text=self.text,
             video=self.video,
             button_rows=self.button_rows,
-            parse_mode=self.parse_mode,
         )
-
-    async def edit(
-        self,
-        new_message: UnSentMessage,
-        bot_adapter: BotAdapter,
-        mapping: CallbackDataMapping,
-    ) -> Self:
-        # TODO:
-        ...
 
 
 class SentVoiceMessage(HasButtonRowsMixin, SentMessage):
@@ -809,16 +436,6 @@ class SentVoiceMessage(HasButtonRowsMixin, SentMessage):
             button_rows=self.button_rows,
         )
 
-    async def edit(
-        self,
-        new_message: UnSentMessage,
-        bot_adapter: BotAdapter,
-        mapping: CallbackDataMapping,
-    ) -> Self:
-        raise CannotTransformMessage(
-            f"{type(self)} cannot be transformed into {type(new_message)}"
-        )
-
 
 class SentVideoNoteMessage(HasButtonRowsMixin, SentMessage):
     def __init__(
@@ -841,16 +458,6 @@ class SentVideoNoteMessage(HasButtonRowsMixin, SentMessage):
         return VideoNoteMessage(
             video_note=self.video_note,
             button_rows=self.button_rows,
-        )
-
-    async def edit(
-        self,
-        new_message: UnSentMessage,
-        bot_adapter: BotAdapter,
-        mapping: CallbackDataMapping,
-    ) -> Self:
-        raise CannotTransformMessage(
-            f"{type(self)} cannot be transformed into {type(new_message)}"
         )
 
 
@@ -879,15 +486,6 @@ class SentPhotoVideoAlbumMessage(HasTextMixin, SentMessage):
             parse_mode=self.parse_mode,
         )
 
-    async def edit(
-        self,
-        new_message: UnSentMessage,
-        bot_adapter: BotAdapter,
-        mapping: CallbackDataMapping,
-    ) -> Self:
-        # TODO:
-        ...
-
 
 class SentAudioAlbumMessage(HasTextMixin, SentMessage):
     def __init__(
@@ -913,15 +511,6 @@ class SentAudioAlbumMessage(HasTextMixin, SentMessage):
             media=self.media,
             parse_mode=self.parse_mode,
         )
-
-    async def edit(
-        self,
-        new_message: UnSentMessage,
-        bot_adapter: BotAdapter,
-        mapping: CallbackDataMapping,
-    ) -> Self:
-        # TODO:
-        ...
 
 
 class SentDocumentAlbumMessage(HasTextMixin, SentMessage):
@@ -949,15 +538,6 @@ class SentDocumentAlbumMessage(HasTextMixin, SentMessage):
             parse_mode=self.parse_mode,
         )
 
-    async def edit(
-        self,
-        new_message: UnSentMessage,
-        bot_adapter: BotAdapter,
-        mapping: CallbackDataMapping,
-    ) -> Self:
-        # TODO:
-        ...
-
 
 # --------------------------------------------------------------------------- #
 
@@ -972,834 +552,59 @@ class MessageEditFunc(Protocol):
     ) -> SentMessage: ...
 
 
-class MessageCanBeEditerFunc(Protocol):
+@dataclass
+class EditPlan:
+    indices_to_delete: list[int]
+    indices_to_edit: list[tuple[int, int]]
+
+
+class GetEditPlan(Protocol):
     def __call__(
         self,
         old_message: SentMessage,
         new_message: UnSentMessage,
-    ) -> tuple[list[int], list[tuple[int, int]]] | None: ...
+    ) -> EditPlan | None: ...
+
+
+SentMessageT = TypeVar("SentMessageT", bound=SentMessage, contravariant=True)
+UnSentMessageT = TypeVar("UnSentMessageT", bound=SentMessage, contravariant=True)
+SentMessageD = TypeVar("SentMessageD", bound=SentMessage, covariant=True)
+
+
+class EditStrategy(Generic[SentMessageT, UnSentMessageT, SentMessageD], ABC):
+    @abstractmethod
+    async def execute(
+        self,
+        old_message: SentMessageT,
+        new_message: UnSentMessageT,
+        bot_adapter: BotAdapter,
+        mapping: CallbackDataMapping,
+    ) -> SentMessageD: ...
 
 
 # ----- #
 
 
-async def edit_simple_to_simple(
-    old_message: SentMessage,
-    new_message: UnSentMessage,
-    bot_adapter: BotAdapter,
-    mapping: CallbackDataMapping,
-) -> SentMessage:
-    if not isinstance(old_message, SentSimpleMessage):
-        raise ImplementationError(f"Found unexpected type {type(old_message).__name__}")
-    if not isinstance(new_message, SimpleMessage):
-        raise ImplementationError(f"Found unexpected type {type(new_message).__name__}")
-
-    await bot_adapter.edit_message_text(
-        chat_id=old_message.user_id,
-        message_id=old_message.message_ids[0],
-        text=new_message.text,
-        mapping=mapping,
-        button_rows=new_message.button_rows,
-    )
-    return SentSimpleMessage(
-        text=new_message.text,
-        message_ids=old_message.message_ids,
-        user_id=old_message.user_id,
-        button_rows=new_message.button_rows,
-        parse_mode=old_message.parse_mode,
-    )
+EditStrategyT = TypeVar("EditStrategyT", bound=EditStrategy)
 
 
-async def edit_simple_to_photo(
-    old_message: SentMessage,
-    new_message: UnSentMessage,
-    bot_adapter: BotAdapter,
-    mapping: CallbackDataMapping,
-) -> SentMessage:
-    if not isinstance(old_message, SentSimpleMessage):
-        raise ImplementationError(f"Found unexpected type {type(old_message).__name__}")
-    if not isinstance(new_message, PhotoMessage):
-        raise ImplementationError(f"Found unexpected type {type(new_message).__name__}")
+class EditRegistrar(Generic[EditStrategyT]):
+    _strategies: dict[tuple[MessageCategory, MessageCategory], EditStrategy] = {}
 
-    await run_parallel_requests(
-        [
-            bot_adapter.edit_message_media(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                media=new_message.media,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-            bot_adapter.edit_message_caption(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                caption=new_message.text,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-        ]
-    )
-    return SentPhotoMessage(
-        media=new_message.media,
-        text=new_message.text,
-        message_ids=old_message.message_ids,
-        user_id=old_message.user_id,
-        button_rows=new_message.button_rows,
-        parse_mode=old_message.parse_mode,
-    )
+    @classmethod
+    def register_strategy(cls, cat_from: MessageCategory, cat_to: MessageCategory):
+        def wrapper(strategy: EditStrategyT):
+            cls._strategies[(cat_from, cat_to)] = strategy
+            return strategy
 
+        return wrapper
 
-async def edit_simple_to_video(
-    old_message: SentMessage,
-    new_message: UnSentMessage,
-    bot_adapter: BotAdapter,
-    mapping: CallbackDataMapping,
-) -> SentMessage:
-    if not isinstance(old_message, SentSimpleMessage):
-        raise ImplementationError(f"Found unexpected type {type(old_message).__name__}")
-    if not isinstance(new_message, VideoMessage):
-        raise ImplementationError(f"Found unexpected type {type(new_message).__name__}")
-
-    await run_parallel_requests(
-        [
-            bot_adapter.edit_message_media(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                media=new_message.media,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-            bot_adapter.edit_message_caption(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                caption=new_message.text,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-        ]
-    )
-    return SentVideoMessage(
-        media=new_message.media,
-        text=new_message.text,
-        message_ids=old_message.message_ids,
-        user_id=old_message.user_id,
-        button_rows=new_message.button_rows,
-        parse_mode=old_message.parse_mode,
-    )
-
-
-async def edit_simple_to_audio(
-    old_message: SentMessage,
-    new_message: UnSentMessage,
-    bot_adapter: BotAdapter,
-    mapping: CallbackDataMapping,
-) -> SentMessage:
-    if not isinstance(old_message, SentSimpleMessage):
-        raise ImplementationError(f"Found unexpected type {type(old_message).__name__}")
-    if not isinstance(new_message, AudioMessage):
-        raise ImplementationError(f"Found unexpected type {type(new_message).__name__}")
-
-    await run_parallel_requests(
-        [
-            bot_adapter.edit_message_media(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                media=new_message.media,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-            bot_adapter.edit_message_caption(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                caption=new_message.text,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-        ]
-    )
-    return SentAudioMessage(
-        media=new_message.media,
-        text=new_message.text,
-        message_ids=old_message.message_ids,
-        user_id=old_message.user_id,
-        button_rows=new_message.button_rows,
-        parse_mode=old_message.parse_mode,
-    )
-
-
-async def edit_simple_to_document(
-    old_message: SentMessage,
-    new_message: UnSentMessage,
-    bot_adapter: BotAdapter,
-    mapping: CallbackDataMapping,
-) -> SentMessage:
-    if not isinstance(old_message, SentSimpleMessage):
-        raise ImplementationError(f"Found unexpected type {type(old_message).__name__}")
-    if not isinstance(new_message, DocumentMessage):
-        raise ImplementationError(f"Found unexpected type {type(new_message).__name__}")
-
-    await run_parallel_requests(
-        [
-            bot_adapter.edit_message_media(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                media=new_message.media,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-            bot_adapter.edit_message_caption(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                caption=new_message.text,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-        ]
-    )
-    return SentDocumentMessage(
-        media=new_message.media,
-        text=new_message.text,
-        message_ids=old_message.message_ids,
-        user_id=old_message.user_id,
-        button_rows=new_message.button_rows,
-        parse_mode=old_message.parse_mode,
-    )
+    @classmethod
+    def get_strategy(cls, cat_from: MessageCategory, cat_to: MessageCategory):
+        return cls._strategies.get((cat_from, cat_to))
 
 
 # ----- #
-
-
-async def edit_photo_to_photo(
-    old_message: SentMessage,
-    new_message: UnSentMessage,
-    bot_adapter: BotAdapter,
-    mapping: CallbackDataMapping,
-) -> SentMessage:
-    if not isinstance(old_message, SentPhotoMessage):
-        raise ImplementationError(f"Found unexpected type {type(old_message).__name__}")
-    if not isinstance(new_message, PhotoMessage):
-        raise ImplementationError(f"Found unexpected type {type(new_message).__name__}")
-
-    await run_parallel_requests(
-        [
-            bot_adapter.edit_message_media(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                media=new_message.media,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-            bot_adapter.edit_message_caption(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                caption=new_message.text,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-        ]
-    )
-    return SentPhotoMessage(
-        media=new_message.media,
-        text=new_message.text,
-        message_ids=old_message.message_ids,
-        user_id=old_message.user_id,
-        button_rows=new_message.button_rows,
-        parse_mode=old_message.parse_mode,
-    )
-
-
-async def edit_photo_to_video(
-    old_message: SentMessage,
-    new_message: UnSentMessage,
-    bot_adapter: BotAdapter,
-    mapping: CallbackDataMapping,
-) -> SentMessage:
-    if not isinstance(old_message, SentPhotoMessage):
-        raise ImplementationError(f"Found unexpected type {type(old_message).__name__}")
-    if not isinstance(new_message, VideoMessage):
-        raise ImplementationError(f"Found unexpected type {type(new_message).__name__}")
-
-    await run_parallel_requests(
-        [
-            bot_adapter.edit_message_media(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                media=new_message.media,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-            bot_adapter.edit_message_caption(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                caption=new_message.text,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-        ]
-    )
-    return SentVideoMessage(
-        media=new_message.media,
-        text=new_message.text,
-        message_ids=old_message.message_ids,
-        user_id=old_message.user_id,
-        button_rows=new_message.button_rows,
-        parse_mode=old_message.parse_mode,
-    )
-
-
-async def edit_photo_to_audio(
-    old_message: SentMessage,
-    new_message: UnSentMessage,
-    bot_adapter: BotAdapter,
-    mapping: CallbackDataMapping,
-) -> SentMessage:
-    if not isinstance(old_message, SentPhotoMessage):
-        raise ImplementationError(f"Found unexpected type {type(old_message).__name__}")
-    if not isinstance(new_message, AudioMessage):
-        raise ImplementationError(f"Found unexpected type {type(new_message).__name__}")
-
-    await run_parallel_requests(
-        [
-            bot_adapter.edit_message_media(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                media=new_message.media,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-            bot_adapter.edit_message_caption(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                caption=new_message.text,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-        ]
-    )
-    return SentAudioMessage(
-        media=new_message.media,
-        text=new_message.text,
-        message_ids=old_message.message_ids,
-        user_id=old_message.user_id,
-        button_rows=new_message.button_rows,
-        parse_mode=old_message.parse_mode,
-    )
-
-
-async def edit_photo_to_document(
-    old_message: SentMessage,
-    new_message: UnSentMessage,
-    bot_adapter: BotAdapter,
-    mapping: CallbackDataMapping,
-) -> SentMessage:
-    if not isinstance(old_message, SentPhotoMessage):
-        raise ImplementationError(f"Found unexpected type {type(old_message).__name__}")
-    if not isinstance(new_message, DocumentMessage):
-        raise ImplementationError(f"Found unexpected type {type(new_message).__name__}")
-
-    await run_parallel_requests(
-        [
-            bot_adapter.edit_message_media(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                media=new_message.media,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-            bot_adapter.edit_message_caption(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                caption=new_message.text,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-        ]
-    )
-    return SentDocumentMessage(
-        media=new_message.media,
-        text=new_message.text,
-        message_ids=old_message.message_ids,
-        user_id=old_message.user_id,
-        button_rows=new_message.button_rows,
-        parse_mode=old_message.parse_mode,
-    )
-
-
-# ----- #
-
-
-async def edit_video_to_video(
-    old_message: SentMessage,
-    new_message: UnSentMessage,
-    bot_adapter: BotAdapter,
-    mapping: CallbackDataMapping,
-) -> SentMessage:
-    if not isinstance(old_message, SentVideoMessage):
-        raise ImplementationError(f"Found unexpected type {type(old_message).__name__}")
-    if not isinstance(new_message, VideoMessage):
-        raise ImplementationError(f"Found unexpected type {type(new_message).__name__}")
-
-    await run_parallel_requests(
-        [
-            bot_adapter.edit_message_media(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                media=new_message.media,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-            bot_adapter.edit_message_caption(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                caption=new_message.text,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-        ]
-    )
-    return SentVideoMessage(
-        media=new_message.media,
-        text=new_message.text,
-        message_ids=old_message.message_ids,
-        user_id=old_message.user_id,
-        button_rows=new_message.button_rows,
-        parse_mode=old_message.parse_mode,
-    )
-
-
-async def edit_video_to_photo(
-    old_message: SentMessage,
-    new_message: UnSentMessage,
-    bot_adapter: BotAdapter,
-    mapping: CallbackDataMapping,
-) -> SentMessage:
-    if not isinstance(old_message, SentVideoMessage):
-        raise ImplementationError(f"Found unexpected type {type(old_message).__name__}")
-    if not isinstance(new_message, PhotoMessage):
-        raise ImplementationError(f"Found unexpected type {type(new_message).__name__}")
-
-    await run_parallel_requests(
-        [
-            bot_adapter.edit_message_media(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                media=new_message.media,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-            bot_adapter.edit_message_caption(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                caption=new_message.text,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-        ]
-    )
-    return SentPhotoMessage(
-        media=new_message.media,
-        text=new_message.text,
-        message_ids=old_message.message_ids,
-        user_id=old_message.user_id,
-        button_rows=new_message.button_rows,
-        parse_mode=old_message.parse_mode,
-    )
-
-
-async def edit_video_to_audio(
-    old_message: SentMessage,
-    new_message: UnSentMessage,
-    bot_adapter: BotAdapter,
-    mapping: CallbackDataMapping,
-) -> SentMessage:
-    if not isinstance(old_message, SentVideoMessage):
-        raise ImplementationError(f"Found unexpected type {type(old_message).__name__}")
-    if not isinstance(new_message, AudioMessage):
-        raise ImplementationError(f"Found unexpected type {type(new_message).__name__}")
-
-    await run_parallel_requests(
-        [
-            bot_adapter.edit_message_media(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                media=new_message.media,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-            bot_adapter.edit_message_caption(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                caption=new_message.text,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-        ]
-    )
-    return SentAudioMessage(
-        media=new_message.media,
-        text=new_message.text,
-        message_ids=old_message.message_ids,
-        user_id=old_message.user_id,
-        button_rows=new_message.button_rows,
-        parse_mode=old_message.parse_mode,
-    )
-
-
-async def edit_video_to_document(
-    old_message: SentMessage,
-    new_message: UnSentMessage,
-    bot_adapter: BotAdapter,
-    mapping: CallbackDataMapping,
-) -> SentMessage:
-    if not isinstance(old_message, SentVideoMessage):
-        raise ImplementationError(f"Found unexpected type {type(old_message).__name__}")
-    if not isinstance(new_message, DocumentMessage):
-        raise ImplementationError(f"Found unexpected type {type(new_message).__name__}")
-
-    await run_parallel_requests(
-        [
-            bot_adapter.edit_message_media(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                media=new_message.media,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-            bot_adapter.edit_message_caption(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                caption=new_message.text,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-        ]
-    )
-    return SentDocumentMessage(
-        media=new_message.media,
-        text=new_message.text,
-        message_ids=old_message.message_ids,
-        user_id=old_message.user_id,
-        button_rows=new_message.button_rows,
-        parse_mode=old_message.parse_mode,
-    )
-
-
-# ----- #
-
-
-async def edit_audio_to_audio(
-    old_message: SentMessage,
-    new_message: UnSentMessage,
-    bot_adapter: BotAdapter,
-    mapping: CallbackDataMapping,
-) -> SentMessage:
-    if not isinstance(old_message, SentAudioMessage):
-        raise ImplementationError(f"Found unexpected type {type(old_message).__name__}")
-    if not isinstance(new_message, AudioMessage):
-        raise ImplementationError(f"Found unexpected type {type(new_message).__name__}")
-
-    await run_parallel_requests(
-        [
-            bot_adapter.edit_message_media(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                media=new_message.media,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-            bot_adapter.edit_message_caption(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                caption=new_message.text,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-        ]
-    )
-    return SentAudioMessage(
-        media=new_message.media,
-        text=new_message.text,
-        message_ids=old_message.message_ids,
-        user_id=old_message.user_id,
-        button_rows=new_message.button_rows,
-        parse_mode=old_message.parse_mode,
-    )
-
-
-async def edit_audio_to_photo(
-    old_message: SentMessage,
-    new_message: UnSentMessage,
-    bot_adapter: BotAdapter,
-    mapping: CallbackDataMapping,
-) -> SentMessage:
-    if not isinstance(old_message, SentAudioMessage):
-        raise ImplementationError(f"Found unexpected type {type(old_message).__name__}")
-    if not isinstance(new_message, PhotoMessage):
-        raise ImplementationError(f"Found unexpected type {type(new_message).__name__}")
-
-    await run_parallel_requests(
-        [
-            bot_adapter.edit_message_media(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                media=new_message.media,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-            bot_adapter.edit_message_caption(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                caption=new_message.text,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-        ]
-    )
-    return SentPhotoMessage(
-        media=new_message.media,
-        text=new_message.text,
-        message_ids=old_message.message_ids,
-        user_id=old_message.user_id,
-        button_rows=new_message.button_rows,
-        parse_mode=old_message.parse_mode,
-    )
-
-
-async def edit_audio_to_video(
-    old_message: SentMessage,
-    new_message: UnSentMessage,
-    bot_adapter: BotAdapter,
-    mapping: CallbackDataMapping,
-) -> SentMessage:
-    if not isinstance(old_message, SentAudioMessage):
-        raise ImplementationError(f"Found unexpected type {type(old_message).__name__}")
-    if not isinstance(new_message, VideoMessage):
-        raise ImplementationError(f"Found unexpected type {type(new_message).__name__}")
-
-    await run_parallel_requests(
-        [
-            bot_adapter.edit_message_media(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                media=new_message.media,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-            bot_adapter.edit_message_caption(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                caption=new_message.text,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-        ]
-    )
-    return SentVideoMessage(
-        media=new_message.media,
-        text=new_message.text,
-        message_ids=old_message.message_ids,
-        user_id=old_message.user_id,
-        button_rows=new_message.button_rows,
-        parse_mode=old_message.parse_mode,
-    )
-
-
-async def edit_audio_to_document(
-    old_message: SentMessage,
-    new_message: UnSentMessage,
-    bot_adapter: BotAdapter,
-    mapping: CallbackDataMapping,
-) -> SentMessage:
-    if not isinstance(old_message, SentAudioMessage):
-        raise ImplementationError(f"Found unexpected type {type(old_message).__name__}")
-    if not isinstance(new_message, DocumentMessage):
-        raise ImplementationError(f"Found unexpected type {type(new_message).__name__}")
-
-    await run_parallel_requests(
-        [
-            bot_adapter.edit_message_media(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                media=new_message.media,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-            bot_adapter.edit_message_caption(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                caption=new_message.text,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-        ]
-    )
-    return SentDocumentMessage(
-        media=new_message.media,
-        text=new_message.text,
-        message_ids=old_message.message_ids,
-        user_id=old_message.user_id,
-        button_rows=new_message.button_rows,
-        parse_mode=old_message.parse_mode,
-    )
-
-
-# ----- #
-
-
-async def edit_document_to_document(
-    old_message: SentMessage,
-    new_message: UnSentMessage,
-    bot_adapter: BotAdapter,
-    mapping: CallbackDataMapping,
-) -> SentMessage:
-    if not isinstance(old_message, SentDocumentMessage):
-        raise ImplementationError(f"Found unexpected type {type(old_message).__name__}")
-    if not isinstance(new_message, DocumentMessage):
-        raise ImplementationError(f"Found unexpected type {type(new_message).__name__}")
-
-    await run_parallel_requests(
-        [
-            bot_adapter.edit_message_media(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                media=new_message.media,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-            bot_adapter.edit_message_caption(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                caption=new_message.text,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-        ]
-    )
-    return SentDocumentMessage(
-        media=new_message.media,
-        text=new_message.text,
-        message_ids=old_message.message_ids,
-        user_id=old_message.user_id,
-        button_rows=new_message.button_rows,
-        parse_mode=old_message.parse_mode,
-    )
-
-
-async def edit_document_to_photo(
-    old_message: SentMessage,
-    new_message: UnSentMessage,
-    bot_adapter: BotAdapter,
-    mapping: CallbackDataMapping,
-) -> SentMessage:
-    if not isinstance(old_message, SentDocumentMessage):
-        raise ImplementationError(f"Found unexpected type {type(old_message).__name__}")
-    if not isinstance(new_message, PhotoMessage):
-        raise ImplementationError(f"Found unexpected type {type(new_message).__name__}")
-
-    await run_parallel_requests(
-        [
-            bot_adapter.edit_message_media(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                media=new_message.media,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-            bot_adapter.edit_message_caption(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                caption=new_message.text,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-        ]
-    )
-    return SentPhotoMessage(
-        media=new_message.media,
-        text=new_message.text,
-        message_ids=old_message.message_ids,
-        user_id=old_message.user_id,
-        button_rows=new_message.button_rows,
-        parse_mode=old_message.parse_mode,
-    )
-
-
-async def edit_document_to_video(
-    old_message: SentMessage,
-    new_message: UnSentMessage,
-    bot_adapter: BotAdapter,
-    mapping: CallbackDataMapping,
-) -> SentMessage:
-    if not isinstance(old_message, SentDocumentMessage):
-        raise ImplementationError(f"Found unexpected type {type(old_message).__name__}")
-    if not isinstance(new_message, VideoMessage):
-        raise ImplementationError(f"Found unexpected type {type(new_message).__name__}")
-
-    await run_parallel_requests(
-        [
-            bot_adapter.edit_message_media(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                media=new_message.media,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-            bot_adapter.edit_message_caption(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                caption=new_message.text,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-        ]
-    )
-    return SentVideoMessage(
-        media=new_message.media,
-        text=new_message.text,
-        message_ids=old_message.message_ids,
-        user_id=old_message.user_id,
-        button_rows=new_message.button_rows,
-        parse_mode=old_message.parse_mode,
-    )
-
-
-async def edit_document_to_audio(
-    old_message: SentMessage,
-    new_message: UnSentMessage,
-    bot_adapter: BotAdapter,
-    mapping: CallbackDataMapping,
-) -> SentMessage:
-    if not isinstance(old_message, SentDocumentMessage):
-        raise ImplementationError(f"Found unexpected type {type(old_message).__name__}")
-    if not isinstance(new_message, AudioMessage):
-        raise ImplementationError(f"Found unexpected type {type(new_message).__name__}")
-
-    await run_parallel_requests(
-        [
-            bot_adapter.edit_message_media(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                media=new_message.media,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-            bot_adapter.edit_message_caption(
-                chat_id=old_message.user_id,
-                message_id=old_message.message_ids[0],
-                caption=new_message.text,
-                mapping=mapping,
-                button_rows=new_message.button_rows,
-            ),
-        ]
-    )
-    return SentAudioMessage(
-        media=new_message.media,
-        text=new_message.text,
-        message_ids=old_message.message_ids,
-        user_id=old_message.user_id,
-        button_rows=new_message.button_rows,
-        parse_mode=old_message.parse_mode,
-    )
 
 
 # ----- #
@@ -2058,65 +863,6 @@ async def edit_document_album_to_document_album(
 
 
 # ----- #
-
-
-EDIT_MEDIA_MATRIX: dict[
-    MessageCategory,
-    dict[
-        MessageCategory,
-        MessageEditFunc | tuple[MessageEditFunc, MessageCanBeEditerFunc],
-    ],
-] = {
-    MessageCategory.SIMPLE: {
-        MessageCategory.SIMPLE: edit_simple_to_simple,
-        MessageCategory.PHOTO: edit_simple_to_photo,
-        MessageCategory.VIDEO: edit_simple_to_video,
-        MessageCategory.AUDIO: edit_simple_to_audio,
-        MessageCategory.DOCUMENT: edit_simple_to_document,
-    },
-    MessageCategory.PHOTO: {
-        MessageCategory.PHOTO: edit_photo_to_photo,
-        MessageCategory.VIDEO: edit_photo_to_video,
-        MessageCategory.AUDIO: edit_photo_to_audio,
-        MessageCategory.DOCUMENT: edit_photo_to_document,
-    },
-    MessageCategory.VIDEO: {
-        MessageCategory.VIDEO: edit_video_to_video,
-        MessageCategory.PHOTO: edit_video_to_photo,
-        MessageCategory.AUDIO: edit_video_to_audio,
-        MessageCategory.DOCUMENT: edit_video_to_document,
-    },
-    MessageCategory.AUDIO: {
-        MessageCategory.AUDIO: edit_audio_to_audio,
-        MessageCategory.PHOTO: edit_audio_to_photo,
-        MessageCategory.VIDEO: edit_audio_to_video,
-        MessageCategory.DOCUMENT: edit_audio_to_document,
-    },
-    MessageCategory.DOCUMENT: {
-        MessageCategory.DOCUMENT: edit_document_to_document,
-        MessageCategory.PHOTO: edit_document_to_photo,
-        MessageCategory.VIDEO: edit_document_to_video,
-        MessageCategory.AUDIO: edit_document_to_audio,
-    },
-    MessageCategory.PHOTO_VIDEO_ALBUM: {
-        MessageCategory.PHOTO_VIDEO_ALBUM: (
-            edit_photo_video_album_to_photo_video_album,
-            photo_video_album_can_be_edited,
-        )
-    },
-    MessageCategory.DOCUMENT_ALBUM: {
-        MessageCategory.DOCUMENT_ALBUM: (
-            edit_document_album_to_document_album,
-            photo_video_album_can_be_edited,
-        )
-    },
-    MessageCategory.AUDIO_ALBUM: {
-        MessageCategory.AUDIO_ALBUM: (
-            edit_audio_album_to_audio_album,
-            photo_video_album_can_be_edited,
-        )
-    },
-}
 
 
 def get_edit_function(

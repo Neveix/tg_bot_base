@@ -81,7 +81,6 @@ class BotAdapterPtb(BotAdapter):
     async def send_audio(
         self,
         chat_id: int,
-        text: str,
         audio: Audio,
         mapping: CallbackDataMapping,
         parse_mode: str | None = None,
@@ -93,7 +92,6 @@ class BotAdapterPtb(BotAdapter):
                 chat_id,
                 self.general_converter.to_send_parameter(audio),
                 parse_mode=parse_mode,
-                caption=text,
                 reply_markup=reply_markup,
             )
             return msg.message_id
@@ -104,7 +102,6 @@ class BotAdapterPtb(BotAdapter):
         self,
         chat_id: int,
         photo: Photo,
-        caption: str,
         mapping: CallbackDataMapping,
         parse_mode: str | None = None,
         button_rows: ButtonRows | None = None,
@@ -114,7 +111,6 @@ class BotAdapterPtb(BotAdapter):
             result = await self.bot.send_photo(
                 chat_id,
                 self.general_converter.to_send_parameter(photo),
-                caption=caption,
                 parse_mode=parse_mode,
                 reply_markup=reply_markup,
             )
@@ -127,7 +123,6 @@ class BotAdapterPtb(BotAdapter):
         chat_id: int,
         video: Video,
         mapping: CallbackDataMapping,
-        caption: str | None = None,
         parse_mode: str | None = None,
         button_rows: ButtonRows | None = None,
     ) -> int:
@@ -136,7 +131,6 @@ class BotAdapterPtb(BotAdapter):
             result = await self.bot.send_video(
                 chat_id,
                 self.general_converter.to_send_parameter(video),
-                caption=caption,
                 parse_mode=parse_mode,
                 reply_markup=reply_markup,
             )
@@ -148,7 +142,6 @@ class BotAdapterPtb(BotAdapter):
         self,
         chat_id: int,
         document: Document,
-        caption: str | None,
         mapping: CallbackDataMapping,
         parse_mode: str | None = None,
         button_rows: ButtonRows | None = None,
@@ -158,7 +151,6 @@ class BotAdapterPtb(BotAdapter):
             result = await self.bot.send_document(
                 chat_id,
                 self.general_converter.to_send_parameter(document),
-                caption=caption,
                 parse_mode=parse_mode,
                 reply_markup=reply_markup,
             )
@@ -171,7 +163,6 @@ class BotAdapterPtb(BotAdapter):
         chat_id: int,
         voice: Voice,
         mapping: CallbackDataMapping,
-        caption: str | None = None,
         parse_mode: str | None = None,
         button_rows: ButtonRows | None = None,
     ) -> int:
@@ -180,7 +171,6 @@ class BotAdapterPtb(BotAdapter):
             result = await self.bot.send_voice(
                 chat_id,
                 self.general_converter.to_send_parameter(voice),
-                caption=caption,
                 parse_mode=parse_mode,
                 reply_markup=reply_markup,
             )
@@ -211,7 +201,6 @@ class BotAdapterPtb(BotAdapter):
         chat_id: int,
         media: Sequence[Photo | Video | Audio | Document],
         mapping: CallbackDataMapping,
-        caption: str | None = None,
         parse_mode: str | None = None,
     ) -> list[int]:
         try:

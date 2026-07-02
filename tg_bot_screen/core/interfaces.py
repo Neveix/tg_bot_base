@@ -11,6 +11,7 @@ from tg_bot_screen.core.models.media_data import (
     VideoNote,
     Voice,
 )
+from tg_bot_screen.core.models.message import SentMessage, UnSentMessage
 from .models.user_state import UserState
 from .models.callback_data_use_params import CallbackDataUseParams
 from .models.screen import ProtoScreen, UnSentScreen, SentScreen
@@ -132,7 +133,6 @@ class BotAdapter(ABC):
     async def send_audio(
         self,
         chat_id: int,
-        text: str,
         audio: Audio,
         mapping: CallbackDataMapping,
         parse_mode: str | None = None,
@@ -150,7 +150,6 @@ class BotAdapter(ABC):
         self,
         chat_id: int,
         photo: Photo,
-        caption: str,
         mapping: CallbackDataMapping,
         parse_mode: str | None = None,
         button_rows: ButtonRows | None = None,
@@ -168,7 +167,6 @@ class BotAdapter(ABC):
         chat_id: int,
         video: Video,
         mapping: CallbackDataMapping,
-        caption: str | None = None,
         parse_mode: str | None = None,
         button_rows: ButtonRows | None = None,
     ) -> int:
@@ -184,7 +182,6 @@ class BotAdapter(ABC):
         self,
         chat_id: int,
         document: Document,
-        caption: str | None,
         mapping: CallbackDataMapping,
         parse_mode: str | None = None,
         button_rows: ButtonRows | None = None,
@@ -202,7 +199,6 @@ class BotAdapter(ABC):
         chat_id: int,
         voice: Voice,
         mapping: CallbackDataMapping,
-        caption: str | None = None,
         parse_mode: str | None = None,
         button_rows: ButtonRows | None = None,
     ) -> int:
@@ -292,7 +288,6 @@ class BotAdapter(ABC):
         chat_id: int,
         media: Sequence[Photo | Video | Audio | Document],
         mapping: CallbackDataMapping,
-        caption: str | None = None,
         parse_mode: str | None = None,
     ) -> list[int]:
         """
@@ -310,3 +305,51 @@ class ButtonRowsToReplyMarkupConverter(ABC):
         mapping: CallbackDataMapping,
         button_rows: ButtonRows | None = None,
     ) -> Any: ...
+
+
+class MessageSender(ABC):
+    @abstractmethod
+    async def send(
+        self,
+        message: UnSentMessage,
+        user_id: int,
+        bot_adapter: BotAdapter,
+        mapping: CallbackDataMapping,
+    ) -> SentMessage:
+        """
+        :raises BadRequest:
+        :raises TgBotScreenException:
+        """
+        ...
+
+
+class MessageEditor(ABC):
+    @abstractmethod
+    async def edit(
+        self,
+        old_message: SentMessage,
+        new_message: UnSentMessage,
+        bot_adapter: BotAdapter,
+        mapping: CallbackDataMapping,
+    ) -> SentMessage:
+        """
+        :raises MessageNotModified:
+        :raises CannotTransformMessage:
+        :raises BadRequest:
+        :raises TgBotScreenException:
+        """
+        ...
+
+
+class MessageDeleter(ABC):
+    @abstractmethod
+    async def delete(
+        self,
+        message: SentMessage,
+        bot_adapter: BotAdapter,
+    ) -> bool:
+        """
+        :raises BadRequest:
+        :raises TgBotScreenException:
+        """
+        ...
