@@ -45,7 +45,7 @@ class ScreenCallback(InputCallback):
         params: InputCallbackUseParams,
     ) -> None:
         params.user_state.input_callback = None
-        await params.screen_service.set_by_name(
+        await params.screen_service.set(
             params.user_state.user_id,
             self.screen_name,
             self.stack,

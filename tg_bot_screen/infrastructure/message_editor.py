@@ -1,5 +1,5 @@
 import asyncio
-from typing import Coroutine, Protocol
+from typing import Any, Coroutine, Protocol, Sequence
 
 from tg_bot_screen.core.exceptions import (
     CannotTransformMessage,
@@ -7,16 +7,28 @@ from tg_bot_screen.core.exceptions import (
     MessageNotModified,
 )
 from tg_bot_screen.core.models.message import (
+    AudioAlbumMessage,
     AudioMessage,
+    DocumentAlbumMessage,
+    DocumentMessage,
     MessageCategory,
     PhotoMessage,
+    PhotoVideoAlbumMessage,
+    SentAudioAlbumMessage,
     SentAudioMessage,
+    SentDocumentAlbumMessage,
     SentDocumentMessage,
     SentMessage,
     SentPhotoMessage,
+    SentPhotoVideoAlbumMessage,
     SentSimpleMessage,
+    SentVideoMessage,
     SimpleMessage,
     UnSentMessage,
+    VideoMessage,
+)
+from tg_bot_screen.infrastructure.message_abstract_diff import (
+    calc_abstract_difference_without_send,
 )
 
 from ..core.interfaces import BotAdapter, CallbackDataMapping, MessageEditor
@@ -562,6 +574,30 @@ async def edit_audio_to_document(
 # ----- #
 
 
+def get_message_media_types(media: Sequence[Any]) -> dict[Any, int]:
+    type_codes = []
+    for media_obj in media:
+        type_codes.append(media_obj)
+    return {code: i for i, code in enumerate(type_codes)}
+
+
+class AlbumMessage(Protocol):
+    media: Sequence[Any]
+
+
+def calc_message_difference_without_send(
+    old_message: AlbumMessage, new_message: AlbumMessage
+) -> tuple[list[int], list[tuple[int, int]]] | None:
+    types = get_message_media_types(*old_message.media, *new_message.media)
+    old_types = [types[media] for media in old_message.media]
+
+    new_types = [types[media] for media in new_message.media]
+    return calc_abstract_difference_without_send(old_types, new_types)
+
+
+# ----- #
+
+
 @EditRegistrar.register_strategy(MessageCategory.DOCUMENT, MessageCategory.DOCUMENT)
 async def edit_document_to_document(
     old_message: SentMessage,
@@ -670,7 +706,249 @@ async def edit_document_to_audio(
     )
 
 
+# ----- #
+
+
+def photo_video_album_can_be_edited(
+    old_message: SentMessage,
+    new_message: UnSentMessage,
+) -> tuple[list[int], list[tuple[int, int]]] | None:
+    if not isinstance(old_message, SentPhotoVideoAlbumMessage):
+        return
+
+    if not isinstance(new_message, PhotoVideoAlbumMessage):
+        return
+
+    return calc_message_difference_without_send(old_message, new_message)
+
+
+async def edit_photo_video_album_to_photo_video_album(
+    old_message: SentMessage,
+    new_message: UnSentMessage,
+    bot_adapter: BotAdapter,
+    mapping: CallbackDataMapping,
+) -> SentMessage:
+    if not isinstance(old_message, SentPhotoVideoAlbumMessage):
+        raise ImplementationError(f"Found unexpected type {type(old_message).__name__}")
+    if not isinstance(new_message, PhotoVideoAlbumMessage):
+        raise ImplementationError(f"Found unexpected type {type(new_message).__name__}")
+
+    edit_plan = photo_video_album_can_be_edited(old_message, new_message)
+    if edit_plan is None:
+        raise CannotTransformMessage(
+            "Cannot edit photo/video album: new media count exceeds old media count"
+        )
+
+    indices_to_delete, indices_to_edit = edit_plan
+
+    tasks = []
+
+    for idx in indices_to_delete:
+        tasks.append(
+            bot_adapter.delete_message(
+                chat_id=old_message.user_id,
+                message_id=old_message.message_ids[idx],
+            )
+        )
+
+    for old_idx, new_idx in indices_to_edit:
+        new_media = new_message.media[new_idx]
+        tasks.append(
+            bot_adapter.edit_message_media(
+                chat_id=old_message.user_id,
+                message_id=old_message.message_ids[old_idx],
+                media=new_media,
+                mapping=mapping,
+            )
+        )
+
+    await run_parallel_requests(tasks)
+
+    new_message_ids = []
+    for old_idx, new_idx in indices_to_edit:
+        new_message_ids.append(old_message.message_ids[old_idx])
+
+    return SentPhotoVideoAlbumMessage(
+        text=new_message.text,
+        media=new_message.media,
+        message_ids=new_message_ids,
+        user_id=old_message.user_id,
+        parse_mode=new_message.parse_mode,
+    )
+
+
+# ----- #
+
+
+def audio_album_can_be_edited(
+    old_message: SentMessage,
+    new_message: UnSentMessage,
+) -> tuple[list[int], list[tuple[int, int]]] | None:
+    if not isinstance(old_message, SentAudioAlbumMessage):
+        return None
+
+    if not isinstance(new_message, AudioAlbumMessage):
+        return None
+
+    old_audio_count = len(old_message.media)
+    new_audio_count = len(new_message.media)
+
+    if new_audio_count > old_audio_count:
+        return None
+
+    indices_delete = list(range(new_audio_count, old_audio_count))
+    indices_edit = [(i, i) for i in range(new_audio_count)]
+
+    return indices_delete, indices_edit
+
+
+async def edit_audio_album_to_audio_album(
+    old_message: SentMessage,
+    new_message: UnSentMessage,
+    bot_adapter: BotAdapter,
+    mapping: CallbackDataMapping,
+) -> SentMessage:
+    if not isinstance(old_message, SentAudioAlbumMessage):
+        raise ImplementationError(f"Found unexpected type {type(old_message).__name__}")
+    if not isinstance(new_message, AudioAlbumMessage):
+        raise ImplementationError(f"Found unexpected type {type(new_message).__name__}")
+
+    edit_plan = audio_album_can_be_edited(old_message, new_message)
+    if edit_plan is None:
+        raise CannotTransformMessage(
+            "Cannot edit audio album: new audio count exceeds old audio count"
+        )
+
+    indices_to_delete, indices_to_edit = edit_plan
+
+    tasks = []
+
+    for idx in indices_to_delete:
+        tasks.append(
+            bot_adapter.delete_message(
+                chat_id=old_message.user_id,
+                message_id=old_message.message_ids[idx],
+            )
+        )
+
+    for old_idx, new_idx in indices_to_edit:
+        new_audio = new_message.media[new_idx]
+        tasks.append(
+            bot_adapter.edit_message_media(
+                chat_id=old_message.user_id,
+                message_id=old_message.message_ids[old_idx],
+                media=new_audio,
+                mapping=mapping,
+            )
+        )
+
+    await run_parallel_requests(tasks)
+
+    new_message_ids = []
+    for old_idx, new_idx in indices_to_edit:
+        new_message_ids.append(old_message.message_ids[old_idx])
+
+    return SentAudioAlbumMessage(
+        text=new_message.text,
+        media=new_message.media,
+        message_ids=new_message_ids,
+        user_id=old_message.user_id,
+        parse_mode=new_message.parse_mode,
+    )
+
+
+# ----- #
+
+
+def document_album_can_be_edited(
+    old_message: SentMessage,
+    new_message: UnSentMessage,
+) -> tuple[list[int], list[tuple[int, int]]] | None:
+    if not isinstance(old_message, SentDocumentAlbumMessage):
+        return None
+
+    if not isinstance(new_message, DocumentAlbumMessage):
+        return None
+
+    old_document_count = len(old_message.media)
+    new_document_count = len(new_message.media)
+
+    if new_document_count > old_document_count:
+        return None
+
+    indices_delete = list(range(new_document_count, old_document_count))
+    indices_edit = [(i, i) for i in range(new_document_count)]
+
+    return indices_delete, indices_edit
+
+
+async def edit_document_album_to_document_album(
+    old_message: SentMessage,
+    new_message: UnSentMessage,
+    bot_adapter: BotAdapter,
+    mapping: CallbackDataMapping,
+) -> SentMessage:
+    if not isinstance(old_message, SentDocumentAlbumMessage):
+        raise ImplementationError(f"Found unexpected type {type(old_message).__name__}")
+    if not isinstance(new_message, DocumentAlbumMessage):
+        raise ImplementationError(f"Found unexpected type {type(new_message).__name__}")
+
+    edit_plan = document_album_can_be_edited(old_message, new_message)
+    if edit_plan is None:
+        raise CannotTransformMessage(
+            "Cannot edit document album: new document count exceeds old document count"
+        )
+
+    indices_to_delete, indices_to_edit = edit_plan
+
+    tasks = []
+
+    for idx in indices_to_delete:
+        tasks.append(
+            bot_adapter.delete_message(
+                chat_id=old_message.user_id,
+                message_id=old_message.message_ids[idx],
+            )
+        )
+
+    for old_idx, new_idx in indices_to_edit:
+        new_document = new_message.media[new_idx]
+        tasks.append(
+            bot_adapter.edit_message_media(
+                chat_id=old_message.user_id,
+                message_id=old_message.message_ids[old_idx],
+                media=new_document,
+                mapping=mapping,
+            )
+        )
+
+    await run_parallel_requests(tasks)
+
+    new_message_ids = []
+    for old_idx, new_idx in indices_to_edit:
+        new_message_ids.append(old_message.message_ids[old_idx])
+
+    return SentDocumentAlbumMessage(
+        text=new_message.text,
+        media=new_message.media,
+        message_ids=new_message_ids,
+        user_id=old_message.user_id,
+        parse_mode=new_message.parse_mode,
+    )
+
+
 # --------------------------------------------------------------------------- #
+
+
+def check_edit(
+    old_message: SentMessage,
+    new_message: UnSentMessage,
+) -> tuple[list[int], list[tuple[int, int]]] | None:
+    checker = EditRegistrar.get_checker(old_message.category, new_message.category)
+    if checker is None:
+        return None
+
+    return checker(old_message, new_message)
 
 
 def get_edit_function(
@@ -684,12 +962,9 @@ def get_edit_function(
     if strat is None:
         return
 
-    checker = EditRegistrar.get_checker(old_category, new_category)
-
-    if checker:
-        result = checker(old_message, new_message)
-        if result is None:
-            return None
+    check_result = check_edit(old_message, new_message)
+    if check_result is None:
+        return None
 
     return strat
 
@@ -715,3 +990,14 @@ class MessageEditorImpl(MessageEditor):
             bot_adapter,
             mapping,
         )
+
+    def check_message_can_be_replaced(
+        self,
+        old_message: SentMessage,
+        new_message: UnSentMessage,
+    ) -> bool:
+        can_be = check_edit(old_message, new_message)
+        if can_be is None:
+            return False
+
+        return True

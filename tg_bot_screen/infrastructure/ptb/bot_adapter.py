@@ -75,6 +75,7 @@ class BotAdapterPtb(BotAdapter):
                 reply_markup=reply_markup,
             )
             return msg.message_id
+
         except Exception as e:
             raise get_wrapped_error(e) from e
 
@@ -95,6 +96,7 @@ class BotAdapterPtb(BotAdapter):
                 reply_markup=reply_markup,
             )
             return msg.message_id
+
         except Exception as e:
             raise get_wrapped_error(e) from e
 
@@ -115,6 +117,7 @@ class BotAdapterPtb(BotAdapter):
                 reply_markup=reply_markup,
             )
             return result.message_id
+
         except Exception as e:
             raise get_wrapped_error(e) from e
 
@@ -135,6 +138,7 @@ class BotAdapterPtb(BotAdapter):
                 reply_markup=reply_markup,
             )
             return result.message_id
+
         except Exception as e:
             raise get_wrapped_error(e) from e
 
@@ -155,6 +159,7 @@ class BotAdapterPtb(BotAdapter):
                 reply_markup=reply_markup,
             )
             return result.message_id
+
         except Exception as e:
             raise get_wrapped_error(e) from e
 
@@ -175,6 +180,7 @@ class BotAdapterPtb(BotAdapter):
                 reply_markup=reply_markup,
             )
             return result.message_id
+
         except Exception as e:
             raise get_wrapped_error(e) from e
 
@@ -193,6 +199,7 @@ class BotAdapterPtb(BotAdapter):
                 reply_markup=reply_markup,
             )
             return result.message_id
+
         except Exception as e:
             raise get_wrapped_error(e) from e
 
@@ -209,6 +216,7 @@ class BotAdapterPtb(BotAdapter):
                 media=[self.general_converter.to_input_media(m) for m in media],
             )
             return [msg.message_id for msg in result]
+
         except Exception as e:
             raise get_wrapped_error(e) from e
 
@@ -216,6 +224,7 @@ class BotAdapterPtb(BotAdapter):
         try:
             result = await self.bot.delete_message(chat_id, message_id)
             return result
+
         except Exception as e:
             raise get_wrapped_error(e) from e
 
@@ -235,6 +244,7 @@ class BotAdapterPtb(BotAdapter):
             if isinstance(result, bool):
                 raise ValueError(f"result of an edited message is {result=}")
             return result.message_id
+
         except Exception as e:
             raise get_wrapped_error(e) from e
 
@@ -258,6 +268,7 @@ class BotAdapterPtb(BotAdapter):
             if isinstance(result, bool):
                 raise ValueError("edit_message_media returned bool, expected Message")
             return result.message_id
+
         except Exception as e:
             raise get_wrapped_error(e) from e
 
@@ -282,5 +293,6 @@ class BotAdapterPtb(BotAdapter):
             if isinstance(result, bool):
                 raise ValueError("edit_message_caption returned bool, expected Message")
             return result.message_id
+
         except Exception as e:
             raise get_wrapped_error(e) from e

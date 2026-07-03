@@ -81,10 +81,10 @@ class ScreenService(ABC):
     async def clear(self, user_id: int, delete_messages: bool = True): ...
 
     @abstractmethod
-    async def set(self, user_id: int, screen: UnSentScreen): ...
+    async def set_by_screen(self, user_id: int, screen: UnSentScreen): ...
 
     @abstractmethod
-    async def set_by_name(
+    async def set(
         self, user_id: int, screen_name: str, stack: bool = True, **kwargs
     ): ...
 
@@ -339,6 +339,13 @@ class MessageEditor(ABC):
         :raises TgBotScreenException:
         """
         ...
+
+    @abstractmethod
+    def check_message_can_be_replaced(
+        self,
+        old_message: SentMessage,
+        new_message: UnSentMessage,
+    ) -> bool: ...
 
 
 class MessageDeleter(ABC):

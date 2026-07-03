@@ -32,11 +32,10 @@ class CallbackQueryHandler:
             params=CallbackDataUseParams(
                 user_id=user_id,
                 input_sessions=sud.sessions.get_input_sessions(),
-                screen_set_by_name=self.user_screen.set_by_name,
+                screen_set_by_name=self.user_screen.set,
                 screen_step_back=self.user_screen.step_back,
                 reset_input_callback=sud.reset_input_callback,
                 update_sessions=sud.sessions.update_all,
             ),
             **kwargs,
         )
-

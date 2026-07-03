@@ -16,3 +16,19 @@ class CannotTransformMessage(TgBotScreenException):
 
 class ImplementationError(TgBotScreenException):
     pass
+
+
+class ScreenAlreadyActiveError(TgBotScreenException):
+    pass
+
+
+class EmptyStackError(TgBotScreenException):
+    pass
+
+
+class ScreenNotFoundError(TgBotScreenException):
+    pass
+
+
+class NoScreenToUnbuffer(TgBotScreenException):
+    pass

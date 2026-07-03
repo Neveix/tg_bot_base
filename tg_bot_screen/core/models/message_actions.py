@@ -5,6 +5,6 @@ from tg_bot_screen.core.interfaces import MessageDeleter, MessageEditor, Message
 
 @dataclass(kw_only=True)
 class MessageActions:
-    send: MessageSender
-    edit: MessageEditor
-    delete: MessageDeleter
+    sender: MessageSender
+    editor: MessageEditor
+    deleter: MessageDeleter
