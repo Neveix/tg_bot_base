@@ -1,10 +1,8 @@
 from uuid import uuid4
-
-from .models.callback_data_impl import CallbackData
-from ..core.interfaces import CallbackDataMapping
+from tg_bot_screen.core.models.callback_data import CallbackData
 
 
-class CallbackDataMappingImpl(CallbackDataMapping):
+class CallbackDataMapping:
     def __init__(self):
         self.items: list[tuple[CallbackData, str]] = []
 
@@ -27,4 +25,3 @@ class CallbackDataMappingImpl(CallbackDataMapping):
             if uuid == i_uuid:
                 return callback
         return None
-

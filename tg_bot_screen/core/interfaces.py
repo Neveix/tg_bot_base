@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import Any, Self, Sequence
+from typing import Any, Sequence
 
 from tg_bot_screen.core.models.button_rows import ButtonRows
-from tg_bot_screen.core.models.input_callback_use_params import InputCallbackUseParams
+from tg_bot_screen.core.models.callback_data_mapping import CallbackDataMapping
 from tg_bot_screen.core.models.media_data import (
     Audio,
     Document,
@@ -13,27 +13,7 @@ from tg_bot_screen.core.models.media_data import (
 )
 from tg_bot_screen.core.models.message import SentMessage, UnSentMessage
 from .models.user_state import UserState
-from .models.callback_data_use_params import CallbackDataUseParams
 from .models.screen import ProtoScreen, UnSentScreen, SentScreen
-
-
-class CallbackData(ABC):
-    @abstractmethod
-    def clone(self) -> Self: ...
-
-    @abstractmethod
-    async def use(self, *, params: CallbackDataUseParams): ...
-
-
-class CallbackDataMapping(ABC):
-    @abstractmethod
-    def add(self, callback: CallbackData) -> None: ...
-
-    @abstractmethod
-    def get_by_callback(self, callback: CallbackData) -> str: ...
-
-    @abstractmethod
-    def get_by_uuid(self, uuid: str) -> CallbackData | None: ...
 
 
 class UserStateStore(ABC):
@@ -47,35 +27,6 @@ class UserStateStore(ABC):
     def set(self, user_id: int, user_data: UserState) -> None: ...
 
 
-class InputCallback(ABC):
-    @abstractmethod
-    async def use(
-        self,
-        *,
-        params: InputCallbackUseParams,
-    ) -> None: ...
-
-
-class DirectoryStack(ABC):
-    @abstractmethod
-    def get_all(self) -> tuple[str, ...]: ...
-
-    @abstractmethod
-    def last(self) -> str | None: ...
-
-    @abstractmethod
-    def append(self, directory: str) -> None: ...
-
-    @abstractmethod
-    def pop(self) -> None: ...
-
-    @abstractmethod
-    def clear(self) -> None: ...
-
-    @abstractmethod
-    def __len__(self) -> int: ...
-
-
 class ScreenService(ABC):
     @abstractmethod
     async def clear(self, user_id: int, delete_messages: bool = True): ...
@@ -85,8 +36,12 @@ class ScreenService(ABC):
 
     @abstractmethod
     async def set(
-        self, user_id: int, screen_name: str, stack: bool = True, **kwargs
-    ): ...
+        self,
+        user_id: int,
+        screen_name: str,
+        stack: bool = True,
+        raise_on_error: bool = True,
+    ) -> None: ...
 
     @abstractmethod
     async def update(self, user_id: int): ...
@@ -313,7 +268,6 @@ class MessageSender(ABC):
         self,
         message: UnSentMessage,
         user_id: int,
-        bot_adapter: BotAdapter,
         mapping: CallbackDataMapping,
     ) -> SentMessage:
         """
@@ -329,7 +283,6 @@ class MessageEditor(ABC):
         self,
         old_message: SentMessage,
         new_message: UnSentMessage,
-        bot_adapter: BotAdapter,
         mapping: CallbackDataMapping,
     ) -> SentMessage:
         """
@@ -353,7 +306,6 @@ class MessageDeleter(ABC):
     async def delete(
         self,
         message: SentMessage,
-        bot_adapter: BotAdapter,
     ) -> bool:
         """
         :raises BadRequest:

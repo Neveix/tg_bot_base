@@ -1,7 +1,7 @@
-from ..core.interfaces import DirectoryStack
+# ----- #
 
 
-class DirectoryStackImpl(DirectoryStack):
+class DirectoryStack:
     def __init__(self) -> None:
         self.__stack: list[str] = []
 
@@ -26,3 +26,5 @@ class DirectoryStackImpl(DirectoryStack):
     def __len__(self):
         return len(self.__stack)
 
+    def __str__(self):
+        return type(self).__name__ + f"({', '.join(self.__stack)})"

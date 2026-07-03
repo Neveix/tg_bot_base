@@ -1,20 +1,12 @@
-import asyncio
 from abc import ABC, abstractmethod
-from typing import Iterable, Protocol, Self, Sequence, runtime_checkable
-
-from tg_bot_screen.core.interfaces import BotAdapter
+from typing import Iterable, Protocol, Sequence, runtime_checkable
 
 from ..guards import check_bad_value
-from ...infrastructure.models.callback_data_impl import CallbackData
+from .callback_data import CallbackData
 from .message import HasButtonRowsMixin, UnSentMessage, SentMessage
 
 
-class HasCallbackData(ABC):
-    @abstractmethod
-    def get_callback_data(self) -> list[CallbackData]: ...
-
-
-class HasCallbackDataMixin(HasCallbackData):
+class HasCallbackDataMixin:
     @abstractmethod
     def get_messages_for_callback_data(self) -> Sequence[HasButtonRowsMixin]: ...
 
@@ -31,7 +23,7 @@ class UnSentScreen(HasCallbackDataMixin):
         self.extend(list(messages))
 
     def get_messages_for_callback_data(self):
-        return self.messages
+        return [msg for msg in self.messages if isinstance(msg, HasButtonRowsMixin)]
 
     def extend(self, messages: list[UnSentMessage]):
         for message in messages:
@@ -44,16 +36,13 @@ class UnSentScreen(HasCallbackDataMixin):
     def __repr__(self):
         return f"{type(self).__name__}({self.messages!r})"
 
-    def clone(self) -> "UnSentScreen":
-        return UnSentScreen(*[message.clone() for message in self.messages])
-
 
 class SentScreen(HasCallbackDataMixin):
     def __init__(self, *messages: SentMessage):
         self.messages: list[SentMessage] = list(messages)
 
     def get_messages_for_callback_data(self):
-        return self.messages
+        return [msg for msg in self.messages if isinstance(msg, HasButtonRowsMixin)]
 
     def extend(self, messages: list[SentMessage]):
         for message in messages:
@@ -62,19 +51,8 @@ class SentScreen(HasCallbackDataMixin):
     def append(self, message: SentMessage):
         self.messages.append(message)
 
-    def clone(self) -> Self:
-        return self.__class__(*[message.clone() for message in self.messages])
-
     def __repr__(self):
         return f"{type(self).__name__}({self.messages!r})"
-
-    async def delete(
-        self,
-        bot_adapter: BotAdapter,
-    ):
-        await asyncio.gather(
-            *[message.delete(bot_adapter) for message in self.messages]
-        )
 
     def get_unsent(self) -> UnSentScreen:
         return UnSentScreen(*[message.get_unsent() for message in self.messages])

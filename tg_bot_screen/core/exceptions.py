@@ -32,3 +32,7 @@ class ScreenNotFoundError(TgBotScreenException):
 
 class NoScreenToUnbuffer(TgBotScreenException):
     pass
+
+
+class MappingKeyError(TgBotScreenException):
+    pass

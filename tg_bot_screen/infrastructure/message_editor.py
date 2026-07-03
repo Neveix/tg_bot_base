@@ -67,7 +67,7 @@ class EditChecker(Protocol):
     ) -> tuple[list[int], list[tuple[int, int]]] | None: ...
 
 
-class EditRegistrar:
+class EditRegistry:
     _strategies: dict[tuple[MessageCategory, MessageCategory], MessageEditFunc] = {}
     _checker_funcs: dict[tuple[MessageCategory, MessageCategory], EditChecker] = {}
 
@@ -99,7 +99,7 @@ class EditRegistrar:
 # --------------------------------------------------------------------------- #
 
 
-@EditRegistrar.register_strategy(MessageCategory.SIMPLE, MessageCategory.SIMPLE)
+@EditRegistry.register_strategy(MessageCategory.SIMPLE, MessageCategory.SIMPLE)
 async def edit_simple_to_simple(
     old_message: SentMessage,
     new_message: UnSentMessage,
@@ -130,7 +130,7 @@ async def edit_simple_to_simple(
 # ----- #
 
 
-@EditRegistrar.register_strategy(MessageCategory.SIMPLE, MessageCategory.PHOTO)
+@EditRegistry.register_strategy(MessageCategory.SIMPLE, MessageCategory.PHOTO)
 async def edit_simple_to_photo(
     old_message: SentMessage,
     new_message: UnSentMessage,
@@ -157,7 +157,7 @@ async def edit_simple_to_photo(
     )
 
 
-@EditRegistrar.register_strategy(MessageCategory.SIMPLE, MessageCategory.VIDEO)
+@EditRegistry.register_strategy(MessageCategory.SIMPLE, MessageCategory.VIDEO)
 async def edit_simple_to_video(
     old_message: SentMessage,
     new_message: UnSentMessage,
@@ -184,7 +184,7 @@ async def edit_simple_to_video(
     )
 
 
-@EditRegistrar.register_strategy(MessageCategory.SIMPLE, MessageCategory.AUDIO)
+@EditRegistry.register_strategy(MessageCategory.SIMPLE, MessageCategory.AUDIO)
 async def edit_simple_to_audio(
     old_message: SentMessage,
     new_message: UnSentMessage,
@@ -211,7 +211,7 @@ async def edit_simple_to_audio(
     )
 
 
-@EditRegistrar.register_strategy(MessageCategory.SIMPLE, MessageCategory.DOCUMENT)
+@EditRegistry.register_strategy(MessageCategory.SIMPLE, MessageCategory.DOCUMENT)
 async def edit_simple_to_document(
     old_message: SentMessage,
     new_message: UnSentMessage,
@@ -241,7 +241,7 @@ async def edit_simple_to_document(
 # ----- #
 
 
-@EditRegistrar.register_strategy(MessageCategory.PHOTO, MessageCategory.PHOTO)
+@EditRegistry.register_strategy(MessageCategory.PHOTO, MessageCategory.PHOTO)
 async def edit_photo_to_photo(
     old_message: SentMessage,
     new_message: UnSentMessage,
@@ -268,7 +268,7 @@ async def edit_photo_to_photo(
     )
 
 
-@EditRegistrar.register_strategy(MessageCategory.PHOTO, MessageCategory.VIDEO)
+@EditRegistry.register_strategy(MessageCategory.PHOTO, MessageCategory.VIDEO)
 async def edit_photo_to_video(
     old_message: SentMessage,
     new_message: UnSentMessage,
@@ -295,7 +295,7 @@ async def edit_photo_to_video(
     )
 
 
-@EditRegistrar.register_strategy(MessageCategory.PHOTO, MessageCategory.AUDIO)
+@EditRegistry.register_strategy(MessageCategory.PHOTO, MessageCategory.AUDIO)
 async def edit_photo_to_audio(
     old_message: SentMessage,
     new_message: UnSentMessage,
@@ -322,7 +322,7 @@ async def edit_photo_to_audio(
     )
 
 
-@EditRegistrar.register_strategy(MessageCategory.PHOTO, MessageCategory.DOCUMENT)
+@EditRegistry.register_strategy(MessageCategory.PHOTO, MessageCategory.DOCUMENT)
 async def edit_photo_to_document(
     old_message: SentMessage,
     new_message: UnSentMessage,
@@ -352,7 +352,7 @@ async def edit_photo_to_document(
 # ----- #
 
 
-@EditRegistrar.register_strategy(MessageCategory.VIDEO, MessageCategory.VIDEO)
+@EditRegistry.register_strategy(MessageCategory.VIDEO, MessageCategory.VIDEO)
 async def edit_video_to_video(
     old_message: SentMessage,
     new_message: UnSentMessage,
@@ -379,7 +379,7 @@ async def edit_video_to_video(
     )
 
 
-@EditRegistrar.register_strategy(MessageCategory.VIDEO, MessageCategory.PHOTO)
+@EditRegistry.register_strategy(MessageCategory.VIDEO, MessageCategory.PHOTO)
 async def edit_video_to_photo(
     old_message: SentMessage,
     new_message: UnSentMessage,
@@ -406,7 +406,7 @@ async def edit_video_to_photo(
     )
 
 
-@EditRegistrar.register_strategy(MessageCategory.VIDEO, MessageCategory.AUDIO)
+@EditRegistry.register_strategy(MessageCategory.VIDEO, MessageCategory.AUDIO)
 async def edit_video_to_audio(
     old_message: SentMessage,
     new_message: UnSentMessage,
@@ -433,7 +433,7 @@ async def edit_video_to_audio(
     )
 
 
-@EditRegistrar.register_strategy(MessageCategory.VIDEO, MessageCategory.DOCUMENT)
+@EditRegistry.register_strategy(MessageCategory.VIDEO, MessageCategory.DOCUMENT)
 async def edit_video_to_document(
     old_message: SentMessage,
     new_message: UnSentMessage,
@@ -463,7 +463,7 @@ async def edit_video_to_document(
 # ----- #
 
 
-@EditRegistrar.register_strategy(MessageCategory.AUDIO, MessageCategory.AUDIO)
+@EditRegistry.register_strategy(MessageCategory.AUDIO, MessageCategory.AUDIO)
 async def edit_audio_to_audio(
     old_message: SentMessage,
     new_message: UnSentMessage,
@@ -490,7 +490,7 @@ async def edit_audio_to_audio(
     )
 
 
-@EditRegistrar.register_strategy(MessageCategory.AUDIO, MessageCategory.PHOTO)
+@EditRegistry.register_strategy(MessageCategory.AUDIO, MessageCategory.PHOTO)
 async def edit_audio_to_photo(
     old_message: SentMessage,
     new_message: UnSentMessage,
@@ -517,7 +517,7 @@ async def edit_audio_to_photo(
     )
 
 
-@EditRegistrar.register_strategy(MessageCategory.AUDIO, MessageCategory.VIDEO)
+@EditRegistry.register_strategy(MessageCategory.AUDIO, MessageCategory.VIDEO)
 async def edit_audio_to_video(
     old_message: SentMessage,
     new_message: UnSentMessage,
@@ -544,7 +544,7 @@ async def edit_audio_to_video(
     )
 
 
-@EditRegistrar.register_strategy(MessageCategory.AUDIO, MessageCategory.DOCUMENT)
+@EditRegistry.register_strategy(MessageCategory.AUDIO, MessageCategory.DOCUMENT)
 async def edit_audio_to_document(
     old_message: SentMessage,
     new_message: UnSentMessage,
@@ -598,7 +598,7 @@ def calc_message_difference_without_send(
 # ----- #
 
 
-@EditRegistrar.register_strategy(MessageCategory.DOCUMENT, MessageCategory.DOCUMENT)
+@EditRegistry.register_strategy(MessageCategory.DOCUMENT, MessageCategory.DOCUMENT)
 async def edit_document_to_document(
     old_message: SentMessage,
     new_message: UnSentMessage,
@@ -625,7 +625,7 @@ async def edit_document_to_document(
     )
 
 
-@EditRegistrar.register_strategy(MessageCategory.DOCUMENT, MessageCategory.PHOTO)
+@EditRegistry.register_strategy(MessageCategory.DOCUMENT, MessageCategory.PHOTO)
 async def edit_document_to_photo(
     old_message: SentMessage,
     new_message: UnSentMessage,
@@ -652,7 +652,7 @@ async def edit_document_to_photo(
     )
 
 
-@EditRegistrar.register_strategy(MessageCategory.DOCUMENT, MessageCategory.VIDEO)
+@EditRegistry.register_strategy(MessageCategory.DOCUMENT, MessageCategory.VIDEO)
 async def edit_document_to_video(
     old_message: SentMessage,
     new_message: UnSentMessage,
@@ -679,7 +679,7 @@ async def edit_document_to_video(
     )
 
 
-@EditRegistrar.register_strategy(MessageCategory.DOCUMENT, MessageCategory.AUDIO)
+@EditRegistry.register_strategy(MessageCategory.DOCUMENT, MessageCategory.AUDIO)
 async def edit_document_to_audio(
     old_message: SentMessage,
     new_message: UnSentMessage,
@@ -943,12 +943,20 @@ async def edit_document_album_to_document_album(
 def check_edit(
     old_message: SentMessage,
     new_message: UnSentMessage,
-) -> tuple[list[int], list[tuple[int, int]]] | None:
-    checker = EditRegistrar.get_checker(old_message.category, new_message.category)
-    if checker is None:
-        return None
+) -> tuple[list[int], list[tuple[int, int]]] | bool:
+    strat = EditRegistry.get_strategy(old_message.category, new_message.category)
+    if strat is None:
+        return False
 
-    return checker(old_message, new_message)
+    checker = EditRegistry.get_checker(old_message.category, new_message.category)
+    if checker is None:
+        return True
+
+    result = checker(old_message, new_message)
+    if result is None:
+        return False
+
+    return result
 
 
 def get_edit_function(
@@ -958,23 +966,25 @@ def get_edit_function(
     old_category = old_message.category
     new_category = new_message.category
 
-    strat = EditRegistrar.get_strategy(old_category, new_category)
+    strat = EditRegistry.get_strategy(old_category, new_category)
     if strat is None:
         return
 
     check_result = check_edit(old_message, new_message)
-    if check_result is None:
+    if check_result is False:
         return None
 
     return strat
 
 
 class MessageEditorImpl(MessageEditor):
+    def __init__(self, bot_adapter: BotAdapter):
+        self.bot_adapter = bot_adapter
+
     async def edit(
         self,
         old_message: SentMessage,
         new_message: UnSentMessage,
-        bot_adapter: BotAdapter,
         mapping: CallbackDataMapping,
     ) -> SentMessage:
         edit_func = get_edit_function(old_message, new_message)
@@ -987,7 +997,7 @@ class MessageEditorImpl(MessageEditor):
         return await edit_func(
             old_message,
             new_message,
-            bot_adapter,
+            self.bot_adapter,
             mapping,
         )
 
@@ -997,7 +1007,7 @@ class MessageEditorImpl(MessageEditor):
         new_message: UnSentMessage,
     ) -> bool:
         can_be = check_edit(old_message, new_message)
-        if can_be is None:
+        if can_be is False:
             return False
 
         return True

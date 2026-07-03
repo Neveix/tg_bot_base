@@ -1,6 +1,6 @@
 from typing import Protocol
 
-from ..core.models.input_callback_use_params import InputCallbackUseParams
+from ..core.models.input_callback import InputCallbackUseParams
 from ..core.interfaces import UserStateStore, ScreenService
 
 
@@ -42,7 +42,8 @@ class MessageHandler:
 
         await input_callback.use(
             params=InputCallbackUseParams(
-                user_state=user_state,
-                screen_service=self.screen_service,
+                user_id=user_id,
+                set_input_callback=user_state.set_input_callback,
+                screen_service_set=self.screen_service.set,
             )
         )

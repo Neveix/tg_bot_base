@@ -9,11 +9,11 @@ from tg_bot_screen.core.exceptions import (
     ScreenAlreadyActiveError,
     ScreenNotFoundError,
 )
+from tg_bot_screen.core.models.message import SentMessage
 from tg_bot_screen.core.models.message_actions import MessageActions
 from tg_bot_screen.infrastructure.screen_diff_service import calc_screen_difference
 
 from ..core.interfaces import (
-    BotAdapter,
     ScreenService,
     CallbackDataMapping,
     UserStateStore,
@@ -27,12 +27,11 @@ class CallbackDataMappingFactory(Protocol):
 
 
 def _map_callback_data(
-    callback_data_mapping_factory: CallbackDataMappingFactory,
     user_id: int,
     screen: UnSentScreen,
     user_state_store: UserStateStore,
 ) -> CallbackDataMapping:
-    mapping = callback_data_mapping_factory()
+    mapping = CallbackDataMapping()
     callback_data_list = screen.get_callback_data()
     for callback_data in callback_data_list:
         mapping.add(callback_data)
@@ -43,28 +42,26 @@ def _map_callback_data(
 class ScreenServiceImpl(ScreenService):
     def __init__(
         self,
-        callback_data_mapping_factory: CallbackDataMappingFactory,
         user_state_store: UserStateStore,
         screen_registry: ScreenRegistry,
-        bot_adapter: BotAdapter,
         message_actions: MessageActions,
     ):
-        self.callback_data_mapping_factory = callback_data_mapping_factory
         self.user_state_store = user_state_store
         self.screen_registry = screen_registry
-        self.bot_adapter = bot_adapter
         self.message_actions = message_actions
 
     async def clear(self, user_id: int, delete_messages: bool = True):
         user_data = self.user_state_store.get(user_id)
         screen = user_data.screen
         if screen and delete_messages:
-            await screen.delete(self.bot_adapter)
+            await asyncio.gather(
+                *[self.message_actions.deleter.delete(msg) for msg in screen.messages],
+                return_exceptions=True,
+            )
         user_data.screen = None
 
     async def set_by_screen(self, user_id: int, screen: UnSentScreen):
         mapping = _map_callback_data(
-            self.callback_data_mapping_factory,
             user_id,
             screen,
             self.user_state_store,
@@ -76,52 +73,77 @@ class ScreenServiceImpl(ScreenService):
             old_screen, screen, self.message_actions.editor
         )
 
-        new_screen = SentScreen()
+        user_data.screen = SentScreen()
+
         tasks = []
         for message in delete:
             tasks.append(
                 self.message_actions.deleter.delete(
                     message,
-                    self.bot_adapter,
                 )
             )
 
-        for old_message, new_message in edit:
-            tasks.append(
-                self.message_actions.editor.edit(
+        for i, (old_message, new_message) in enumerate(edit):
+
+            async def edit_func():
+                return i, await self.message_actions.editor.edit(
                     old_message,
                     new_message,
-                    self.bot_adapter,
                     mapping,
                 )
-            )
-            new_screen.extend([old_message])
 
-        for message in send:
-            new_message = await self.message_actions.sender.send(
-                message,
-                user_id,
-                self.bot_adapter,
-                mapping,
-            )
-            new_screen.extend([new_message])
+            tasks.append(edit_func())
 
-        user_data.screen = new_screen
+        async def send_consecuently():
+            result: list[SentMessage] = []
+            for message in send:
+                result.append(
+                    await self.message_actions.sender.send(
+                        message,
+                        user_id,
+                        mapping,
+                    )
+                )
+            return result
 
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-        continue_types: list[type[Exception]] = [
+        tasks.append(send_consecuently())
+
+        results = await asyncio.gather(
+            *tasks,
+            return_exceptions=True,
+        )
+        continue_exception_types: list[type[Exception]] = [
             MessageNotModified,
             CannotTransformMessage,
         ]
+        edited_messages: dict[int, SentMessage] = {}
+        sent_messages: list[SentMessage] = []
+        must_be_raised: Exception | None = None
         for result in results:
             if isinstance(result, Exception):
-                for continue_type in continue_types:
+                for continue_type in continue_exception_types:
                     if isinstance(result, continue_type):
                         break
                 else:
-                    raise result
+                    if must_be_raised is None:
+                        must_be_raised = result
 
                 continue
+
+            if isinstance(result, tuple):
+                i, edited_message = result
+                edited_messages[i] = edited_message
+
+            if isinstance(result, list):
+                sent_messages = result
+
+        for _, msg in sorted(edited_messages.items(), key=lambda t: t[0]):
+            user_data.screen.append(msg)
+
+        user_data.screen.extend(sent_messages)
+
+        if must_be_raised:
+            raise must_be_raised
 
     async def set(
         self,
@@ -135,24 +157,21 @@ class ScreenServiceImpl(ScreenService):
         directory_stack = user_data.directory_stack
 
         try:
-            if directory_stack.last() == screen_name:
-                raise ScreenAlreadyActiveError(
-                    f"{user_id} attempted to navigate to {screen_name!r} "
-                    f"but already on this screen"
-                )
-
             if not stack:
                 if len(directory_stack) == 0:
                     raise EmptyStackError(
                         f"{user_id} attempted to navigate to {screen_name!r} "
                         f"with stack=False but stack is empty"
                     )
-
-                user_data.directory_stack.pop()
-                user_data.directory_stack.append(screen_name)
+                directory_stack.pop()
             else:
-                if len(directory_stack) == 0:
-                    directory_stack.append(screen_name)
+                if directory_stack.last() == screen_name:
+                    raise ScreenAlreadyActiveError(
+                        f"{user_id} attempted to navigate to {screen_name!r} "
+                        f"but already on this screen"
+                    )
+
+            directory_stack.append(screen_name)
 
             screen = self.screen_registry.get(screen_name)
             if screen is None:
@@ -175,7 +194,7 @@ class ScreenServiceImpl(ScreenService):
         last_screen_name = directory_stack.last()
         if last_screen_name:
             try:
-                await self.set(user_id, last_screen_name)
+                await self.set(user_id, last_screen_name, stack=False)
 
             except ScreenAlreadyActiveError:
                 return
@@ -188,19 +207,16 @@ class ScreenServiceImpl(ScreenService):
             directory_stack.pop()
 
         self.user_state_store.get(user_id).sessions.update_all()
-        last_screen_name = directory_stack.last()
-        if last_screen_name:
-            await self.set(user_id, last_screen_name)
+        await self.update(user_id)
 
     async def buffer(self, user_id: int):
         user_data = self.user_state_store.get(user_id)
         unsent = None
         if user_data.screen:
             unsent = user_data.screen.get_unsent()
-            await user_data.screen.delete(self.bot_adapter)
 
         user_data.screen_buffer = unsent
-        user_data.screen = None
+        await self.clear(user_id)
 
     async def unbuffer(
         self,

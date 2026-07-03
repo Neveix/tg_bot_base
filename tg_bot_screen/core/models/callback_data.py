@@ -1,7 +1,15 @@
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any, Protocol
-from ...core.interfaces import CallbackData
+from typing import Any, Protocol, Self
 from ...core.models.callback_data_use_params import CallbackDataUseParams
+
+
+class CallbackData(ABC):
+    @abstractmethod
+    def clone(self) -> Self: ...
+
+    @abstractmethod
+    async def use(self, *, params: CallbackDataUseParams): ...
 
 
 @dataclass(frozen=True)
@@ -38,7 +46,7 @@ class GoToScreen(CallbackData):
         return GoToScreen(self.screen_name)
 
     async def use(self, *, params: CallbackDataUseParams):
-        await params.screen_set_by_name(params.user_id, self.screen_name)
+        await params.screen_service_set(params.user_id, self.screen_name)
         params.update_sessions()
 
 
@@ -57,7 +65,7 @@ class StepBack(CallbackData):
 
     async def use(self, *, params: CallbackDataUseParams, **kwargs):
         if self.clear_input_callback:
-            params.reset_input_callback()
+            params.set_input_callback(None)
 
         for session in params.input_sessions:
             if self.pop_last_input and session.may_pop_last_input:
@@ -69,4 +77,3 @@ class StepBack(CallbackData):
         await params.screen_step_back(params.user_id, self.times)
 
         params.update_sessions()
-

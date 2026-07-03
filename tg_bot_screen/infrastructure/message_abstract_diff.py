@@ -15,7 +15,7 @@ class CheckFunc(Protocol):
     ) -> bool: ...
 
 
-class Index(int): ...
+Index = int
 
 
 def calc_abstract_difference(
@@ -80,7 +80,7 @@ def calc_abstract_difference(
     return indices_delete, indices_edit, indices_send
 
 
-class MessageType(int): ...
+MessageType = int
 
 
 def calc_abstract_difference_without_send(

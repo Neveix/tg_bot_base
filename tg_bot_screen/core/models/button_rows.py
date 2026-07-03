@@ -1,6 +1,7 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
-from ...infrastructure.models.callback_data_impl import CallbackData
+
+from tg_bot_screen.core.models.callback_data import CallbackData
 
 
 @dataclass(frozen=True)
@@ -11,14 +12,14 @@ class Button:
     web_app: Any | None = None
 
 
-@dataclass(frozen=True)
 class ButtonRow:
-    buttons: list[Button] = field(default_factory=list)
+    def __init__(self, *buttons: Button):
+        self.buttons: list[Button] = list(buttons)
 
 
-@dataclass(frozen=True)
 class ButtonRows:
-    rows: list[ButtonRow] = field(default_factory=list)
+    def __init__(self, *rows: ButtonRow):
+        self.rows: list[ButtonRow] = list(rows)
 
     def get_callback_data(self) -> list[CallbackData]:
         result = []

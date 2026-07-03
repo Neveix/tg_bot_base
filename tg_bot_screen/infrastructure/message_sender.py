@@ -40,7 +40,7 @@ class SendFunc(Protocol):
     ) -> SentMessage: ...
 
 
-class SendRegistrar:
+class SendRegistry:
     _strategies: dict[MessageCategory, SendFunc] = {}
 
     @classmethod
@@ -59,7 +59,7 @@ class SendRegistrar:
 # ----- #
 
 
-@SendRegistrar.register(MessageCategory.SIMPLE)
+@SendRegistry.register(MessageCategory.SIMPLE)
 async def send_simple(
     message: UnSentMessage,
     user_id: int,
@@ -88,7 +88,7 @@ async def send_simple(
     )
 
 
-@SendRegistrar.register(MessageCategory.AUDIO)
+@SendRegistry.register(MessageCategory.AUDIO)
 async def send_audio(
     message: UnSentMessage,
     user_id: int,
@@ -103,13 +103,11 @@ async def send_audio(
     message_id = await bot_adapter.send_audio(
         chat_id=user_id,
         audio=message.media,
-        text=message.text,
         mapping=mapping,
         button_rows=message.button_rows,
     )
 
     return SentAudioMessage(
-        text=message.text,
         media=message.media,
         message_ids=[message_id],
         user_id=user_id,
@@ -118,7 +116,7 @@ async def send_audio(
     )
 
 
-@SendRegistrar.register(MessageCategory.DOCUMENT)
+@SendRegistry.register(MessageCategory.DOCUMENT)
 async def send_document(
     message: UnSentMessage,
     user_id: int,
@@ -133,13 +131,11 @@ async def send_document(
     message_id = await bot_adapter.send_document(
         chat_id=user_id,
         document=message.media,
-        caption=message.text,
         mapping=mapping,
         button_rows=message.button_rows,
     )
 
     return SentDocumentMessage(
-        text=message.text,
         media=message.media,
         message_ids=[message_id],
         user_id=user_id,
@@ -148,7 +144,7 @@ async def send_document(
     )
 
 
-@SendRegistrar.register(MessageCategory.PHOTO)
+@SendRegistry.register(MessageCategory.PHOTO)
 async def send_photo(
     message: UnSentMessage,
     user_id: int,
@@ -163,13 +159,11 @@ async def send_photo(
     message_id = await bot_adapter.send_photo(
         chat_id=user_id,
         photo=message.media,
-        caption=message.text,
         mapping=mapping,
         button_rows=message.button_rows,
     )
 
     return SentPhotoMessage(
-        text=message.text,
         media=message.media,
         message_ids=[message_id],
         user_id=user_id,
@@ -178,7 +172,7 @@ async def send_photo(
     )
 
 
-@SendRegistrar.register(MessageCategory.VIDEO)
+@SendRegistry.register(MessageCategory.VIDEO)
 async def send_video(
     message: UnSentMessage,
     user_id: int,
@@ -193,13 +187,11 @@ async def send_video(
     message_id = await bot_adapter.send_video(
         chat_id=user_id,
         video=message.media,
-        caption=message.text,
         mapping=mapping,
         button_rows=message.button_rows,
     )
 
     return SentVideoMessage(
-        text=message.text,
         media=message.media,
         message_ids=[message_id],
         user_id=user_id,
@@ -208,7 +200,7 @@ async def send_video(
     )
 
 
-@SendRegistrar.register(MessageCategory.VOICE)
+@SendRegistry.register(MessageCategory.VOICE)
 async def send_voice(
     message: UnSentMessage,
     user_id: int,
@@ -235,7 +227,7 @@ async def send_voice(
     )
 
 
-@SendRegistrar.register(MessageCategory.VIDEO_NOTE)
+@SendRegistry.register(MessageCategory.VIDEO_NOTE)
 async def send_video_note(
     message: UnSentMessage,
     user_id: int,
@@ -262,7 +254,7 @@ async def send_video_note(
     )
 
 
-@SendRegistrar.register(MessageCategory.PHOTO_VIDEO_ALBUM)
+@SendRegistry.register(MessageCategory.PHOTO_VIDEO_ALBUM)
 async def send_photo_video_album(
     message: UnSentMessage,
     user_id: int,
@@ -277,7 +269,6 @@ async def send_photo_video_album(
     message_ids = await bot_adapter.send_media_group(
         chat_id=user_id,
         media=message.media,
-        caption=message.text,
         mapping=mapping,
     )
 
@@ -290,7 +281,7 @@ async def send_photo_video_album(
     )
 
 
-@SendRegistrar.register(MessageCategory.AUDIO_ALBUM)
+@SendRegistry.register(MessageCategory.AUDIO_ALBUM)
 async def send_audio_album(
     message: UnSentMessage,
     user_id: int,
@@ -305,7 +296,6 @@ async def send_audio_album(
     message_ids = await bot_adapter.send_media_group(
         chat_id=user_id,
         media=message.media,
-        caption=message.text,
         mapping=mapping,
     )
 
@@ -318,7 +308,7 @@ async def send_audio_album(
     )
 
 
-@SendRegistrar.register(MessageCategory.DOCUMENT_ALBUM)
+@SendRegistry.register(MessageCategory.DOCUMENT_ALBUM)
 async def send_document_album(
     message: UnSentMessage,
     user_id: int,
@@ -333,7 +323,6 @@ async def send_document_album(
     message_ids = await bot_adapter.send_media_group(
         chat_id=user_id,
         media=message.media,
-        caption=message.text,
         mapping=mapping,
     )
 
@@ -350,15 +339,17 @@ async def send_document_album(
 
 
 class MessageSenderImpl(MessageSender):
+    def __init__(self, bot_adapter: BotAdapter):
+        self.bot_adapter = bot_adapter
+
     async def send(
         self,
         message: UnSentMessage,
         user_id: int,
-        bot_adapter: BotAdapter,
         mapping: CallbackDataMapping,
     ) -> SentMessage:
-        if func := SendRegistrar.get(message.category):
-            return await func(message, user_id, bot_adapter, mapping)
+        if func := SendRegistry.get(message.category):
+            return await func(message, user_id, self.bot_adapter, mapping)
 
         raise ImplementationError(
             f"send function is not implemented for {message.category}"

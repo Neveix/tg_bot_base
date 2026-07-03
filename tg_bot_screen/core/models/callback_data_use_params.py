@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 from typing import Protocol, Sequence
+
+from tg_bot_screen.core.models.input_callback import InputCallback
 from .session import InputSession
 
 
@@ -9,7 +11,7 @@ class ScreenSetByName(Protocol):
         user_id: int,
         screen_name: str,
         stack: bool = True,
-        **kwargs,
+        raise_on_error: bool = True,
     ) -> None: ...
 
 
@@ -17,8 +19,8 @@ class ScreenStepBack(Protocol):
     async def __call__(self, user_id: int, times: int) -> None: ...
 
 
-class ResetInputCallback(Protocol):
-    def __call__(self) -> None: ...
+class SetInputCallback(Protocol):
+    def __call__(self, value: InputCallback | None) -> None: ...
 
 
 class UpdateSettions(Protocol):
@@ -29,8 +31,7 @@ class UpdateSettions(Protocol):
 class CallbackDataUseParams:
     user_id: int
     input_sessions: Sequence[InputSession]
-    screen_set_by_name: ScreenSetByName
+    screen_service_set: ScreenSetByName
     screen_step_back: ScreenStepBack
-    reset_input_callback: ResetInputCallback
+    set_input_callback: SetInputCallback
     update_sessions: UpdateSettions
-
