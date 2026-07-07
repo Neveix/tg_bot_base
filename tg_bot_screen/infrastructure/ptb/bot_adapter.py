@@ -92,6 +92,9 @@ class BotAdapterPtb(BotAdapter):
             msg = await self.bot.send_audio(
                 chat_id,
                 self.general_converter.to_send_parameter(audio),
+                caption=audio.caption,
+                filename=audio.filename,
+                title=audio.title,
                 parse_mode=parse_mode,
                 reply_markup=reply_markup,
             )
@@ -113,6 +116,8 @@ class BotAdapterPtb(BotAdapter):
             result = await self.bot.send_photo(
                 chat_id,
                 self.general_converter.to_send_parameter(photo),
+                caption=photo.caption,
+                filename=photo.filename,
                 parse_mode=parse_mode,
                 reply_markup=reply_markup,
             )
@@ -134,6 +139,8 @@ class BotAdapterPtb(BotAdapter):
             result = await self.bot.send_video(
                 chat_id,
                 self.general_converter.to_send_parameter(video),
+                caption=video.caption,
+                filename=video.filename,
                 parse_mode=parse_mode,
                 reply_markup=reply_markup,
             )
@@ -155,6 +162,8 @@ class BotAdapterPtb(BotAdapter):
             result = await self.bot.send_document(
                 chat_id,
                 self.general_converter.to_send_parameter(document),
+                caption=document.caption,
+                filename=document.filename,
                 parse_mode=parse_mode,
                 reply_markup=reply_markup,
             )
@@ -176,6 +185,8 @@ class BotAdapterPtb(BotAdapter):
             result = await self.bot.send_voice(
                 chat_id,
                 self.general_converter.to_send_parameter(voice),
+                caption=voice.caption,
+                filename=voice.filename,
                 parse_mode=parse_mode,
                 reply_markup=reply_markup,
             )
@@ -197,6 +208,7 @@ class BotAdapterPtb(BotAdapter):
                 chat_id,
                 self.general_converter.to_send_parameter(video_note),
                 reply_markup=reply_markup,
+                filename=video_note.filename,
             )
             return result.message_id
 
@@ -235,11 +247,16 @@ class BotAdapterPtb(BotAdapter):
         text: str,
         mapping: CallbackDataMapping,
         button_rows: ButtonRows | None = None,
+        parse_mode: str | None = None,
     ) -> int:
         try:
             reply_markup = self._prepare_reply_markup(mapping, button_rows)
             result = await self.bot.edit_message_text(
-                text, chat_id, message_id, reply_markup=reply_markup
+                text,
+                chat_id,
+                message_id,
+                reply_markup=reply_markup,
+                parse_mode=parse_mode,
             )
             if isinstance(result, bool):
                 raise ValueError(f"result of an edited message is {result=}")

@@ -1,5 +1,5 @@
 import asyncio
-from typing import Protocol
+from typing import Any, Coroutine, Protocol
 
 from tg_bot_screen.core.exceptions import (
     CannotTransformMessage,
@@ -9,9 +9,13 @@ from tg_bot_screen.core.exceptions import (
     ScreenAlreadyActiveError,
     ScreenNotFoundError,
 )
-from tg_bot_screen.core.models.message import SentMessage
+from tg_bot_screen.core.models.message import SentMessage, UnSentMessage
 from tg_bot_screen.core.models.message_actions import MessageActions
-from tg_bot_screen.infrastructure.screen_diff_service import calc_screen_difference
+from tg_bot_screen.core.models.user_state import UserState
+from tg_bot_screen.infrastructure.screen_diff_service import (
+    ScreenDifference,
+    calc_screen_difference,
+)
 
 from ..core.interfaces import (
     ScreenService,
@@ -37,6 +41,101 @@ def _map_callback_data(
         mapping.add(callback_data)
     user_state_store.get(user_id).callback_mapping = mapping
     return mapping
+
+
+async def _screen_set_run_message_actions(
+    diff: ScreenDifference,
+    message_actions: MessageActions,
+    mapping: CallbackDataMapping,
+    user_id: int,
+):
+    tasks: list[
+        Coroutine[Any, Any, bool]
+        | Coroutine[Any, Any, tuple[int, SentMessage]]
+        | Coroutine[Any, Any, list[SentMessage]]
+    ] = []
+    for message in diff.delete:
+        tasks.append(message_actions.deleter.delete(message))
+
+    for i, (old_message, new_message) in enumerate(diff.edit):
+
+        async def edit_func(
+            i: int = i,
+            old: SentMessage = old_message,
+            new: UnSentMessage = new_message,
+        ):
+            return i, await message_actions.editor.edit(
+                old,
+                new,
+                mapping,
+            )
+
+        tasks.append(edit_func())
+
+    async def send_consecuently():
+        result: list[SentMessage] = []
+        for message in diff.send:
+            result.append(
+                await message_actions.sender.send(
+                    message,
+                    user_id,
+                    mapping,
+                )
+            )
+        return result
+
+    # tasks.append(send_consecuently())
+    results: list[
+        BaseException | tuple[int, SentMessage] | list[SentMessage] | bool
+    ] = []
+    results.append(await send_consecuently())
+
+    results.extend(
+        await asyncio.gather(
+            *tasks,
+            return_exceptions=True,
+        )
+    )
+    return results
+
+
+def _screen_set_check_results(
+    results: list[BaseException | tuple[int, SentMessage] | list[SentMessage] | bool],
+    user_state: UserState,
+):
+    continue_exception_types: list[type[Exception]] = [
+        MessageNotModified,
+        CannotTransformMessage,
+    ]
+    edited_messages: dict[int, SentMessage] = {}
+    sent_messages: list[SentMessage] = []
+    must_be_raised: Exception | None = None
+    for result in results:
+        if isinstance(result, Exception):
+            for continue_type in continue_exception_types:
+                if isinstance(result, continue_type):
+                    break
+            else:
+                if must_be_raised is None:
+                    must_be_raised = result
+
+            continue
+
+        if isinstance(result, tuple):
+            i, edited_message = result
+            edited_messages[i] = edited_message
+
+        if isinstance(result, list):
+            sent_messages = result
+
+    assert user_state.screen is not None
+    for _, msg in sorted(edited_messages.items(), key=lambda t: t[0]):
+        user_state.screen.append(msg)
+
+    user_state.screen.extend(sent_messages)
+
+    if must_be_raised:
+        raise must_be_raised
 
 
 class ScreenServiceImpl(ScreenService):
@@ -66,84 +165,23 @@ class ScreenServiceImpl(ScreenService):
             screen,
             self.user_state_store,
         )
-
         old_screen = self.get(user_id)
-        user_data = self.user_state_store.get(user_id)
-        delete, edit, send = calc_screen_difference(
-            old_screen, screen, self.message_actions.editor
+
+        diff = calc_screen_difference(
+            old_screen,
+            screen,
+            self.message_actions.editor,
         )
+        user_state = self.user_state_store.get(user_id)
+        user_state.screen = SentScreen()
 
-        user_data.screen = SentScreen()
-
-        tasks = []
-        for message in delete:
-            tasks.append(
-                self.message_actions.deleter.delete(
-                    message,
-                )
-            )
-
-        for i, (old_message, new_message) in enumerate(edit):
-
-            async def edit_func():
-                return i, await self.message_actions.editor.edit(
-                    old_message,
-                    new_message,
-                    mapping,
-                )
-
-            tasks.append(edit_func())
-
-        async def send_consecuently():
-            result: list[SentMessage] = []
-            for message in send:
-                result.append(
-                    await self.message_actions.sender.send(
-                        message,
-                        user_id,
-                        mapping,
-                    )
-                )
-            return result
-
-        tasks.append(send_consecuently())
-
-        results = await asyncio.gather(
-            *tasks,
-            return_exceptions=True,
+        results = await _screen_set_run_message_actions(
+            diff,
+            self.message_actions,
+            mapping,
+            user_id,
         )
-        continue_exception_types: list[type[Exception]] = [
-            MessageNotModified,
-            CannotTransformMessage,
-        ]
-        edited_messages: dict[int, SentMessage] = {}
-        sent_messages: list[SentMessage] = []
-        must_be_raised: Exception | None = None
-        for result in results:
-            if isinstance(result, Exception):
-                for continue_type in continue_exception_types:
-                    if isinstance(result, continue_type):
-                        break
-                else:
-                    if must_be_raised is None:
-                        must_be_raised = result
-
-                continue
-
-            if isinstance(result, tuple):
-                i, edited_message = result
-                edited_messages[i] = edited_message
-
-            if isinstance(result, list):
-                sent_messages = result
-
-        for _, msg in sorted(edited_messages.items(), key=lambda t: t[0]):
-            user_data.screen.append(msg)
-
-        user_data.screen.extend(sent_messages)
-
-        if must_be_raised:
-            raise must_be_raised
+        _screen_set_check_results(results, user_state)
 
     async def set(
         self,
@@ -151,10 +189,10 @@ class ScreenServiceImpl(ScreenService):
         screen_name: str,
         stack: bool = True,
         raise_on_error: bool = True,
-        **kwargs,
+        params: dict[Any, Any] | None = None,
     ):
-        user_data = self.user_state_store.get(user_id)
-        directory_stack = user_data.directory_stack
+        us = self.user_state_store.get(user_id)
+        directory_stack = us.directory_stack
 
         try:
             if not stack:
@@ -180,7 +218,9 @@ class ScreenServiceImpl(ScreenService):
                     "but it does not exist"
                 )
             evaluated_screen = await screen.evaluate(
-                user_id, sys_user_data=user_data, **kwargs
+                user_id,
+                us=us,
+                params=params,
             )
 
             await self.set_by_screen(user_id, evaluated_screen)

@@ -112,7 +112,6 @@ async def send_audio(
         message_ids=[message_id],
         user_id=user_id,
         button_rows=message.button_rows,
-        parse_mode=message.parse_mode,
     )
 
 
@@ -140,7 +139,6 @@ async def send_document(
         message_ids=[message_id],
         user_id=user_id,
         button_rows=message.button_rows,
-        parse_mode=message.parse_mode,
     )
 
 
@@ -168,7 +166,6 @@ async def send_photo(
         message_ids=[message_id],
         user_id=user_id,
         button_rows=message.button_rows,
-        parse_mode=message.parse_mode,
     )
 
 
@@ -196,7 +193,6 @@ async def send_video(
         message_ids=[message_id],
         user_id=user_id,
         button_rows=message.button_rows,
-        parse_mode=message.parse_mode,
     )
 
 
@@ -273,11 +269,9 @@ async def send_photo_video_album(
     )
 
     return SentPhotoVideoAlbumMessage(
-        text=message.text,
         media=message.media,
         message_ids=message_ids,
         user_id=user_id,
-        parse_mode=message.parse_mode,
     )
 
 
@@ -300,11 +294,9 @@ async def send_audio_album(
     )
 
     return SentAudioAlbumMessage(
-        text=message.text,
         media=message.media,
         message_ids=message_ids,
         user_id=user_id,
-        parse_mode=message.parse_mode,
     )
 
 
@@ -327,11 +319,9 @@ async def send_document_album(
     )
 
     return SentDocumentAlbumMessage(
-        text=message.text,
         media=message.media,
         message_ids=message_ids,
         user_id=user_id,
-        parse_mode=message.parse_mode,
     )
 
 

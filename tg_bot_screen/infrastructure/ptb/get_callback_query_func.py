@@ -1,9 +1,9 @@
 from telegram import Update
 
-from tg_bot_screen.infrastructure.callback_query_handler import CallbackQueryHandlerTBS
+from tg_bot_screen.infrastructure.callback_query_handler import CallbackQueryHandler
 
 
-def get_callback_query_func_ptb(callback_query_handler: CallbackQueryHandlerTBS):
+def get_callback_query_func_ptb(callback_query_handler: CallbackQueryHandler):
     async def handle_callback_query(update: Update, _):
         assert update.callback_query
         assert update.callback_query.from_user

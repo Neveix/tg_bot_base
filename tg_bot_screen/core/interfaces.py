@@ -13,7 +13,8 @@ from tg_bot_screen.core.models.media_data import (
 )
 from tg_bot_screen.core.models.message import SentMessage, UnSentMessage
 from .models.user_state import UserState
-from .models.screen import ProtoScreen, UnSentScreen, SentScreen
+from .models.screen import UnSentScreen, SentScreen
+from .models.proto_screen import ProtoScreen
 
 
 class UserStateStore(ABC):
@@ -41,6 +42,7 @@ class ScreenService(ABC):
         screen_name: str,
         stack: bool = True,
         raise_on_error: bool = True,
+        params: dict[Any, Any] | None = None,
     ) -> None: ...
 
     @abstractmethod

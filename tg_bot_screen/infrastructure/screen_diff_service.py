@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import TypeVar
 
 from tg_bot_screen.core.interfaces import MessageEditor
@@ -9,13 +10,18 @@ MsgType = TypeVar("MsgType", bound=UnSentMessage)
 SentMsgType = TypeVar("SentMsgType", bound=SentMessage)
 
 
+@dataclass
+class ScreenDifference:
+    delete: list[SentMessage]
+    edit: list[tuple[SentMessage, UnSentMessage]]
+    send: list[UnSentMessage]
+
+
 def calc_screen_difference(
     screen1: SentScreen | None,
     screen2: UnSentScreen,
     message_editor: MessageEditor,
-) -> tuple[
-    list[SentMessage], list[tuple[SentMessage, UnSentMessage]], list[UnSentMessage]
-]:
+) -> ScreenDifference:
 
     messages1 = screen1.messages if screen1 else []
     messages2 = screen2.messages
@@ -29,4 +35,9 @@ def calc_screen_difference(
         (messages1[from_i], messages2[to_i]) for from_i, to_i in indices_edit
     ]
     messages_send: list[UnSentMessage] = [messages2[index] for index in indices_send]
-    return messages_delete, messages_edit, messages_send
+
+    return ScreenDifference(
+        delete=messages_delete,
+        edit=messages_edit,
+        send=messages_send,
+    )

@@ -11,7 +11,7 @@ from tg_bot_screen.core.models.media_data import (
     VideoNote,
     Voice,
 )
-
+from .parse_mode import ParseMode
 from .callback_data import CallbackData
 from .button_rows import ButtonRows
 
@@ -30,11 +30,6 @@ class MessageCategory(StrEnum):
 
 
 # ----- #
-
-
-class ParseMode(StrEnum):
-    MARKDOWN = "markdown"
-    HTML = "html"
 
 
 @dataclass(kw_only=True)
@@ -90,17 +85,15 @@ Message = UnSentMessage | SentMessage
 # ----- #
 
 
-class MediaMessage(HasButtonRowsMixin, HasParseModeMixin):
+class MediaMessage(HasButtonRowsMixin):
     def __init__(
         self,
         *,
         category: MessageCategory,
         button_rows: ButtonRows | None = None,
-        parse_mode: ParseMode | None = None,
     ):
         self.category = category
         HasButtonRowsMixin.__init__(self, button_rows=button_rows)
-        HasParseModeMixin.__init__(self, parse_mode=parse_mode)
 
     def __new__(cls, *args, **kwargs):
         assert cls is not MediaMessage, (
@@ -140,21 +133,18 @@ class AudioMessage(MediaMessage, UnSentMessage):
         self,
         audio: Audio,
         button_rows: ButtonRows | None = None,
-        parse_mode: ParseMode | None = None,
     ):
         self.media = audio
         MediaMessage.__init__(
             self,
             category=MessageCategory.AUDIO,
             button_rows=button_rows,
-            parse_mode=parse_mode,
         )
 
     def clone(self) -> Self:
         return type(self)(
             audio=self.media,
             button_rows=self.button_rows,
-            parse_mode=self.parse_mode,
         )
 
 
@@ -163,21 +153,18 @@ class DocumentMessage(MediaMessage, UnSentMessage):
         self,
         document: Document,
         button_rows: ButtonRows | None = None,
-        parse_mode: ParseMode | None = None,
     ):
         self.media = document
         MediaMessage.__init__(
             self,
             category=MessageCategory.DOCUMENT,
             button_rows=button_rows,
-            parse_mode=parse_mode,
         )
 
     def clone(self) -> Self:
         return type(self)(
             document=self.media,
             button_rows=self.button_rows,
-            parse_mode=self.parse_mode,
         )
 
 
@@ -186,21 +173,18 @@ class PhotoMessage(MediaMessage, UnSentMessage):
         self,
         photo: Photo,
         button_rows: ButtonRows | None = None,
-        parse_mode: ParseMode | None = None,
     ):
         self.media = photo
         MediaMessage.__init__(
             self,
             category=MessageCategory.PHOTO,
             button_rows=button_rows,
-            parse_mode=parse_mode,
         )
 
     def clone(self) -> Self:
         return type(self)(
             photo=self.media,
             button_rows=self.button_rows,
-            parse_mode=self.parse_mode,
         )
 
 
@@ -209,41 +193,35 @@ class VideoMessage(MediaMessage, UnSentMessage):
         self,
         video: Video,
         button_rows: ButtonRows | None = None,
-        parse_mode: ParseMode | None = None,
     ):
         self.media = video
         MediaMessage.__init__(
             self,
             category=MessageCategory.VIDEO,
             button_rows=button_rows,
-            parse_mode=parse_mode,
         )
 
     def clone(self) -> Self:
         return type(self)(
             video=self.media,
             button_rows=self.button_rows,
-            parse_mode=self.parse_mode,
         )
 
 
-class VoiceMessage(HasButtonRowsMixin, HasParseModeMixin, UnSentMessage):
+class VoiceMessage(HasButtonRowsMixin, UnSentMessage):
     def __init__(
         self,
         voice: Voice,
         button_rows: ButtonRows | None = None,
-        parse_mode: ParseMode | None = None,
     ):
         self.voice = voice
         HasButtonRowsMixin.__init__(self, button_rows=button_rows)
-        HasParseModeMixin.__init__(self, parse_mode=parse_mode)
         UnSentMessage.__init__(self, category=MessageCategory.VOICE)
 
     def clone(self) -> Self:
         return type(self)(
             voice=self.voice,
             button_rows=self.button_rows,
-            parse_mode=self.parse_mode,
         )
 
 
@@ -264,18 +242,12 @@ class VideoNoteMessage(HasButtonRowsMixin, UnSentMessage):
         )
 
 
-class PhotoVideoAlbumMessage(UnSentMessage, HasTextMixin, HasParseModeMixin):
+class PhotoVideoAlbumMessage(UnSentMessage):
     def __init__(
         self,
-        text: str,
         media: Sequence[Photo | Video],
-        button_rows: ButtonRows | None = None,
-        parse_mode: ParseMode | None = None,
     ):
         self.media = media
-        self.button_rows = button_rows
-        HasTextMixin.__init__(self, text=text)
-        HasParseModeMixin.__init__(self, parse_mode=parse_mode)
         UnSentMessage.__init__(
             self,
             category=MessageCategory.PHOTO_VIDEO_ALBUM,
@@ -283,25 +255,16 @@ class PhotoVideoAlbumMessage(UnSentMessage, HasTextMixin, HasParseModeMixin):
 
     def clone(self) -> Self:
         return type(self)(
-            text=self.text,
             media=self.media,
-            button_rows=self.button_rows,
-            parse_mode=self.parse_mode,
         )
 
 
-class AudioAlbumMessage(UnSentMessage, HasTextMixin, HasParseModeMixin):
+class AudioAlbumMessage(UnSentMessage):
     def __init__(
         self,
-        text: str,
         media: Sequence[Audio],
-        button_rows: ButtonRows | None = None,
-        parse_mode: ParseMode | None = None,
     ):
         self.media = media
-        self.button_rows = button_rows
-        HasTextMixin.__init__(self, text=text)
-        HasParseModeMixin.__init__(self, parse_mode=parse_mode)
         UnSentMessage.__init__(
             self,
             category=MessageCategory.AUDIO_ALBUM,
@@ -309,25 +272,17 @@ class AudioAlbumMessage(UnSentMessage, HasTextMixin, HasParseModeMixin):
 
     def clone(self) -> Self:
         return type(self)(
-            text=self.text,
             media=self.media,
-            button_rows=self.button_rows,
-            parse_mode=self.parse_mode,
         )
 
 
-class DocumentAlbumMessage(UnSentMessage, HasTextMixin, HasParseModeMixin):
+class DocumentAlbumMessage(UnSentMessage):
     def __init__(
         self,
-        text: str,
         media: Sequence[Document],
         button_rows: ButtonRows | None = None,
-        parse_mode: ParseMode | None = None,
     ):
         self.media = media
-        self.button_rows = button_rows
-        HasTextMixin.__init__(self, text=text)
-        HasParseModeMixin.__init__(self, parse_mode=parse_mode)
         UnSentMessage.__init__(
             self,
             category=MessageCategory.DOCUMENT_ALBUM,
@@ -335,10 +290,7 @@ class DocumentAlbumMessage(UnSentMessage, HasTextMixin, HasParseModeMixin):
 
     def clone(self) -> Self:
         return type(self)(
-            text=self.text,
             media=self.media,
-            button_rows=self.button_rows,
-            parse_mode=self.parse_mode,
         )
 
 
@@ -383,7 +335,7 @@ class SentSimpleMessage(
         )
 
 
-class SentMediaMessage(SentMessage, HasButtonRowsMixin, HasParseModeMixin):
+class SentMediaMessage(SentMessage, HasButtonRowsMixin):
     def __init__(
         self,
         message_ids: Sequence[int],
@@ -402,10 +354,6 @@ class SentMediaMessage(SentMessage, HasButtonRowsMixin, HasParseModeMixin):
             self,
             button_rows=button_rows,
         )
-        HasParseModeMixin.__init__(
-            self,
-            parse_mode=parse_mode,
-        )
 
     def __new__(cls, *args, **kwargs):
         assert cls is not SentMediaMessage, (
@@ -421,7 +369,6 @@ class SentAudioMessage(SentMediaMessage):
         message_ids: Sequence[int],
         user_id: int,
         button_rows: ButtonRows | None = None,
-        parse_mode: ParseMode | None = None,
     ):
         self.audio = media
         super().__init__(
@@ -429,14 +376,12 @@ class SentAudioMessage(SentMediaMessage):
             category=MessageCategory.AUDIO,
             user_id=user_id,
             button_rows=button_rows,
-            parse_mode=parse_mode,
         )
 
     def get_unsent(self) -> UnSentMessage:
         return AudioMessage(
             audio=self.audio,
             button_rows=self.button_rows,
-            parse_mode=self.parse_mode,
         )
 
 
@@ -447,7 +392,6 @@ class SentDocumentMessage(SentMediaMessage):
         message_ids: Sequence[int],
         user_id: int,
         button_rows: ButtonRows | None = None,
-        parse_mode: ParseMode | None = None,
     ):
         self.document = media
         super().__init__(
@@ -455,14 +399,12 @@ class SentDocumentMessage(SentMediaMessage):
             user_id=user_id,
             category=MessageCategory.DOCUMENT,
             button_rows=button_rows,
-            parse_mode=parse_mode,
         )
 
     def get_unsent(self) -> UnSentMessage:
         return DocumentMessage(
             document=self.document,
             button_rows=self.button_rows,
-            parse_mode=self.parse_mode,
         )
 
 
@@ -473,7 +415,6 @@ class SentPhotoMessage(SentMediaMessage):
         message_ids: Sequence[int],
         user_id: int,
         button_rows: ButtonRows | None = None,
-        parse_mode: ParseMode | None = None,
     ):
         self.photo = media
         super().__init__(
@@ -481,14 +422,12 @@ class SentPhotoMessage(SentMediaMessage):
             category=MessageCategory.PHOTO,
             user_id=user_id,
             button_rows=button_rows,
-            parse_mode=parse_mode,
         )
 
     def get_unsent(self) -> UnSentMessage:
         return PhotoMessage(
             photo=self.photo,
             button_rows=self.button_rows,
-            parse_mode=self.parse_mode,
         )
 
 
@@ -499,7 +438,6 @@ class SentVideoMessage(SentMediaMessage):
         message_ids: Sequence[int],
         user_id: int,
         button_rows: ButtonRows | None = None,
-        parse_mode: ParseMode | None = None,
     ):
         self.video = media
         super().__init__(
@@ -507,14 +445,12 @@ class SentVideoMessage(SentMediaMessage):
             category=MessageCategory.VIDEO,
             user_id=user_id,
             button_rows=button_rows,
-            parse_mode=parse_mode,
         )
 
     def get_unsent(self) -> UnSentMessage:
         return VideoMessage(
             video=self.video,
             button_rows=self.button_rows,
-            parse_mode=self.parse_mode,
         )
 
 
@@ -525,7 +461,6 @@ class SentVoiceMessage(HasButtonRowsMixin, HasParseModeMixin, SentMessage):
         message_ids: Sequence[int],
         user_id: int,
         button_rows: ButtonRows | None = None,
-        parse_mode: ParseMode | None = None,
     ):
         self.voice = voice
         SentMessage.__init__(
@@ -535,13 +470,11 @@ class SentVoiceMessage(HasButtonRowsMixin, HasParseModeMixin, SentMessage):
             user_id=user_id,
         )
         HasButtonRowsMixin.__init__(self, button_rows=button_rows)
-        HasParseModeMixin.__init__(self, parse_mode=parse_mode)
 
     def get_unsent(self) -> UnSentMessage:
         return VoiceMessage(
             voice=self.voice,
             button_rows=self.button_rows,
-            parse_mode=self.parse_mode,
         )
 
 
@@ -569,18 +502,14 @@ class SentVideoNoteMessage(HasButtonRowsMixin, SentMessage):
         )
 
 
-class SentPhotoVideoAlbumMessage(SentMessage, HasTextMixin, HasParseModeMixin):
+class SentPhotoVideoAlbumMessage(SentMessage):
     def __init__(
         self,
-        text: str,
         media: Sequence[Photo | Video],
         message_ids: Sequence[int],
         user_id: int,
-        parse_mode: ParseMode | None = None,
     ):
         self.media = media
-        HasTextMixin.__init__(self, text=text)
-        HasParseModeMixin.__init__(self, parse_mode=parse_mode)
         SentMessage.__init__(
             self,
             category=MessageCategory.PHOTO_VIDEO_ALBUM,
@@ -590,24 +519,18 @@ class SentPhotoVideoAlbumMessage(SentMessage, HasTextMixin, HasParseModeMixin):
 
     def get_unsent(self) -> UnSentMessage:
         return PhotoVideoAlbumMessage(
-            text=self.text,
             media=self.media,
-            parse_mode=self.parse_mode,
         )
 
 
-class SentAudioAlbumMessage(SentMessage, HasTextMixin, HasParseModeMixin):
+class SentAudioAlbumMessage(SentMessage):
     def __init__(
         self,
-        text: str,
         media: Sequence[Audio],
         message_ids: Sequence[int],
         user_id: int,
-        parse_mode: ParseMode | None = None,
     ):
         self.media = media
-        HasTextMixin.__init__(self, text=text)
-        HasParseModeMixin.__init__(self, parse_mode=parse_mode)
         SentMessage.__init__(
             self,
             category=MessageCategory.AUDIO_ALBUM,
@@ -617,24 +540,18 @@ class SentAudioAlbumMessage(SentMessage, HasTextMixin, HasParseModeMixin):
 
     def get_unsent(self) -> UnSentMessage:
         return AudioAlbumMessage(
-            text=self.text,
             media=self.media,
-            parse_mode=self.parse_mode,
         )
 
 
-class SentDocumentAlbumMessage(SentMessage, HasTextMixin, HasParseModeMixin):
+class SentDocumentAlbumMessage(SentMessage):
     def __init__(
         self,
-        text: str,
         media: Sequence[Document],
         message_ids: Sequence[int],
         user_id: int,
-        parse_mode: ParseMode | None = None,
     ):
         self.media = media
-        HasTextMixin.__init__(self, text=text)
-        HasParseModeMixin.__init__(self, parse_mode=parse_mode)
         SentMessage.__init__(
             self,
             category=MessageCategory.DOCUMENT_ALBUM,
@@ -644,9 +561,7 @@ class SentDocumentAlbumMessage(SentMessage, HasTextMixin, HasParseModeMixin):
 
     def get_unsent(self) -> UnSentMessage:
         return DocumentAlbumMessage(
-            text=self.text,
             media=self.media,
-            parse_mode=self.parse_mode,
         )
 
 

@@ -6,7 +6,7 @@ from ..core.interfaces import UserStateStore
 from ..core.interfaces import ScreenService
 
 
-class CallbackQueryHandlerTBS:
+class CallbackQueryHandler:
     def __init__(
         self,
         user_state_store: UserStateStore,

@@ -769,11 +769,9 @@ async def edit_photo_video_album_to_photo_video_album(
         new_message_ids.append(old_message.message_ids[old_idx])
 
     return SentPhotoVideoAlbumMessage(
-        text=new_message.text,
         media=new_message.media,
         message_ids=new_message_ids,
         user_id=old_message.user_id,
-        parse_mode=new_message.parse_mode,
     )
 
 
@@ -849,11 +847,9 @@ async def edit_audio_album_to_audio_album(
         new_message_ids.append(old_message.message_ids[old_idx])
 
     return SentAudioAlbumMessage(
-        text=new_message.text,
         media=new_message.media,
         message_ids=new_message_ids,
         user_id=old_message.user_id,
-        parse_mode=new_message.parse_mode,
     )
 
 
@@ -929,11 +925,9 @@ async def edit_document_album_to_document_album(
         new_message_ids.append(old_message.message_ids[old_idx])
 
     return SentDocumentAlbumMessage(
-        text=new_message.text,
         media=new_message.media,
         message_ids=new_message_ids,
         user_id=old_message.user_id,
-        parse_mode=new_message.parse_mode,
     )
 
 

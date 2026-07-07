@@ -3,10 +3,14 @@ from dataclasses import dataclass
 from pathlib import Path
 from io import BytesIO
 
+from tg_bot_screen.core.models.parse_mode import ParseMode
+
 
 @dataclass(kw_only=True)
 class Photo(ABC):
     caption: str | None = None
+    parse_mode: ParseMode | None = None
+    filename: str | None = None
 
 
 @dataclass(kw_only=True)
@@ -27,7 +31,6 @@ class PhotoPath(Photo):
 @dataclass(kw_only=True)
 class PhotoBytes(Photo):
     data: bytes | BytesIO
-    filename: str = "image.jpg"
 
 
 # ----- #
@@ -39,6 +42,8 @@ class Audio(ABC):
     duration: int | None = None
     performer: str | None = None
     title: str | None = None
+    parse_mode: ParseMode | None = None
+    filename: str | None = None
 
 
 @dataclass(kw_only=True)
@@ -59,7 +64,6 @@ class AudioPath(Audio):
 @dataclass(kw_only=True)
 class AudioBytes(Audio):
     data: bytes | BytesIO
-    filename: str = "audio.mp3"
 
 
 # ----- #
@@ -72,6 +76,8 @@ class Video(ABC):
     width: int | None = None
     height: int | None = None
     supports_streaming: bool | None = None
+    parse_mode: ParseMode | None = None
+    filename: str | None = None
 
 
 @dataclass(kw_only=True)
@@ -92,7 +98,6 @@ class VideoPath(Video):
 @dataclass(kw_only=True)
 class VideoBytes(Video):
     data: bytes | BytesIO
-    filename: str = "video.mp4"
 
 
 # ----- #
@@ -101,6 +106,8 @@ class VideoBytes(Video):
 @dataclass(kw_only=True)
 class Document(ABC):
     caption: str | None = None
+    parse_mode: ParseMode | None = None
+    filename: str | None = None
 
 
 @dataclass(kw_only=True)
@@ -121,7 +128,6 @@ class DocumentPath(Document):
 @dataclass(kw_only=True)
 class DocumentBytes(Document):
     data: bytes | BytesIO
-    filename: str = "document.pdf"
 
 
 # ----- #
@@ -129,8 +135,11 @@ class DocumentBytes(Document):
 
 @dataclass(kw_only=True)
 class Voice(ABC):
+    caption: str | None = None
+    parse_mode: ParseMode | None = None
     duration: int | None = None
-    "Длительность в секундах"
+    "In seconds"
+    filename: str | None = None
 
 
 @dataclass(kw_only=True)
@@ -151,7 +160,6 @@ class VoicePath(Voice):
 @dataclass(kw_only=True)
 class VoiceBytes(Voice):
     data: bytes | BytesIO
-    filename: str = "voice.ogg"
 
 
 # ----- #
@@ -160,9 +168,10 @@ class VoiceBytes(Voice):
 @dataclass(kw_only=True)
 class VideoNote(ABC):
     duration: int | None = None
-    "Длительность в секундах"
+    "in seconds"
     length: int | None = None
-    "Длина стороны видео (квадратное)"
+    "video size length (width or height)"
+    filename: str | None = None
 
 
 @dataclass(kw_only=True)
@@ -178,4 +187,3 @@ class VideoNotePath(VideoNote):
 @dataclass(kw_only=True)
 class VideoNoteBytes(VideoNote):
     data: bytes | BytesIO
-    filename: str = "video_note.mp4"

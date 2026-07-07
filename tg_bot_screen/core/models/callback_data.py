@@ -41,12 +41,19 @@ class RunFunc(CallbackData):
 @dataclass(frozen=True)
 class GoToScreen(CallbackData):
     screen_name: str
+    stack: bool = True
+    raise_on_error: bool = True
 
     def clone(self):
         return GoToScreen(self.screen_name)
 
     async def use(self, *, params: CallbackDataUseParams):
-        await params.screen_service_set(params.user_id, self.screen_name)
+        await params.screen_service_set(
+            params.user_id,
+            self.screen_name,
+            stack=self.stack,
+            raise_on_error=self.raise_on_error,
+        )
         params.update_sessions()
 
 

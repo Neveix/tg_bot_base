@@ -1,7 +1,6 @@
 from io import BytesIO
 
 from telegram import (
-    InputFile,
     InputMediaAudio,
     InputMediaDocument,
     InputMediaPhoto,
@@ -42,146 +41,172 @@ from tg_bot_screen.core.models.media_data import (
 
 
 class PhotoConverterPtb:
-    def to_send_parameter(self, photo: Photo):
-        if isinstance(photo, PhotoFileId):
-            return photo.file_id
+    def to_send_parameter(self, media: Photo):
+        if isinstance(media, PhotoFileId):
+            return media.file_id
 
-        if isinstance(photo, PhotoUrl):
-            return photo.url
+        if isinstance(media, PhotoUrl):
+            return media.url
 
-        if isinstance(photo, PhotoPath):
-            return InputFile(open(photo.path, "rb"))
+        if isinstance(media, PhotoPath):
+            return open(media.path, "rb")
 
-        if isinstance(photo, PhotoBytes):
-            if isinstance(photo.data, bytes):
-                data = BytesIO(photo.data)
+        if isinstance(media, PhotoBytes):
+            if isinstance(media.data, bytes):
+                data = BytesIO(media.data)
             else:
-                data = photo.data
-            return InputFile(data, filename=photo.filename)
+                data = media.data
+            return data
 
-        raise TypeError(f"Unsupported photo type: {type(photo)}")
+        raise TypeError(f"Unsupported photo type: {type(media)}")
 
-    def to_input_media(self, photo: Photo):
-        send_param = self.to_send_parameter(photo)
-        return InputMediaPhoto(media=send_param)
+    def to_input_media(self, media: Photo):
+        send_param = self.to_send_parameter(media)
+        return InputMediaPhoto(
+            media=send_param,
+            caption=media.caption,
+            parse_mode=media.parse_mode,
+            filename=media.filename,
+        )
 
 
 class AudioConverterPtb:
-    def to_send_parameter(self, audio: Audio):
-        if isinstance(audio, AudioFileId):
-            return audio.file_id
+    def to_send_parameter(self, media: Audio):
+        if isinstance(media, AudioFileId):
+            return media.file_id
 
-        if isinstance(audio, AudioUrl):
-            return audio.url
+        if isinstance(media, AudioUrl):
+            return media.url
 
-        if isinstance(audio, AudioPath):
-            return InputFile(open(audio.path, "rb"))
+        if isinstance(media, AudioPath):
+            return open(media.path, "rb")
 
-        if isinstance(audio, AudioBytes):
-            if isinstance(audio.data, bytes):
-                data = BytesIO(audio.data)
+        if isinstance(media, AudioBytes):
+            if isinstance(media.data, bytes):
+                data = BytesIO(media.data)
             else:
-                data = audio.data
-            return InputFile(data, filename=audio.filename)
+                data = media.data
+            return data
 
-        raise TypeError(f"Unsupported audio type: {type(audio)}")
+        raise TypeError(f"Unsupported audio type: {type(media)}")
 
-    def to_input_media(self, audio: Audio):
-        send_param = self.to_send_parameter(audio)
-        return InputMediaAudio(media=send_param)
+    def to_input_media(self, media: Audio):
+        send_param = self.to_send_parameter(media)
+        return InputMediaAudio(
+            media=send_param,
+            caption=media.caption,
+            parse_mode=media.parse_mode,
+            title=media.title,
+            filename=media.filename,
+        )
 
 
 class VideoConverterPtb:
-    def to_send_parameter(self, video: Video):
-        if isinstance(video, VideoFileId):
-            return video.file_id
+    def to_send_parameter(self, media: Video):
+        if isinstance(media, VideoFileId):
+            return media.file_id
 
-        if isinstance(video, VideoUrl):
-            return video.url
+        if isinstance(media, VideoUrl):
+            return media.url
 
-        if isinstance(video, VideoPath):
-            return InputFile(open(video.path, "rb"))
+        if isinstance(media, VideoPath):
+            return open(media.path, "rb")
 
-        if isinstance(video, VideoBytes):
-            if isinstance(video.data, bytes):
-                data = BytesIO(video.data)
+        if isinstance(media, VideoBytes):
+            if isinstance(media.data, bytes):
+                data = BytesIO(media.data)
             else:
-                data = video.data
-            return InputFile(data, filename=video.filename)
+                data = media.data
+            return data
 
-        raise TypeError(f"Unsupported video type: {type(video)}")
+        raise TypeError(f"Unsupported video type: {type(media)}")
 
-    def to_input_media(self, video: Video):
-        send_param = self.to_send_parameter(video)
-        return InputMediaVideo(media=send_param)
+    def to_input_media(self, media: Video):
+        send_param = self.to_send_parameter(media)
+        return InputMediaVideo(
+            media=send_param,
+            caption=media.caption,
+            parse_mode=media.parse_mode,
+            filename=media.filename,
+        )
 
 
 class DocumentConverterPtb:
-    def to_send_parameter(self, document: Document):
-        if isinstance(document, DocumentFileId):
-            return document.file_id
+    def to_send_parameter(self, media: Document):
+        if isinstance(media, DocumentFileId):
+            return media.file_id
 
-        if isinstance(document, DocumentUrl):
-            return document.url
+        if isinstance(media, DocumentUrl):
+            return media.url
 
-        if isinstance(document, DocumentPath):
-            return InputFile(open(document.path, "rb"))
+        if isinstance(media, DocumentPath):
+            return open(media.path, "rb")
 
-        if isinstance(document, DocumentBytes):
-            if isinstance(document.data, bytes):
-                data = BytesIO(document.data)
+        if isinstance(media, DocumentBytes):
+            if isinstance(media.data, bytes):
+                data = BytesIO(media.data)
             else:
-                data = document.data
-            return InputFile(data, filename=document.filename)
+                data = media.data
+            return data
 
-        raise TypeError(f"Unsupported document type: {type(document)}")
+        raise TypeError(f"Unsupported document type: {type(media)}")
 
-    def to_input_media(self, document: Document):
-        send_param = self.to_send_parameter(document)
-        return InputMediaDocument(media=send_param)
+    def to_input_media(self, media: Document):
+        send_param = self.to_send_parameter(media)
+        return InputMediaDocument(
+            media=send_param,
+            caption=media.caption,
+            parse_mode=media.parse_mode,
+            filename=media.filename,
+        )
 
 
 class VoiceConverterPtb:
-    def to_send_parameter(self, voice: Voice):
-        if isinstance(voice, VoiceFileId):
-            return voice.file_id
+    def to_send_parameter(self, media: Voice):
+        if isinstance(media, VoiceFileId):
+            return media.file_id
 
-        if isinstance(voice, VoiceUrl):
-            return voice.url
+        if isinstance(media, VoiceUrl):
+            return media.url
 
-        if isinstance(voice, VoicePath):
-            return InputFile(open(voice.path, "rb"))
+        if isinstance(media, VoicePath):
+            return open(media.path, "rb")
 
-        if isinstance(voice, VoiceBytes):
-            if isinstance(voice.data, bytes):
-                data = BytesIO(voice.data)
+        if isinstance(media, VoiceBytes):
+            if isinstance(media.data, bytes):
+                data = BytesIO(media.data)
             else:
-                data = voice.data
-            return InputFile(data, filename=voice.filename)
+                data = media.data
+            return data
 
-        raise TypeError(f"Unsupported voice type: {type(voice)}")
+        raise TypeError(f"Unsupported voice type: {type(media)}")
 
-    def to_input_media(self, voice: Voice):
-        send_param = self.to_send_parameter(voice)
-        return InputMediaAudio(media=send_param)
+    def to_input_media(self, media: Voice):
+        send_param = self.to_send_parameter(media)
+        return InputMediaAudio(
+            media=send_param,
+            caption=media.caption,
+            parse_mode=media.parse_mode,
+            filename=media.filename,
+        )
 
 
 class VideoNoteConverterPtb:
-    def to_send_parameter(self, video_note: VideoNote):
-        if isinstance(video_note, VideoNoteFileId):
-            return video_note.file_id
+    def to_send_parameter(self, media: VideoNote):
+        if isinstance(media, VideoNoteFileId):
+            return media.file_id
 
-        if isinstance(video_note, VideoNotePath):
-            return InputFile(open(video_note.path, "rb"))
+        if isinstance(media, VideoNotePath):
+            return open(media.path, "rb")
 
-        if isinstance(video_note, VideoNoteBytes):
-            if isinstance(video_note.data, bytes):
-                data = BytesIO(video_note.data)
+        if isinstance(media, VideoNoteBytes):
+            if isinstance(media.data, bytes):
+                data = BytesIO(media.data)
             else:
-                data = video_note.data
-            return InputFile(data, filename=video_note.filename)
+                data = media.data
+            return data
 
-        raise TypeError(f"Unsupported video note type: {type(video_note)}")
+        raise TypeError(f"Unsupported video note type: {type(media)}")
 
 
 class GeneralConverterPtb:
