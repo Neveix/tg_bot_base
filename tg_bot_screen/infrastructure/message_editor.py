@@ -588,7 +588,7 @@ class AlbumMessage(Protocol):
 def calc_message_difference_without_send(
     old_message: AlbumMessage, new_message: AlbumMessage
 ) -> tuple[list[int], list[tuple[int, int]]] | None:
-    types = get_message_media_types(*old_message.media, *new_message.media)
+    types = get_message_media_types(list(old_message.media) + list(new_message.media))
     old_types = [types[media] for media in old_message.media]
 
     new_types = [types[media] for media in new_message.media]
@@ -709,6 +709,9 @@ async def edit_document_to_audio(
 # ----- #
 
 
+@EditRegistry.register_checker(
+    MessageCategory.PHOTO_VIDEO_ALBUM, MessageCategory.PHOTO_VIDEO_ALBUM
+)
 def photo_video_album_can_be_edited(
     old_message: SentMessage,
     new_message: UnSentMessage,
@@ -722,6 +725,9 @@ def photo_video_album_can_be_edited(
     return calc_message_difference_without_send(old_message, new_message)
 
 
+@EditRegistry.register_strategy(
+    MessageCategory.PHOTO_VIDEO_ALBUM, MessageCategory.PHOTO_VIDEO_ALBUM
+)
 async def edit_photo_video_album_to_photo_video_album(
     old_message: SentMessage,
     new_message: UnSentMessage,
@@ -778,6 +784,7 @@ async def edit_photo_video_album_to_photo_video_album(
 # ----- #
 
 
+@EditRegistry.register_checker(MessageCategory.AUDIO_ALBUM, MessageCategory.AUDIO_ALBUM)
 def audio_album_can_be_edited(
     old_message: SentMessage,
     new_message: UnSentMessage,
@@ -800,6 +807,9 @@ def audio_album_can_be_edited(
     return indices_delete, indices_edit
 
 
+@EditRegistry.register_strategy(
+    MessageCategory.AUDIO_ALBUM, MessageCategory.AUDIO_ALBUM
+)
 async def edit_audio_album_to_audio_album(
     old_message: SentMessage,
     new_message: UnSentMessage,
@@ -856,6 +866,9 @@ async def edit_audio_album_to_audio_album(
 # ----- #
 
 
+@EditRegistry.register_checker(
+    MessageCategory.DOCUMENT_ALBUM, MessageCategory.DOCUMENT_ALBUM
+)
 def document_album_can_be_edited(
     old_message: SentMessage,
     new_message: UnSentMessage,
@@ -878,6 +891,9 @@ def document_album_can_be_edited(
     return indices_delete, indices_edit
 
 
+@EditRegistry.register_strategy(
+    MessageCategory.DOCUMENT_ALBUM, MessageCategory.DOCUMENT_ALBUM
+)
 async def edit_document_album_to_document_album(
     old_message: SentMessage,
     new_message: UnSentMessage,
@@ -938,16 +954,20 @@ def check_edit(
     old_message: SentMessage,
     new_message: UnSentMessage,
 ) -> tuple[list[int], list[tuple[int, int]]] | bool:
+    print(f"check messages {old_message}, {new_message}")
     strat = EditRegistry.get_strategy(old_message.category, new_message.category)
     if strat is None:
+        print("no strat. cannot edit.")
         return False
 
     checker = EditRegistry.get_checker(old_message.category, new_message.category)
     if checker is None:
+        print("no checker. can edit!")
         return True
 
     result = checker(old_message, new_message)
     if result is None:
+        print("no result. cannot edit.")
         return False
 
     return result
