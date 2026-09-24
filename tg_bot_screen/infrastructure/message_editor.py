@@ -577,7 +577,7 @@ async def edit_audio_to_document(
 def get_message_media_types(media: Sequence[Any]) -> dict[Any, int]:
     type_codes = []
     for media_obj in media:
-        type_codes.append(media_obj)
+        type_codes.append(type(media_obj))
     return {code: i for i, code in enumerate(type_codes)}
 
 
